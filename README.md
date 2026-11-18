@@ -31,12 +31,8 @@ endorsed by Arch Linux.
 - **Installs three ways:** erase a disk, use free space alongside macOS or Windows, or format a
   partition you prepared.
 - **Btrfs + Timeshift** by default: snapshots before risky upgrades, bootable from the GRUB menu.
-- **One look from boot to desktop:** GRUB, the boot splash, the login screen and the Plasma splash all
-  draw the logo in the same place, so it never moves. Matching wallpaper, icon, fastfetch logo and an
-  About This Computer page.
 - **Hardware detection:** Mac fixes only on Intel Macs, the Broadcom `wl` Wi-Fi driver only on chips
   that need it, and microcode and graphics drivers matched to your CPU and GPU.
-- **Dated versions:** each build is named for the day it was built, e.g. *kirkus 26.11.18*.
 - **Hands-off updates:** new kirkus releases are applied automatically after `pacman -Syu`
   (see [UPDATING.md](UPDATING.md)).
 
