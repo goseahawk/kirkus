@@ -138,7 +138,10 @@ become unreachable.
 
 ## 5. Updating an installed system
 
-Copy this project onto the installed computer and run, from its folder:
+**See [UPDATING.md](UPDATING.md)** for the full guide: `sudo pacman -Syu` for the Arch system
+underneath, `apply-to-installed.sh` for a new kirkus release, and Discover for Flatpak apps.
+
+To apply a new kirkus release, copy this project onto the installed computer and run, from its folder:
 
     sudo ./apply-to-installed.sh
 
@@ -267,6 +270,7 @@ breaks; standard fonts are used instead.
 - zram swap with zstd, capped at 4 GB
 - PipeWire audio
 - `power-profiles-daemon`, which integrates with Plasma's battery controls
+- Discover with Flatpak and Flathub set up, for installing and updating apps
 
 ## Layout
 
@@ -275,6 +279,7 @@ breaks; standard fonts are used instead.
 | `build.sh` | builds the ISO on Arch |
 | `build-docker.sh` | builds the ISO on any other OS, in a container |
 | `apply-to-installed.sh` | updates an existing install to the current project |
+| `UPDATING.md` | how to keep an installed system up to date |
 | `overlay/airootfs/` | files for the live USB: `install.sh`, `kirk-install-backend`, live Wi-Fi detection |
 | `overlay/installed/` | files copied into every installed system (incl. `kirk-detect`) |
 | `overlay/hardware/broadcom-wl/` | added only when a chip needs the `wl` driver |

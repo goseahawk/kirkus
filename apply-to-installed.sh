@@ -25,7 +25,10 @@ SRC=$HERE/overlay/installed
 [[ -d $SRC ]] || { echo "Run this from inside the project folder."; exit 1; }
 
 echo "== packages =="
-pacman -S --needed --noconfirm kinfocenter plymouth fastfetch
+pacman -S --needed --noconfirm kinfocenter plymouth fastfetch discover flatpak
+# Flathub, so Discover can install and update Flatpak apps
+flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo \
+  || echo "Could not add Flathub (offline?). Run this script again later to add it."
 
 echo "== scripts, config, icons =="
 install -Dm755 -t /usr/local/bin \
