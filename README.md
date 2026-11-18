@@ -22,8 +22,7 @@ work as usual whenever you want to go further.
 ## What's included
 
 Arch Linux with KDE Plasma, packaged as a bootable ISO with a text installer. Btrfs with Timeshift
-snapshots, a consistent look from power-on to desktop, and hardware support that installs itself
-when it's needed, including Intel Macs.
+snapshots and hardware support that installs itself when it's needed, including Intel Macs.
 
 kirkus is an independent project **based on Arch Linux**. It is not affiliated with or
 endorsed by Arch Linux.
@@ -257,36 +256,6 @@ password field disappears and the logo stays until the desktop appears. It's the
 account via `/etc/xdg/ksplashrc`; change it in System Settings → Colors & Themes → Splash Screen. Plasma
 only loads splashes from "look-and-feel" packages, so it also appears in the Global Theme list. Keep
 Breeze selected there.
-
-## fastfetch
-
-`fastfetch` shows the mark (blue K, cream dot) in Unicode half-blocks, with the labels in brand blue.
-The default for everyone is `/etc/xdg/fastfetch/config.jsonc`; your own
-`~/.config/fastfetch/config.jsonc` takes priority. `fastfetch -c kirkus` always uses it.
-
-## Branding
-
-Everything visual comes from the logo files in `branding/source/` (the original artwork, which read
-"kirk / ARCH LINUX"). `branding/build/` holds what's generated from them:
-
-- `mark-src.png`, `dot-src.png`: the K and its dot, made transparent by separating them from the
-  black background (accurate to 1/255).
-- `lockup.png`, `lockup-nodot.png`: the K plus the **kirkus** wordmark, set in Space Grotesk at the
-  weight, size and spacing that reproduce the original "kirk" lettering. Rebuild them with
-  `python3 branding/tools/make-lockup.py SpaceGrotesk[wght].ttf branding`.
-- `screen-*.png`: the same at screen size, with the dot as its own layer so it can breathe. Every
-  screen draws the lockup at `x = floor(W/2 - w/2), y = floor(H/2 - h/2) - 50`, so it's
-  pixel-identical from GRUB to the desktop.
-- `mark.svg`: the K and dot traced to vector outlines, from which the app icon (`kirkus-logo.svg`)
-  and wallpaper (`kirkus-wallpaper.svg`) are built.
-
-Palette: navy `#0b1020`, blue `#5590b4`, cream `#fff8ec`, slate `#aeb6c8` (secondary text). The boot-to-desktop screens
-are black; the wallpaper and icon tile are navy.
-
-Typeface: **Space Grotesk** (SIL Open Font License), the wordmark's font, used on the login screen and
-in the GRUB menu. It isn't in Arch's repos, so `kirk-install-fonts` downloads the official 2.0.0
-release, checks its SHA-256 and installs it to `/usr/share/fonts/kirkus/`. If that fails, nothing
-breaks; standard fonts are used instead.
 
 ## Other defaults
 
