@@ -177,17 +177,14 @@ become unreachable.
 system underneath, and afterwards kirkus checks GitHub and applies any newer published release on its
 own (`kirk-update`; turn it off in `/etc/kirk-update.conf`). Flatpak apps update in Discover.
 
-To apply a new kirkus release, copy this project onto the installed computer and run, from its folder:
+To apply the project by hand instead (for example to try unreleased changes), run this from its
+folder on the installed computer:
 
     sudo ./apply-to-installed.sh
 
-It brings an existing install up to date with the current project (name and version, branding, splash
-screens, login screen, fastfetch, About page, hardware support) without reinstalling. It never touches
-the EFI partition or reinstalls GRUB, so the way the computer boots stays as it is. It also renames
-files that earlier versions installed under other names, putting the new ones in place before removing
-the old. Systems installed under the earlier names (Kirk Arch Linux, Kirk's Arch Linux) are moved over
-to the kirkus names: boot splash, GRUB theme, login theme, Plasma splash, icon and wallpaper. The
-hostname you chose isn't changed.
+It installs the same files and settings as the installer (branding, splash screens, login screen,
+About page, update hooks, hardware support) without reinstalling. It never touches the EFI partition
+or reinstalls GRUB, so the way the computer boots stays as it is.
 
 On an Intel Mac, run `facetimehd-setup` once as your normal user to install the webcam driver from the AUR.
 
