@@ -1,5 +1,24 @@
 # kirkus
 
+**kirkus is meant to be a simple, easy-to-use Arch system.** Arch Linux is fast, up to date and
+flexible, but setting it up yourself takes a lot of decisions and a lot of time on the command line.
+kirkus makes those decisions for you, with sensible defaults, so you get a complete, good-looking
+desktop that just works:
+
+- **Installing** is a few questions in a guided installer, not an afternoon with the Arch wiki.
+- **Your hardware is handled for you.** Drivers and fixes (including for Intel Macs) are detected
+  and set up automatically.
+- **Mistakes can be undone.** With the default Btrfs setup, snapshots are taken before risky updates,
+  and you can start from one
+  right from the boot menu.
+- **Updating is one command.** `sudo pacman -Syu` updates the system, and kirkus keeps itself up to
+  date along with it. Apps from Discover update in Discover.
+
+It's still Arch underneath. Nothing is hidden or locked down, so pacman, the AUR and the Arch wiki all
+work as usual whenever you want to go further.
+
+## What's included
+
 Arch Linux with KDE Plasma, packaged as a bootable ISO with a text installer. Btrfs with Timeshift
 snapshots, a consistent look from power-on to desktop, and hardware support that installs itself
 when it's needed, including Intel Macs.
@@ -16,6 +35,8 @@ endorsed by Arch Linux.
 - **Hardware detection:** Mac fixes only on Macs, the Broadcom `wl` Wi-Fi driver only on chips
   that need it, and microcode and graphics drivers matched to your CPU and GPU.
 - **Dated versions:** each build is named for the day it was built, e.g. *kirkus 26.11.18*.
+- **Hands-off updates:** new kirkus releases are applied automatically after `pacman -Syu`
+  (see [UPDATING.md](UPDATING.md)).
 
 ## 1. Build the ISO
 
