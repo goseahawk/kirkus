@@ -1,0 +1,11 @@
+# After pacman upgrades anything, check for a newer kirkus release. The check runs as a background
+# service because it has to wait for pacman to finish first. Turn it off in /etc/kirk-update.conf.
+[Trigger]
+Operation = Upgrade
+Type = Package
+Target = *
+
+[Action]
+Description = Checking for a new kirkus release in the background (journalctl -u kirk-update)...
+When = PostTransaction
+Exec = /bin/sh -c 'systemctl start --no-block kirk-update.service >/dev/null 2>&1 || true'

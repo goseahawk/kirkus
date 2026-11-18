@@ -1,0 +1,12 @@
+[Unit]
+Description=Apply the newest kirkus release
+Documentation=file:///etc/kirk-update.conf
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/kirk-update --auto
+Nice=10
+TimeoutStartSec=2h
+Environment=HOME=/root

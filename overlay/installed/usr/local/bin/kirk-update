@@ -1,0 +1,76 @@
+#!/usr/bin/env bash
+# Applies the newest published kirkus release, if it's newer than what's installed.
+#
+#   sudo kirk-update            check now and apply if there's a newer release
+#   sudo kirk-update --check    only say whether there's one
+#
+# Started automatically (as kirk-update.service) after pacman upgrades packages; see
+# /etc/kirk-update.conf to turn that off. Logs: journalctl -u kirk-update
+set -euo pipefail
+[[ $EUID -eq 0 ]] || exec sudo "$0" "$@"
+
+AUTO_UPDATE=yes
+REPO=goseahawk/kirkus
+[[ -r /etc/kirk-update.conf ]] && . /etc/kirk-update.conf
+STATE=/var/lib/kirkus/applied-release
+CACHE=/var/cache/kirkus
+ver_re='^[0-9]{2}\.[0-9]{2}\.[0-9]{2}$'
+
+mode=apply
+case ${1:-} in
+  --check) mode=check ;;
+  --auto)  mode=auto ;;     # used by the service
+  "")      ;;
+  *) echo "usage: kirk-update [--check]"; exit 2 ;;
+esac
+if [[ $mode == auto && $AUTO_UPDATE != yes ]]; then
+  echo "Automatic kirkus updates are off (AUTO_UPDATE in /etc/kirk-update.conf)."; exit 0
+fi
+
+# Started from a pacman hook, pacman is still running. Wait for it to finish (up to an hour).
+for _ in $(seq 720); do [[ -e /var/lib/pacman/db.lck ]] || break; sleep 5; done
+[[ -e /var/lib/pacman/db.lck ]] && { echo "pacman is still busy; trying again after the next upgrade."; exit 0; }
+
+# The newest release: github.com/<repo>/releases/latest redirects to .../releases/tag/<tag>
+url=$(curl -fsSL --max-time 30 -o /dev/null -w '%{url_effective}' "https://github.com/$REPO/releases/latest") \
+  || { echo "Couldn't reach GitHub; skipping."; exit 0; }
+tag=${url##*/tag/}
+if [[ $url != */tag/* || ! $tag =~ $ver_re ]]; then
+  echo "No kirkus release found on github.com/$REPO (got '$url')."; exit 0
+fi
+
+installed=$(sed -n 's/^VERSION=//p' /etc/kirk-release 2>/dev/null | head -1)
+applied=$(cat "$STATE" 2>/dev/null || true)
+# Versions are YY.MM.DD, so plain string order is date order.
+if [[ $tag == "$applied" || ( $installed =~ $ver_re && ! $tag > $installed ) ]]; then
+  echo "kirkus ${installed:-?} is up to date (latest release: $tag)."; exit 0
+fi
+if [[ $mode == check ]]; then
+  echo "kirkus $tag is available (installed: ${installed:-unknown}). Apply it with: sudo kirk-update"
+  exit 0
+fi
+
+echo "Updating kirkus ${installed:-?} -> $tag"
+mkdir -p "$CACHE"
+work=$(mktemp -d "$CACHE/$tag.XXXXXX")
+trap 'rm -rf "$work"' EXIT
+curl -fsSL --max-time 300 -o "$work/src.tar.gz" "https://github.com/$REPO/archive/refs/tags/$tag.tar.gz"
+tar -xzf "$work/src.tar.gz" -C "$work" --no-same-owner
+src=$(find "$work" -mindepth 2 -maxdepth 2 -name apply-to-installed.sh -printf '%h\n' | head -1)
+[[ -n $src ]] || { echo "The $tag release has no apply-to-installed.sh; skipping."; exit 1; }
+
+KIRK_VERSION=$tag bash "$src/apply-to-installed.sh"
+mkdir -p "$(dirname "$STATE")"
+echo "$tag" > "$STATE"
+echo "kirkus $tag applied. Restart to see everything."
+
+# Let anyone logged in to Plasma know (best effort)
+for bus in /run/user/*/bus; do
+  [[ -S $bus ]] || continue
+  uid=$(basename "$(dirname "$bus")"); user=$(id -nu "$uid" 2>/dev/null) || continue
+  runuser -u "$user" -- env DBUS_SESSION_BUS_ADDRESS="unix:path=$bus" \
+    gdbus call --session --dest org.freedesktop.Notifications \
+      --object-path /org/freedesktop/Notifications --method org.freedesktop.Notifications.Notify \
+      kirkus 0 kirkus-logo "kirkus $tag installed" "Restart your computer to finish updating." \
+      '[]' '{}' 10000 >/dev/null 2>&1 || true
+done

@@ -5,10 +5,10 @@ There are three kinds of updates, each with its own tool:
 | What | How | How often |
 |---|---|---|
 | The Arch Linux system underneath (kernel, Plasma, drivers, apps installed with pacman) | `sudo pacman -Syu` | about once a week |
-| The kirkus release (branding, boot and login screens, About page, hardware support) | `sudo ./apply-to-installed.sh` | when a new kirkus release comes out |
+| The kirkus release (branding, boot and login screens, About page, hardware support) | automatic, after `sudo pacman -Syu` | nothing to do |
 | Flatpak apps | Discover → **Updates** | whenever Discover says updates are available |
 
-If you do more than one at a time, go in that order: system first, then kirkus, then Flatpak apps.
+So in practice: run `sudo pacman -Syu` now and then, and update apps in Discover.
 
 ## 1. The Arch system: `sudo pacman -Syu`
 
@@ -42,10 +42,31 @@ it lists and type `Y` to go ahead.
 3. Once it starts, open **Timeshift**, select the same snapshot and click **Restore** to make it
    permanent, then restart.
 
-## 2. The kirkus release: `apply-to-installed.sh`
+## 2. The kirkus release: automatic
 
-`pacman -Syu` doesn't update kirkus's own files. Those come from this project, so a new kirkus release
-is applied with its script. First get the latest version of the project.
+kirkus's own files (branding, boot and login screens, About page, hardware support) don't come from
+Arch's packages. They're updated by kirkus itself, and it happens on its own: whenever
+`sudo pacman -Syu` upgrades something, kirkus checks GitHub for a newer published release once pacman
+has finished. If there is one, it downloads that release and applies it in the background, and a
+notification tells you to restart when it's done.
+
+- Only **published releases** are installed, never unfinished work.
+- It never goes backwards to an older release.
+- If you're offline, it skips the check and tries again after the next upgrade.
+
+Useful commands:
+
+    sudo kirk-update --check     # is there a newer release?
+    sudo kirk-update             # check and install it now
+    journalctl -u kirk-update    # what the automatic updates did
+
+**To turn automatic updates off**, edit `/etc/kirk-update.conf` and set `AUTO_UPDATE=no`. Updates
+won't change that setting. You can still update with `sudo kirk-update`.
+
+### Updating by hand from the project folder
+
+You can also apply the project directly, for example to try changes that haven't been released yet.
+First get the latest version of the project.
 
 **If you cloned it with git:**
 
@@ -63,7 +84,7 @@ Then, from the project folder:
 
     sudo ./apply-to-installed.sh
 
-This updates the name and version, the boot splash, GRUB theme, login screen, Plasma splash,
+Like the automatic update, this updates the name and version, the boot splash, GRUB theme, login screen, Plasma splash,
 wallpaper, icon, fastfetch logo, About This Computer page and hardware support, without reinstalling.
 On Btrfs it takes a snapshot before changing anything that affects starting up. It doesn't touch your
 files or apps, the EFI partition or the way your computer boots, and it's safe to run more than once. Restart when it finishes.

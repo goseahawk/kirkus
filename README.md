@@ -138,8 +138,9 @@ become unreachable.
 
 ## 5. Updating an installed system
 
-**See [UPDATING.md](UPDATING.md)** for the full guide: `sudo pacman -Syu` for the Arch system
-underneath, `apply-to-installed.sh` for a new kirkus release, and Discover for Flatpak apps.
+**See [UPDATING.md](UPDATING.md)** for the full guide. In short: `sudo pacman -Syu` updates the Arch
+system underneath, and afterwards kirkus checks GitHub and applies any newer published release on its
+own (`kirk-update`; turn it off in `/etc/kirk-update.conf`). Flatpak apps update in Discover.
 
 To apply a new kirkus release, copy this project onto the installed computer and run, from its folder:
 
@@ -179,6 +180,9 @@ welcome message, System Settings → About this System, fastfetch, the login ban
 
 - `build.sh` uses the date you build the ISO, and the installer passes it on in `/etc/kirk-release`.
   `apply-to-installed.sh` uses the date you run it. Override either with `KIRK_VERSION=26.11.18`.
+- **Publishing a release:** tag it with the version exactly, e.g. `26.11.18` (no `v` in front), and
+  publish it on GitHub. Installed systems pick up the newest published release automatically after
+  their next `pacman -Syu`. Drafts and pre-releases aren't picked up, so you can test one first.
 - os-release gets `NAME="kirkus"`, `PRETTY_NAME="kirkus 26.11.18"`, `VERSION` and
   `VERSION_ID`. pacman resets os-release whenever the `filesystem` package updates, so a hook
   rebuilds it from `/etc/kirk-release`.
