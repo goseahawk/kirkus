@@ -9,8 +9,7 @@ desktop that just works:
 - **Your hardware is handled for you.** Drivers and fixes (including for Intel Macs) are detected
   and set up automatically.
 - **Mistakes can be undone.** With the default Btrfs setup, snapshots are taken before risky updates,
-  and you can start from one
-  right from the boot menu.
+  and you can start from one right from the boot menu.
 - **Updating is one command.** `sudo pacman -Syu` updates the system, and kirkus keeps itself up to
   date along with it. Apps from Discover update in Discover.
 
