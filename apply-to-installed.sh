@@ -14,7 +14,7 @@ set -euo pipefail
 [[ $EUID -eq 0 ]] || exec sudo KIRK_VERSION="${KIRK_VERSION:-}" "$0" "$@"
 
 VERSION=${KIRK_VERSION:-$(date +%y.%m.%d)}
-[[ $VERSION =~ ^[0-9]{2}\.[0-9]{2}\.[0-9]{2}$ ]] || { echo "Bad version '$VERSION': use YY.MM.DD, e.g. 26.11.18"; exit 1; }
+[[ $VERSION =~ ^[0-9]{2}\.[0-9]{2}\.[0-9]{2}(\.[0-9]+)?$ ]] || { echo "Bad version '$VERSION': use YY.MM.DD or YY.MM.DD.N, e.g. 26.11.18 or 26.11.18.1"; exit 1; }
 BRAND="kirkus $VERSION"
 HERE=$(cd "$(dirname "$0")" && pwd)
 SRC=$HERE/overlay/installed

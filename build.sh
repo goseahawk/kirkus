@@ -9,7 +9,7 @@ set -euo pipefail
 BRAND="kirkus"
 # Version = the build date as YY.MM.DD, e.g. "kirkus 26.11.18".
 VERSION=${KIRK_VERSION:-$(date +%y.%m.%d)}
-[[ $VERSION =~ ^[0-9]{2}\.[0-9]{2}\.[0-9]{2}$ ]] || { echo "Bad version '$VERSION': use YY.MM.DD, e.g. 26.11.18"; exit 1; }
+[[ $VERSION =~ ^[0-9]{2}\.[0-9]{2}\.[0-9]{2}(\.[0-9]+)?$ ]] || { echo "Bad version '$VERSION': use YY.MM.DD or YY.MM.DD.N, e.g. 26.11.18 or 26.11.18.1"; exit 1; }
 echo "Building $BRAND $VERSION"
 HERE=$(cd "$(dirname "$0")" && pwd)
 WORK=$HERE/build

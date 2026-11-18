@@ -25,7 +25,7 @@ set -euo pipefail
 # /etc/os-release, and an ASCII apostrophe there produces a grub.cfg that fails grub-script-check.
 # Version: whatever the ISO was built as (YY.MM.DD), recorded in /etc/kirk-release on the new system.
 VERSION=$(cat /etc/kirk-version 2>/dev/null || true)
-[[ $VERSION =~ ^[0-9]{2}\.[0-9]{2}\.[0-9]{2}$ ]] || VERSION=$(date +%y.%m.%d)
+[[ $VERSION =~ ^[0-9]{2}\.[0-9]{2}\.[0-9]{2}(\.[0-9]+)?$ ]] || VERSION=$(date +%y.%m.%d)
 BRAND="kirkus $VERSION"
 TOTAL=7
 ESP_GUID=c12a7328-f81f-11d2-ba4b-00a0c93ec93b

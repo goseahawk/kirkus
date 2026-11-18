@@ -206,13 +206,15 @@ that in Timeshift → Settings → Users.
 
 ## Version
 
-Each build is versioned by its date as **YY.MM.DD**, e.g. **kirkus 26.11.18**. The version
+Each build is versioned by its date as **YY.MM.DD**, e.g. **kirkus 26.11.18**. More builds on the
+same day add a number: **26.11.18.1**, **26.11.18.2** and so on. The version
 appears in the ISO's boot menu and filename (`kirkus-26.11.18-x86_64.iso`), the live USB's
 welcome message, System Settings → About this System, fastfetch, the login banner and the GRUB menu.
 
 - `build.sh` uses the date you build the ISO, and the installer passes it on in `/etc/kirk-release`.
   `apply-to-installed.sh` uses the date you run it. Override either with `KIRK_VERSION=26.11.18`.
-- **Publishing a release:** tag it with the version exactly, e.g. `26.11.18` (no `v` in front), and
+- **Publishing a release:** tag it with the version exactly, e.g. `26.11.18` or `26.11.18.1` (no `v`
+  in front), and
   publish it on GitHub. Installed systems pick up the newest published release automatically after
   their next `pacman -Syu`. Drafts and pre-releases aren't picked up, so you can test one first.
 - os-release gets `NAME="kirkus"`, `PRETTY_NAME="kirkus 26.11.18"`, `VERSION` and

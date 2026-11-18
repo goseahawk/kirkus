@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: "Version, YY.MM.DD (leave empty for today's date)"
+        description: "Version, YY.MM.DD (leave empty for today's date; a second build the same day becomes YY.MM.DD.1)"
         required: false
         default: ""
       publish:
@@ -45,11 +45,17 @@ jobs:
           PUBLISH: ${{ inputs.publish }}
           GH_TOKEN: ${{ github.token }}
         run: |
-          v="${INPUT_VERSION:-$(date +%y.%m.%d)}"
-          if ! [[ $v =~ ^[0-9]{2}\.[0-9]{2}\.[0-9]{2}$ ]]; then
+          exists() { gh release view "$1" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; }
+          v="$INPUT_VERSION"
+          if [[ -z $v ]]; then
+            # today's date; if that's taken, the next free .1, .2, ...
+            v=$(date +%y.%m.%d); n=0
+            while [[ $PUBLISH != Just* ]] && exists "$v"; do n=$((n + 1)); v="$(date +%y.%m.%d).$n"; done
+          fi
+          if ! [[ $v =~ ^[0-9]{2}\.[0-9]{2}\.[0-9]{2}(\.[0-9]+)?$ ]]; then
             echo "::error::Version must look like 26.11.18, got '$v'"; exit 1
           fi
-          if [[ $PUBLISH != Just* ]] && gh release view "$v" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+          if [[ $PUBLISH != Just* ]] && exists "$v"; then
             echo "::error::A release called $v already exists. Delete it first, or enter a different version."
             exit 1
           fi
