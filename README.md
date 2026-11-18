@@ -47,6 +47,13 @@ You only need to build the ISO yourself if you want to change something or try u
 
 ## 1. Build the ISO
 
+**On GitHub (easiest):** open the repo's **Actions** tab, pick **Build ISO** and click
+**Run workflow**. GitHub builds the ISO on its own servers (30–60 minutes) and publishes it as a release
+with its `.sha256` file. You can set the version (it defaults to today's date) and choose to make a
+draft release to test first, or just build without releasing.
+
+To build on your own computer instead:
+
 **On Arch:**
 
     sudo ./build.sh

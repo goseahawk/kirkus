@@ -1,0 +1,111 @@
+# Builds the kirkus ISO on GitHub's servers and (optionally) publishes it as a release.
+# Run it from the Actions tab: "Build ISO" -> "Run workflow".
+name: Build ISO
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Version, YY.MM.DD (leave empty for today's date)"
+        required: false
+        default: ""
+      publish:
+        description: "What to do with the ISO"
+        type: choice
+        default: "Publish release"
+        options:
+          - "Publish release"
+          - "Draft release (test it first, publish it yourself)"
+          - "Just build (download it from this run)"
+      notes:
+        description: "Release notes (optional)"
+        required: false
+        default: ""
+
+permissions:
+  contents: write          # to create the tag and the release
+
+concurrency:
+  group: build-iso
+  cancel-in-progress: false
+
+env:
+  TZ: America/New_York     # "today's date" for the version
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 150
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Choose the version
+        env:
+          INPUT_VERSION: ${{ inputs.version }}
+          PUBLISH: ${{ inputs.publish }}
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          v="${INPUT_VERSION:-$(date +%y.%m.%d)}"
+          if ! [[ $v =~ ^[0-9]{2}\.[0-9]{2}\.[0-9]{2}$ ]]; then
+            echo "::error::Version must look like 26.11.18, got '$v'"; exit 1
+          fi
+          if [[ $PUBLISH != Just* ]] && gh release view "$v" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            echo "::error::A release called $v already exists. Delete it first, or enter a different version."
+            exit 1
+          fi
+          echo "VERSION=$v" >> "$GITHUB_ENV"
+          echo "Building kirkus $v"
+
+      - name: Make room on the build machine
+        run: |
+          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /opt/hostedtoolcache/CodeQL \
+                      /usr/local/share/boost /usr/local/.ghcup || true
+          sudo docker system prune -af >/dev/null || true
+          df -h /
+
+      - name: Build the ISO (takes 30-60 minutes)
+        run: sudo env KIRK_VERSION="$VERSION" ./build-docker.sh
+
+      - name: Checksum
+        run: |
+          cd out
+          iso=$(ls kirkus-*.iso)
+          sudo chown "$(id -u)" "$iso"
+          size=$(stat -c %s "$iso")
+          echo "$iso: $((size / 1024 / 1024)) MiB"
+          if (( size >= 2 * 1024 * 1024 * 1024 )); then
+            echo "::error::$iso is 2 GiB or larger, over GitHub's limit for a release file."; exit 1
+          fi
+          sha256sum "$iso" > "$iso.sha256"
+          cat "$iso.sha256"
+          echo "ISO=$iso" >> "$GITHUB_ENV"
+
+      - name: Create the release
+        if: ${{ !startsWith(inputs.publish, 'Just') }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PUBLISH: ${{ inputs.publish }}
+          NOTES: ${{ inputs.notes }}
+        run: |
+          body="${NOTES:-kirkus $VERSION}
+
+          **Install:** write \`$ISO\` to a USB stick, boot it, connect to Wi-Fi with \`nmtui\`, then run \`./install.sh\`.
+          Check the download with \`sha256sum -c $ISO.sha256\`.
+
+          Already running kirkus? This release is applied automatically after your next \`sudo pacman -Syu\`."
+          draft=()
+          [[ $PUBLISH == Draft* ]] && draft=(--draft)
+          gh release create "$VERSION" "out/$ISO" "out/$ISO.sha256" \
+            --repo "$GITHUB_REPOSITORY" --target "$GITHUB_SHA" \
+            --title "kirkus $VERSION" --notes "$body" "${draft[@]}"
+
+      - name: Keep the ISO with this run
+        if: ${{ startsWith(inputs.publish, 'Just') }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: kirkus-${{ env.VERSION }}
+          path: |
+            out/*.iso
+            out/*.sha256
+          retention-days: 7
+          compression-level: 0
