@@ -35,6 +35,16 @@ endorsed by Arch Linux.
 - **Hands-off updates:** new kirkus releases are applied automatically after `pacman -Syu`
   (see [UPDATING.md](UPDATING.md)).
 
+## Download
+
+The ready-made ISO is in the **[Releases](https://github.com/goseahawk/kirkus/releases/latest)**
+section of this GitHub page. Download the newest `kirkus-YY.MM.DD-x86_64.iso`, write it to a USB
+stick (for example with [balenaEtcher](https://etcher.balena.io/) or `dd`), and skip ahead to
+[Pick an install style](#2-pick-an-install-style). If the release includes a `.sha256` file, you can
+check your download with `sha256sum -c kirkus-*.iso.sha256`.
+
+You only need to build the ISO yourself if you want to change something or try unreleased work.
+
 ## 1. Build the ISO
 
 **On Arch:**
