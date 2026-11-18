@@ -30,7 +30,7 @@ it lists and type `Y` to go ahead.
   programs.
 - **Check the news first** if you haven't updated in a while: <https://archlinux.org/news/>. Now and
   then an update needs a manual step, and it's announced there.
-- **The Broadcom Wi-Fi driver** (on Macs and PCs that need it) is rebuilt automatically for each new
+- **The Broadcom Wi-Fi driver** (on Intel Macs and PCs that need it) is rebuilt automatically for each new
   kernel. That's why the update can pause for a minute on `dkms`. Let it finish.
 
 ### If an update breaks something

@@ -13,6 +13,9 @@ desktop that just works:
 - **Updating is one command.** `sudo pacman -Syu` updates the system, and kirkus keeps itself up to
   date along with it. Apps from Discover update in Discover.
 
+kirkus runs on 64-bit Intel and AMD PCs and on **Intel Macs**. Apple Silicon
+Macs (M1 and later) aren't supported, because kirkus is built for x86_64 only.
+
 It's still Arch underneath. Nothing is hidden or locked down, so pacman, the AUR and the Arch wiki all
 work as usual whenever you want to go further.
 
@@ -31,7 +34,7 @@ endorsed by Arch Linux.
 - **One look from boot to desktop:** GRUB, the boot splash, the login screen and the Plasma splash all
   draw the logo in the same place, so it never moves. Matching wallpaper, icon, fastfetch logo and an
   About This Computer page.
-- **Hardware detection:** Mac fixes only on Macs, the Broadcom `wl` Wi-Fi driver only on chips
+- **Hardware detection:** Mac fixes only on Intel Macs, the Broadcom `wl` Wi-Fi driver only on chips
   that need it, and microcode and graphics drivers matched to your CPU and GPU.
 - **Dated versions:** each build is named for the day it was built, e.g. *kirkus 26.11.18*.
 - **Hands-off updates:** new kirkus releases are applied automatically after `pacman -Syu`
@@ -79,7 +82,7 @@ one Linux partition in the free space. It needs at least 15 GiB.
 
 ## 3. Install
 
-Boot the USB (on a Mac, hold Option at startup and pick "EFI Boot"), then:
+Boot the USB (on an Intel Mac, hold Option at startup and pick "EFI Boot"), then:
 
     nmtui          # join Wi-Fi
     ./install.sh   # pick a mode, filesystem, user details, and go
@@ -94,7 +97,7 @@ computer.
 | Detected | What gets installed |
 |---|---|
 | Broadcom **BCM4331, BCM4352 or BCM4360** Wi-Fi (on any computer) | Broadcom's `wl` driver, with the open-source drivers that would grab the chip blocked. Other Broadcom chips, e.g. the BCM4350 in later MacBooks, keep Linux's built-in drivers, which `wl` would break. |
-| An **Apple** computer | Mac support: the instant-wake-from-suspend fix, the Apple keyboard Fn setting, a FaceTime HD webcam helper, and a bootloader setup that never writes to the Mac's firmware settings (see below) |
+| An **Intel Mac** | Mac support: the instant-wake-from-suspend fix, the Apple keyboard Fn setting, a FaceTime HD webcam helper, and a bootloader setup that never writes to the Mac's firmware settings (see below) |
 | Intel / AMD **CPU** | `intel-ucode` + `thermald`, or `amd-ucode` |
 | Intel / AMD **graphics** | `vulkan-intel` + `intel-media-driver`, or `vulkan-radeon` |
 
@@ -125,7 +128,7 @@ it insists on one; your account is created afterwards and root is locked.
 system starts instead, pick kirkus in your firmware's boot menu (often F12, F11 or Esc at power-on),
 or move it to the top of the boot order in the firmware settings.
 
-**On a Mac:** GRUB goes only at `EFI/BOOT/BOOTX64.EFI`, the path the Option-key startup manager
+**On an Intel Mac:** GRUB goes only at `EFI/BOOT/BOOTX64.EFI`, the path the Option-key startup manager
 lists as "EFI Boot". The installer never writes boot entries to a Mac's firmware with `efibootmgr`,
 which has been reported to damage Mac firmware, and never touches macOS's boot files. Hold Option at
 startup to choose. If the startup manager doesn't list Linux, make it the default from macOS
@@ -174,7 +177,7 @@ the old. Systems installed under the earlier names (Kirk Arch Linux, Kirk's Arch
 to the kirkus names: boot splash, GRUB theme, login theme, Plasma splash, icon and wallpaper. The
 hostname you chose isn't changed.
 
-On a Mac, run `facetimehd-setup` once as your normal user to install the webcam driver from the AUR.
+On an Intel Mac, run `facetimehd-setup` once as your normal user to install the webcam driver from the AUR.
 
 ## Btrfs + Timeshift (default filesystem)
 
@@ -307,9 +310,9 @@ breaks; standard fonts are used instead.
 | `overlay/airootfs/` | files for the live USB: `install.sh`, `kirk-install-backend`, live Wi-Fi detection |
 | `overlay/installed/` | files copied into every installed system (incl. `kirk-detect`) |
 | `overlay/hardware/broadcom-wl/` | added only when a chip needs the `wl` driver |
-| `overlay/hardware/mac/` | added only on Macs |
+| `overlay/hardware/mac/` | added only on Intel Macs |
 | `branding/` | logo sources and everything generated from them |
-| `tools/` | Mac boot troubleshooting: a read-only diagnosis script and a repair script |
+| `tools/` | Intel Mac boot troubleshooting: a read-only diagnosis script and a repair script |
 
 ## License
 
