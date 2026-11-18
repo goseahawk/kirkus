@@ -1,0 +1,6 @@
+[Desktop Entry]
+Type=Application
+Name=kirkus launcher icon
+Exec=/usr/local/bin/kirk-set-launcher-icon
+OnlyShowIn=KDE;
+NoDisplay=true

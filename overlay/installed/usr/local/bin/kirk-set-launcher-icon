@@ -1,0 +1,31 @@
+#!/bin/sh
+# One-shot per user: show the kirkus logo on the Application Launcher (Kickoff) at Plasma login.
+# It only replaces the stock KDE icon, never one you picked yourself, and runs once; change it any
+# time from the launcher's Configure dialog.
+flag="$HOME/.config/kirk-launcher-icon-done"
+[ -e "$flag" ] && exit 0
+
+js='var n = 0;
+var stock = ["", "start-here-kde", "start-here-kde-symbolic", "start-here", "start-here-symbolic"];
+panels().forEach(function (p) {
+  p.widgets("org.kde.plasma.kickoff").forEach(function (w) {
+    n++;
+    w.currentConfigGroup = ["General"];
+    if (stock.indexOf(String(w.readConfig("icon", ""))) >= 0) w.writeConfig("icon", "kirkus-logo");
+  });
+});
+print(n);'
+
+# plasmashell may still be starting, and on a first login it's still building the panel: retry ~1 min
+i=0
+while [ $i -lt 30 ]; do
+  out=$(busctl --user call org.kde.plasmashell /PlasmaShell org.kde.PlasmaShell \
+          evaluateScript s "$js" 2>/dev/null)
+  n=$(printf '%s' "$out" | grep -o '[0-9][0-9]*' | head -1)
+  if [ -n "$n" ] && [ "$n" -gt 0 ]; then
+    mkdir -p "$HOME/.config"; touch "$flag"
+    exit 0
+  fi
+  i=$((i + 1)); sleep 2
+done
+exit 0   # no launcher found yet; try again next login

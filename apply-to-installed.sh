@@ -39,6 +39,7 @@ install -Dm755 -t /usr/local/bin \
   "$SRC"/usr/local/bin/kirk-about-installed \
   "$SRC"/usr/local/bin/kirk-branding \
   "$SRC"/usr/local/bin/kirk-set-wallpaper \
+  "$SRC"/usr/local/bin/kirk-set-launcher-icon \
   "$SRC"/usr/local/bin/kirk-grub-theme-font \
   "$SRC"/usr/local/bin/kirk-login-theme \
   "$SRC"/usr/local/bin/kirk-login-preview \
@@ -52,6 +53,7 @@ install -Dm644 "$SRC"/etc/systemd/system/kirk-update.service      /etc/systemd/s
 [[ -e /etc/kirk-update.conf ]] || install -Dm644 "$SRC"/etc/kirk-update.conf /etc/kirk-update.conf
 systemctl daemon-reload
 install -Dm644 "$SRC"/etc/xdg/autostart/kirk-wallpaper.desktop    /etc/xdg/autostart/kirk-wallpaper.desktop
+install -Dm644 "$SRC"/etc/xdg/autostart/kirk-launcher-icon.desktop /etc/xdg/autostart/kirk-launcher-icon.desktop
 install -Dm644 "$SRC"/usr/share/applications/kirk-about.desktop   /usr/share/applications/kirk-about.desktop
 install -Dm644 "$SRC"/usr/share/icons/hicolor/scalable/apps/kirkus-logo.svg \
   /usr/share/icons/hicolor/scalable/apps/kirkus-logo.svg
