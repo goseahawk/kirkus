@@ -4,8 +4,8 @@
 # the version comes from /etc/kirk-release (VERSION=YY.MM.DD).
 # Never put an apostrophe in the name: GRUB's config generators read it from os-release, and an
 # ASCII apostrophe there produces a grub.cfg that fails grub-script-check.
-B="Kirk Arch Linux"
-L="kirk-arch-logo"     # icon-theme name; shown in System Settings > About this System
+B="kirkus"
+L="kirkus-logo"     # icon-theme name; shown in System Settings > About this System
 V=$(sed -n 's/^VERSION=//p' /etc/kirk-release 2>/dev/null | head -1 | tr -d '"[:space:]')
 case "$V" in
   [0-9][0-9].[0-9][0-9].[0-9][0-9]) PRETTY="$B $V" ;;

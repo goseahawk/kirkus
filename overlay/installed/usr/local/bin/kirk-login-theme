@@ -1,15 +1,15 @@
 #!/bin/sh
 # Switch the login screen theme. Takes effect the next time the login screen appears.
-#     sudo kirk-login-theme              # Kirk Arch Linux
+#     sudo kirk-login-theme              # kirkus
 #     sudo kirk-login-theme breeze       # KDE's default
 set -e
-NAME=${1:-kirk-arch}
+NAME=${1:-kirkus}
 [ "$(id -u)" -eq 0 ] || exec sudo "$0" "$@"
 if [ ! -d "/usr/share/sddm/themes/$NAME" ]; then
   echo "No login theme called '$NAME'. Installed:"; ls /usr/share/sddm/themes; exit 1
 fi
 mkdir -p /etc/sddm.conf.d
-printf '[Theme]\nCurrent=%s\n' "$NAME" > /etc/sddm.conf.d/00-kirk-arch.conf
+printf '[Theme]\nCurrent=%s\n' "$NAME" > /etc/sddm.conf.d/00-kirkus.conf
 # System Settings saves its choice in kde_settings.conf, which SDDM reads after ours. Keep it in
 # step, so the settings page shows the right theme and the two never disagree.
 K=/etc/sddm.conf.d/kde_settings.conf

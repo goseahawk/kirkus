@@ -1,6 +1,6 @@
-// Kirk Arch Linux startup splash (shown after login while Plasma loads).
+// kirkus startup splash (shown after login while Plasma loads).
 //
-// Same as the boot splash: the kirk lockup at exactly the spot every other screen draws it, so when
+// Same as the boot splash: the kirkus lockup at exactly the spot every other screen draws it, so when
 // you log in the password field simply disappears, and the cream dot breathes until the desktop
 // arrives.
 import QtQuick

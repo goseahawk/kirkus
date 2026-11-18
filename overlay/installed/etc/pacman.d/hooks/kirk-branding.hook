@@ -5,6 +5,6 @@ Type = Package
 Target = filesystem
 
 [Action]
-Description = Re-applying Kirk Arch Linux branding...
+Description = Re-applying kirkus branding...
 When = PostTransaction
 Exec = /usr/local/bin/kirk-branding

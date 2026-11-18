@@ -1,0 +1,8 @@
+[Plymouth Theme]
+Name=kirkus
+Description=kirkus boot splash
+ModuleName=script
+
+[script]
+ImageDir=/usr/share/plymouth/themes/kirkus
+ScriptFile=/usr/share/plymouth/themes/kirkus/kirkus.script

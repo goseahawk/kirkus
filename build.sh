@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
-# Builds Kirk Arch Linux ISO. Run on an Arch Linux system (or Arch container/VM) with internet access.
+# Builds the kirkus ISO. Run on an Arch Linux system (or Arch container/VM) with internet access.
 # On a non-Arch host, run ./build-docker.sh instead.
 set -euo pipefail
 # KIRK_VERSION overrides the version (normally today's date); passed through sudo explicitly,
 # because sudo drops the caller's environment.
 [[ $EUID -eq 0 ]] || exec sudo KIRK_VERSION="${KIRK_VERSION:-}" "$0" "$@"
 
-BRAND="Kirk Arch Linux"
-# Version = the build date as YY.MM.DD, e.g. "Kirk Arch Linux 26.11.18".
+BRAND="kirkus"
+# Version = the build date as YY.MM.DD, e.g. "kirkus 26.11.18".
 VERSION=${KIRK_VERSION:-$(date +%y.%m.%d)}
 [[ $VERSION =~ ^[0-9]{2}\.[0-9]{2}\.[0-9]{2}$ ]] || { echo "Bad version '$VERSION': use YY.MM.DD, e.g. 26.11.18"; exit 1; }
 echo "Building $BRAND $VERSION"
@@ -22,8 +22,8 @@ cp -r /usr/share/archiso/configs/releng "$P"
 
 # ---- Branding: ISO metadata ----
 sed -i \
-  -e 's|^iso_name=.*|iso_name="kirk-arch"|' \
-  -e 's|^iso_label=.*|iso_label="KIRK_ARCH"|' \
+  -e 's|^iso_name=.*|iso_name="kirkus"|' \
+  -e 's|^iso_label=.*|iso_label="KIRKUS"|' \
   -e "s|^iso_publisher=.*|iso_publisher=\"${BRAND}\"|" \
   -e "s|^iso_application=.*|iso_application=\"${BRAND} ${VERSION} Installer\"|" \
   -e "s|^iso_version=.*|iso_version=\"${VERSION}\"|" \
@@ -65,7 +65,7 @@ cp -a "$HERE/overlay/hardware/." "$P/airootfs/root/kirk-hardware/"
 # computers that need it, instead of blacklisting the standard drivers for everyone.
 install -Dm755 "$HERE/overlay/installed/usr/local/bin/kirk-detect" "$P/airootfs/usr/local/bin/kirk-detect"
 install -Dm644 "$HERE/overlay/hardware/broadcom-wl/etc/modprobe.d/broadcom-wl.conf" \
-  "$P/airootfs/usr/share/kirk-arch/broadcom-wl-blacklist.conf"
+  "$P/airootfs/usr/share/kirkus/broadcom-wl-blacklist.conf"
 ln -sf /etc/systemd/system/kirk-live-wifi.service \
   "$P/airootfs/etc/systemd/system/multi-user.target.wants/kirk-live-wifi.service"
 
@@ -92,4 +92,4 @@ fi
 
 echo
 echo "Done. ISO is in $HERE/out/"
-echo "Write it with:  sudo dd if=out/kirk-arch-*.iso of=/dev/sdX bs=4M status=progress oflag=sync"
+echo "Write it with:  sudo dd if=out/kirkus-*.iso of=/dev/sdX bs=4M status=progress oflag=sync"

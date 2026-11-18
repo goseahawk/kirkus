@@ -1,6 +1,6 @@
-// Kirk Arch Linux login screen for SDDM (Qt 6).
+// kirkus login screen for SDDM (Qt 6).
 //
-// The kirk lockup is drawn with exactly the same arithmetic as the Plymouth boot splash, the GRUB
+// The kirkus lockup is drawn with exactly the same arithmetic as the Plymouth boot splash, the GRUB
 // menu background and the Plasma startup splash, so from power-on to desktop it never moves. Under
 // it, the password field, which carries your name. Clock at the top, session, user and power
 // controls along the bottom, so nothing competes with the centre. Colours are the brand palette:
@@ -13,7 +13,7 @@ Rectangle {
     height: 900
     color: "black"
 
-    // ---- shared layout (same numbers as kirk-arch.script and the GRUB background) ----
+    // ---- shared layout (same numbers as kirkus.script and the GRUB background) ----
 
     // ---- state ----
     property int userIndex: userModel.lastIndex >= 0 ? userModel.lastIndex : 0

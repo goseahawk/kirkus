@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Installer for Kirk Arch Linux. Asks a few questions, then runs kirk-install-backend.
+# Installer for kirkus. Asks a few questions, then runs kirk-install-backend.
 set -euo pipefail
 [[ $EUID -eq 0 ]] || { echo "Run as root."; exit 1; }
 ping -c1 -W3 archlinux.org >/dev/null 2>&1 || { echo "No internet. Run 'nmtui' to join Wi-Fi first."; exit 1; }
@@ -26,7 +26,7 @@ read -rp "Filesystem: 1) btrfs with Timeshift snapshots (default)  2) ext4: " fs
 case ${fs:-1} in 2) KIRK_FS=ext4 ;; *) KIRK_FS=btrfs ;; esac
 read -rp "Installer engine: 1) archinstall (default)  2) pacstrap: " eng
 case ${eng:-1} in 2) KIRK_ENGINE=pacstrap ;; *) KIRK_ENGINE=archinstall ;; esac
-read -rp "Hostname [kirk-arch]: " KIRK_HOST; KIRK_HOST=${KIRK_HOST:-kirk-arch}
+read -rp "Hostname [kirkus]: " KIRK_HOST; KIRK_HOST=${KIRK_HOST:-kirkus}
 read -rp "Username: " KIRK_USER
 read -rp "Timezone [UTC]: " KIRK_TZ; KIRK_TZ=${KIRK_TZ:-UTC}
 read -rp "Locale [en_US.UTF-8]: " KIRK_LOCALE; KIRK_LOCALE=${KIRK_LOCALE:-en_US.UTF-8}

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
-# kirk-boot-fix.sh -- reinstall the bootloader for an already-installed Kirk Arch Linux.
+# kirk-boot-fix.sh -- reinstall the bootloader for an already-installed kirkus.
 #
-# Run as root from the Kirk Arch Linux live USB, AFTER running kirk-boot-check.sh:
+# Run as root from the kirkus live USB, AFTER running kirk-boot-check.sh:
 #     bash kirk-boot-fix.sh            # reinstall GRUB at the path Apple's picker scans
 #     bash kirk-boot-fix.sh --refind   # also install rEFInd (needs internet in the live session)
 #
@@ -58,7 +58,7 @@ fi
 # Mac firmware.
 echo "== installing GRUB =="
 arch-chroot /mnt grub-install --target=x86_64-efi --efi-directory=/efi \
-  --bootloader-id=KirkArch --removable --recheck
+  --bootloader-id=kirkus --removable --recheck
 
 echo "== regenerating grub.cfg =="
 if ! arch-chroot /mnt grub-mkconfig -o /boot/grub/grub.cfg; then

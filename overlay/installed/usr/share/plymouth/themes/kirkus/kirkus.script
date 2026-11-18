@@ -1,5 +1,5 @@
-// Kirk Arch Linux boot splash (Plymouth "script" theme).
-// Black background and the kirk lockup, with the cream dot breathing while the system starts.
+// kirkus boot splash (Plymouth "script" theme).
+// Black background and the kirkus lockup, with the cream dot breathing while the system starts.
 // The lockup sits exactly where GRUB, the login screen and the Plasma splash draw it.
 // Press Esc during boot to see the normal boot messages behind it.
 

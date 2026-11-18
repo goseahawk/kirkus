@@ -1,13 +1,13 @@
 [SddmGreeterTheme]
-Name=Kirk Arch Linux
+Name=kirkus
 Description=Matches the boot splash: the logo and name stay put, and the login form sits underneath.
-Author=Kirk Arch Linux
+Author=kirkus
 Type=sddm-theme
 Version=1.0
 Screenshot=preview.png
 MainScript=Main.qml
 ConfigFile=theme.conf
-Theme-Id=kirk-arch
+Theme-Id=kirkus
 Theme-API=2.0
 # Required: without it SDDM starts the Qt 5 greeter, which can't load this theme.
 QtVersion=6

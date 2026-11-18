@@ -1,5 +1,5 @@
 #!/bin/sh
-# /etc/grub.d/06_kirk_splash -- Kirk Arch Linux
+# /etc/grub.d/06_kirk_splash -- kirkus
 # Shows the boot splash image during GRUB's hidden wait instead of a black screen, and keeps
 # "tap Esc to show the menu".
 #
@@ -16,13 +16,13 @@ exec_prefix="/usr"
 datarootdir="/usr/share"
 . "${pkgdatadir:-/usr/share/grub}/grub-mkconfig_lib"
 
-BG=/boot/grub/themes/kirk-arch/background.png
+BG=/boot/grub/themes/kirkus/background.png
 WAIT=${GRUB_TIMEOUT:-2}
 [ "$WAIT" -gt 0 ] 2>/dev/null || exit 0      # timeout 0 or not a number: nothing to wait for
 [ -f "$BG" ] || exit 0
 is_path_readable_by_grub "$BG" || exit 0
 
-echo "### Kirk Arch Linux: boot splash during the hidden wait ###"
+echo "### kirkus: boot splash during the hidden wait ###"
 prepare_grub_to_access_device $(${grub_probe:-grub-probe} --target=device "$BG")
 cat <<EOF
 insmod png

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Build Kirk Arch Linux on a NON-Arch host (Fedora, Debian/Ubuntu, macOS, Windows+WSL2).
+# Build kirkus on a NON-Arch host (Fedora, Debian/Ubuntu, macOS, Windows+WSL2).
 #
 # Put this file next to build.sh in the project folder and run:   ./build-docker.sh
 #
@@ -141,9 +141,9 @@ cat <<MSG
 Done. The ISO is in $HERE/out/
 
 Write it to a USB stick:
-  Linux:    sudo dd if=out/kirk-arch-*.iso of=/dev/sdX bs=4M status=progress oflag=sync
+  Linux:    sudo dd if=out/kirkus-*.iso of=/dev/sdX bs=4M status=progress oflag=sync
   macOS:    diskutil list                       # find the USB, e.g. /dev/disk4
             diskutil unmountDisk /dev/disk4
-            sudo dd if=out/kirk-arch-*.iso of=/dev/rdisk4 bs=4m status=progress
+            sudo dd if=out/kirkus-*.iso of=/dev/rdisk4 bs=4m status=progress
   Windows:  Rufus or balenaEtcher, written in DD / image mode
 MSG

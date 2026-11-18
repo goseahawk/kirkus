@@ -1,0 +1,11 @@
+{
+    "KPackageStructure": "Plasma/LookAndFeel",
+    "KPlugin": {
+        "Authors": [ { "Name": "kirkus" } ],
+        "Description": "Startup splash matching the kirkus boot and login screens",
+        "Id": "org.kirkus.splash",
+        "Name": "kirkus",
+        "Version": "1.0"
+    },
+    "X-Plasma-APIVersion": "2"
+}

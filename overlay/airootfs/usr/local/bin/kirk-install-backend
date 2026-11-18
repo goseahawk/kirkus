@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Non-interactive installer for Kirk Arch Linux, configured through environment variables:
+# Non-interactive installer for kirkus, configured through environment variables:
 #   KIRK_MODE      wipe | freespace | partition
 #   KIRK_DISK      (wipe, freespace) target disk, e.g. /dev/sda
 #   KIRK_ROOT      (partition) existing partition to FORMAT and use for /
@@ -26,7 +26,7 @@ set -euo pipefail
 # Version: whatever the ISO was built as (YY.MM.DD), recorded in /etc/kirk-release on the new system.
 VERSION=$(cat /etc/kirk-version 2>/dev/null || true)
 [[ $VERSION =~ ^[0-9]{2}\.[0-9]{2}\.[0-9]{2}$ ]] || VERSION=$(date +%y.%m.%d)
-BRAND="Kirk Arch Linux $VERSION"
+BRAND="kirkus $VERSION"
 TOTAL=7
 ESP_GUID=c12a7328-f81f-11d2-ba4b-00a0c93ec93b
 MIN_FREE_MIB=15360   # 15 GiB
@@ -165,7 +165,7 @@ mount --mkdir "$ESP" /mnt/efi
 step 3 "Installing the base system and KDE Plasma (this takes a while)"
 
 run_archinstall() {
-  local cfg=/tmp/kirk-archinstall.json creds=/tmp/kirk-creds.json
+  local cfg=/tmp/kirk-ai-cfg.json creds=/tmp/kirk-creds.json
 
   echo "archinstall version: $(archinstall --version 2>/dev/null || echo unknown)"
 
@@ -267,7 +267,7 @@ if [[ $KIRK_ENGINE == archinstall ]]; then
 else
   run_pacstrap
 fi
-rm -f /tmp/kirk-archinstall.json /tmp/kirk-creds.json
+rm -f /tmp/kirk-ai-cfg.json /tmp/kirk-creds.json
 installed_ok || die "No usable system was installed."
 [[ $KIRK_BROADCOM_WL == yes ]] && { arch-chroot /mnt dkms status || true; }   # did the wl module build?
 
@@ -331,14 +331,14 @@ arch-chroot /mnt /bin/bash -e <<CHROOT
 id -u "$KIRK_USER" >/dev/null 2>&1 || useradd -m -G wheel -s /bin/bash "$KIRK_USER"
 /usr/local/bin/kirk-branding
 /usr/local/bin/kirk-install-fonts
-/usr/local/bin/kirk-login-theme kirk-arch
+/usr/local/bin/kirk-login-theme kirkus
 command -v gtk-update-icon-cache >/dev/null && gtk-update-icon-cache -q -t -f /usr/share/icons/hicolor || true
 if [ "$KIRK_FS" = btrfs ] && ! grep -q grub-btrfs-overlayfs /etc/mkinitcpio.conf; then
   sed -i -E 's/^(HOOKS=\(.*)\)/\1 grub-btrfs-overlayfs)/' /etc/mkinitcpio.conf
 fi
 # Boot splash: plymouth hook right after udev (or systemd), as the Arch packaging expects.
 sed -i -E '/^HOOKS=/{/[( ]plymouth[ )]/!s/([( ])(udev|systemd)([ )])/\1\2 plymouth\3/}' /etc/mkinitcpio.conf
-plymouth-set-default-theme kirk-arch
+plymouth-set-default-theme kirkus
 mkinitcpio -P
 systemctl enable NetworkManager sddm bluetooth power-profiles-daemon \\
   fstrim.timer systemd-timesyncd cronie.service
@@ -367,7 +367,7 @@ set_grub_var() {
 set_grub_var GRUB_TIMEOUT 2 /mnt/etc/default/grub
 set_grub_var GRUB_TIMEOUT_STYLE hidden /mnt/etc/default/grub
 # GRUB theme: the boot splash as the menu background (seen when you press Esc at boot).
-set_grub_var GRUB_THEME '"/boot/grub/themes/kirk-arch/theme.txt"' /mnt/etc/default/grub
+set_grub_var GRUB_THEME '"/boot/grub/themes/kirkus/theme.txt"' /mnt/etc/default/grub
 set_grub_var GRUB_TERMINAL_OUTPUT gfxterm /mnt/etc/default/grub
 set_grub_var GRUB_GFXMODE auto /mnt/etc/default/grub
 # keep the graphics mode into Linux, so GRUB hands over to the splash without a flicker
@@ -392,18 +392,18 @@ if [[ $KIRK_IS_MAC == yes ]]; then
     cp /mnt/efi/EFI/BOOT/BOOTX64.EFI /mnt/efi/EFI/BOOT/BOOTX64.EFI.pre-kirks
     echo "Existing EFI/BOOT/BOOTX64.EFI backed up as BOOTX64.EFI.pre-kirks"
   fi
-  arch-chroot /mnt grub-install --target=x86_64-efi --efi-directory=/efi --bootloader-id=KirkArch --removable
+  arch-chroot /mnt grub-install --target=x86_64-efi --efi-directory=/efi --bootloader-id=kirkus --removable
   BOOT_FILE=/mnt/efi/EFI/BOOT/BOOTX64.EFI
 else
-  # PC: the normal way, an EFI/KirkArch folder plus a firmware boot entry. Also the fallback path,
+  # PC: the normal way, an EFI/kirkus folder plus a firmware boot entry. Also the fallback path,
   # for firmware that forgets boot entries, but only if it's empty, since on a Windows dual-boot
   # Windows may be using it.
-  arch-chroot /mnt grub-install --target=x86_64-efi --efi-directory=/efi --bootloader-id=KirkArch
+  arch-chroot /mnt grub-install --target=x86_64-efi --efi-directory=/efi --bootloader-id=kirkus
   if [[ ! -f /mnt/efi/EFI/BOOT/BOOTX64.EFI ]]; then
-    arch-chroot /mnt grub-install --target=x86_64-efi --efi-directory=/efi --bootloader-id=KirkArch --removable \
+    arch-chroot /mnt grub-install --target=x86_64-efi --efi-directory=/efi --bootloader-id=kirkus --removable \
       || echo "(fallback copy skipped)"
   fi
-  BOOT_FILE=/mnt/efi/EFI/KirkArch/grubx64.efi
+  BOOT_FILE=/mnt/efi/EFI/kirkus/grubx64.efi
 fi
 
 write_minimal_grub_cfg() {
@@ -453,6 +453,6 @@ echo "Installation complete."
 if [[ $KIRK_IS_MAC == yes ]]; then
   echo "To start it: hold Option at the startup chime and pick \"EFI Boot\"."
 else
-  echo "Remove the USB and restart. If another system starts instead, pick $BRAND (or KirkArch)"
+  echo "Remove the USB and restart. If another system starts instead, pick kirkus"
   echo "in your computer's boot menu (often F12, F11 or Esc at power-on)."
 fi

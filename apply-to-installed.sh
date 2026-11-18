@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 # Brings an ALREADY-INSTALLED system up to date with this project, without reinstalling:
-#   - renames it to "Kirk Arch Linux YY.MM.DD" (os-release, login banner, GRUB menu, snapshot
+#   - renames it to "kirkus YY.MM.DD" (os-release, login banner, GRUB menu, snapshot
 #     submenu); the version is today's date, or set KIRK_VERSION=26.11.18 to choose it
 #   - new logo and wallpaper
 #   - the About This Computer page
-#   - the Kirk Arch Linux boot splash (Plymouth), and the same look as the GRUB menu background
+#   - the kirkus boot splash (Plymouth), and the same look as the GRUB menu background
 #   - a matching login screen and Plasma startup splash
 #   - hardware support by detection: Mac fixes on Macs, the Broadcom wl Wi-Fi driver where the chip
 #     needs it (and renames the files earlier versions installed for these)
@@ -19,7 +19,7 @@ set -euo pipefail
 
 VERSION=${KIRK_VERSION:-$(date +%y.%m.%d)}
 [[ $VERSION =~ ^[0-9]{2}\.[0-9]{2}\.[0-9]{2}$ ]] || { echo "Bad version '$VERSION': use YY.MM.DD, e.g. 26.11.18"; exit 1; }
-BRAND="Kirk Arch Linux $VERSION"
+BRAND="kirkus $VERSION"
 HERE=$(cd "$(dirname "$0")" && pwd)
 SRC=$HERE/overlay/installed
 [[ -d $SRC ]] || { echo "Run this from inside the project folder."; exit 1; }
@@ -44,40 +44,57 @@ install -Dm644 "$SRC"/etc/xdg/kcm-about-distrorc                 /etc/xdg/kcm-ab
 install -Dm644 "$SRC"/etc/pacman.d/hooks/kirk-branding.hook       /etc/pacman.d/hooks/kirk-branding.hook
 install -Dm644 "$SRC"/etc/xdg/autostart/kirk-wallpaper.desktop    /etc/xdg/autostart/kirk-wallpaper.desktop
 install -Dm644 "$SRC"/usr/share/applications/kirk-about.desktop   /usr/share/applications/kirk-about.desktop
-install -Dm644 "$SRC"/usr/share/icons/hicolor/scalable/apps/kirk-arch-logo.svg \
-  /usr/share/icons/hicolor/scalable/apps/kirk-arch-logo.svg
-install -Dm644 "$SRC"/usr/share/backgrounds/kirk-arch.svg         /usr/share/backgrounds/kirk-arch.svg
-install -Dm644 -t /usr/share/plymouth/themes/kirk-arch "$SRC"/usr/share/plymouth/themes/kirk-arch/*
+install -Dm644 "$SRC"/usr/share/icons/hicolor/scalable/apps/kirkus-logo.svg \
+  /usr/share/icons/hicolor/scalable/apps/kirkus-logo.svg
+install -Dm644 "$SRC"/usr/share/backgrounds/kirkus.svg         /usr/share/backgrounds/kirkus.svg
+install -Dm644 -t /usr/share/plymouth/themes/kirkus "$SRC"/usr/share/plymouth/themes/kirkus/*
 # images from earlier designs (progress bar, triangle logo, separate name/label)
-rm -f /usr/share/plymouth/themes/kirk-arch/{track,fill,logo,title}.png
-install -Dm644 -t /boot/grub/themes/kirk-arch "$SRC"/boot/grub/themes/kirk-arch/*
+rm -f /usr/share/plymouth/themes/kirkus/{track,fill,logo,title}.png
+install -Dm644 -t /boot/grub/themes/kirkus "$SRC"/boot/grub/themes/kirkus/*
 install -Dm755 "$SRC"/etc/grub.d/06_kirk_splash /etc/grub.d/06_kirk_splash
-install -Dm644 -t /usr/share/sddm/themes/kirk-arch "$SRC"/usr/share/sddm/themes/kirk-arch/*
-rm -f /usr/share/sddm/themes/kirk-arch/{logo,title}.png
+install -Dm644 -t /usr/share/sddm/themes/kirkus "$SRC"/usr/share/sddm/themes/kirkus/*
+rm -f /usr/share/sddm/themes/kirkus/{logo,title}.png
+# Space Grotesk was installed under the old name; move it rather than downloading it again
+if [[ -d /usr/share/fonts/kirk-arch && ! -e /usr/share/fonts/kirkus ]]; then
+  mv /usr/share/fonts/kirk-arch /usr/share/fonts/kirkus && fc-cache -f >/dev/null 2>&1 || true
+fi
+if [[ -d /usr/share/licenses/kirk-arch-fonts && ! -e /usr/share/licenses/kirkus-fonts ]]; then
+  mv /usr/share/licenses/kirk-arch-fonts /usr/share/licenses/kirkus-fonts
+fi
 /usr/local/bin/kirk-install-fonts
-/usr/local/bin/kirk-login-theme kirk-arch
+/usr/local/bin/kirk-login-theme kirkus
+# the login theme setting under its old file name would be read too; the new file replaces it
+rm -f /etc/sddm.conf.d/00-kirk-arch.conf
 # Plasma startup splash: install the package, make it the default for every account...
-rm -rf /usr/share/plasma/look-and-feel/org.kirkarch.splash
+rm -rf /usr/share/plasma/look-and-feel/org.kirkus.splash
 mkdir -p /usr/share/plasma/look-and-feel
-cp -r "$SRC"/usr/share/plasma/look-and-feel/org.kirkarch.splash /usr/share/plasma/look-and-feel/
-chmod -R u=rwX,go=rX /usr/share/plasma/look-and-feel/org.kirkarch.splash
+cp -r "$SRC"/usr/share/plasma/look-and-feel/org.kirkus.splash /usr/share/plasma/look-and-feel/
+chmod -R u=rwX,go=rX /usr/share/plasma/look-and-feel/org.kirkus.splash
 install -Dm644 "$SRC"/etc/xdg/ksplashrc /etc/xdg/ksplashrc
-# fastfetch: the kirk mark as its logo, brand colours on the labels
-install -Dm644 "$SRC"/usr/share/kirk-arch/fastfetch-logo.txt /usr/share/kirk-arch/fastfetch-logo.txt
+# fastfetch: the K mark as its logo, brand colours on the labels
+install -Dm644 "$SRC"/usr/share/kirkus/fastfetch-logo.txt /usr/share/kirkus/fastfetch-logo.txt
 install -Dm644 "$SRC"/etc/xdg/fastfetch/config.jsonc /etc/xdg/fastfetch/config.jsonc
-install -Dm644 "$SRC"/usr/share/fastfetch/presets/kirk-arch.jsonc /usr/share/fastfetch/presets/kirk-arch.jsonc
+install -Dm644 "$SRC"/usr/share/fastfetch/presets/kirkus.jsonc /usr/share/fastfetch/presets/kirkus.jsonc
 # ...and for yours too, since a splash you picked before would otherwise take precedence
 if [[ -n ${SUDO_USER:-} ]] && command -v kwriteconfig6 >/dev/null; then
   sudo -H -u "$SUDO_USER" kwriteconfig6 --file ksplashrc --group KSplash --key Engine KSplashQML || true
-  sudo -H -u "$SUDO_USER" kwriteconfig6 --file ksplashrc --group KSplash --key Theme org.kirkarch.splash || true
+  sudo -H -u "$SUDO_USER" kwriteconfig6 --file ksplashrc --group KSplash --key Theme org.kirkus.splash || true
 fi
 
-# Old names from earlier builds. Your desktop may still point at the old wallpaper path, so make
-# that path show the new image rather than deleting it out from under Plasma.
-rm -f /usr/share/icons/hicolor/scalable/apps/kirks-arch-logo.svg
-if [[ -e /usr/share/backgrounds/kirks-arch.svg && ! -L /usr/share/backgrounds/kirks-arch.svg ]]; then
-  ln -sf kirk-arch.svg /usr/share/backgrounds/kirks-arch.svg
-fi
+# Old names from earlier builds (Kirk's Arch Linux, then Kirk Arch Linux). Your desktop may still
+# point at an old wallpaper path, so those paths become links to the new image rather than
+# disappearing out from under Plasma. The old boot splash and GRUB theme are removed further down,
+# only once the new ones are in use.
+rm -f /usr/share/icons/hicolor/scalable/apps/kirks-arch-logo.svg \
+      /usr/share/icons/hicolor/scalable/apps/kirk-arch-logo.svg
+for old in kirks-arch kirk-arch; do
+  if [[ -e /usr/share/backgrounds/$old.svg || -L /usr/share/backgrounds/$old.svg ]]; then
+    ln -sfn kirkus.svg /usr/share/backgrounds/$old.svg
+  fi
+done
+rm -rf /usr/share/plasma/look-and-feel/org.kirkarch.splash /usr/share/sddm/themes/kirk-arch \
+       /usr/share/kirk-arch
+rm -f /usr/share/fastfetch/presets/kirk-arch.jsonc
 command -v gtk-update-icon-cache >/dev/null && gtk-update-icon-cache -q -t -f /usr/share/icons/hicolor || true
 
 # Install date for systems that predate /etc/kirk-release: the first pacman log entry.
@@ -149,10 +166,11 @@ if ! grep -qE '^HOOKS=.*[( ]plymouth[ )]' /etc/mkinitcpio.conf; then
   echo "WARNING: couldn't find udev or systemd in HOOKS, so the splash was not enabled."
   cp /etc/mkinitcpio.conf.pre-splash /etc/mkinitcpio.conf
 else
-  plymouth-set-default-theme kirk-arch
+  plymouth-set-default-theme kirkus
   if mkinitcpio -P; then
     SPLASH_OK=yes
     echo "Boot splash installed."
+    rm -rf /usr/share/plymouth/themes/kirk-arch     # the previous name's theme, no longer used
   else
     echo "WARNING: rebuilding the boot image failed. Restoring the previous setup..."
     cp /etc/mkinitcpio.conf.pre-splash /etc/mkinitcpio.conf
@@ -174,7 +192,7 @@ set_grub_var() {
 set_grub_var GRUB_TIMEOUT 2 /etc/default/grub
 set_grub_var GRUB_TIMEOUT_STYLE hidden /etc/default/grub
 # GRUB theme: the boot splash as the menu background (seen when you press Esc at boot).
-set_grub_var GRUB_THEME '"/boot/grub/themes/kirk-arch/theme.txt"' /etc/default/grub
+set_grub_var GRUB_THEME '"/boot/grub/themes/kirkus/theme.txt"' /etc/default/grub
 set_grub_var GRUB_TERMINAL_OUTPUT gfxterm /etc/default/grub
 set_grub_var GRUB_GFXMODE auto /etc/default/grub
 # keep the graphics mode into Linux, so GRUB hands over to the splash without a flicker
@@ -196,6 +214,8 @@ fi
 # check, so a failure here leaves your current, working boot menu in place.
 if grub-mkconfig -o /boot/grub/grub.cfg; then
   echo "GRUB menu regenerated."
+  # the menu now uses the kirkus theme, so the previous name's copy can go
+  grep -q 'themes/kirk-arch/' /boot/grub/grub.cfg || rm -rf /boot/grub/themes/kirk-arch
 else
   echo "WARNING: grub-mkconfig failed; your existing grub.cfg was left untouched and still boots."
 fi
@@ -205,7 +225,7 @@ cat <<MSG
 Done. Log out and back in to see the new logo. Then:
   - System Settings > About this System (or "About This Computer" in the app menu)
   - Wallpaper: right-click the desktop > Configure Desktop and Wallpaper, and pick
-    /usr/share/backgrounds/kirk-arch.svg if it didn't switch on its own.
+    /usr/share/backgrounds/kirkus.svg if it didn't switch on its own.
 MSG
 echo "Preview of the extra About lines:"
 for s in model battery storage installed; do /usr/local/bin/kirk-about-$s | paste -sd' '; done

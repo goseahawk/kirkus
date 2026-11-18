@@ -6,6 +6,6 @@ eval "$(/usr/local/bin/kirk-detect)"
 echo "kirk-live-wifi: $KIRK_WL_DEVICE found, using the wl driver"
 # /run/modprobe.d is read like /etc/modprobe.d, so this also stops udev loading them again later
 mkdir -p /run/modprobe.d
-cp /usr/share/kirk-arch/broadcom-wl-blacklist.conf /run/modprobe.d/broadcom-wl.conf
+cp /usr/share/kirkus/broadcom-wl-blacklist.conf /run/modprobe.d/broadcom-wl.conf
 modprobe -r b43 b43legacy brcmsmac bcma ssb 2>/dev/null
 modprobe wl

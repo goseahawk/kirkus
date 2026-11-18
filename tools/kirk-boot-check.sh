@@ -2,7 +2,7 @@
 # kirk-boot-check.sh -- READ-ONLY diagnosis of why the Mac's boot picker doesn't show Linux.
 # Changes nothing. Mounts things read-only and unmounts them again.
 #
-# Run as root from the Kirk Arch Linux live USB:
+# Run as root from the kirkus live USB:
 #     bash kirk-boot-check.sh
 #
 # Paste the whole output back into the chat.
@@ -33,7 +33,7 @@ if have sgdisk; then
     sgdisk -p "$d" 2>&1 | sed 's/^/    /'
   done
 else
-  echo "sgdisk not installed; skipping (run this from the Kirk Arch live USB, which has it)"
+  echo "sgdisk not installed; skipping (run this from the kirkus live USB, which has it)"
 fi
 
 hr "EFI System Partitions found"

@@ -4,7 +4,7 @@ flag="$HOME/.config/kirk-wallpaper-done"
 [ -e "$flag" ] && exit 0
 sleep 8
 if command -v plasma-apply-wallpaperimage >/dev/null 2>&1 &&
-   plasma-apply-wallpaperimage /usr/share/backgrounds/kirk-arch.svg; then
+   plasma-apply-wallpaperimage /usr/share/backgrounds/kirkus.svg; then
   mkdir -p "$HOME/.config"; touch "$flag"
 fi
 exit 0

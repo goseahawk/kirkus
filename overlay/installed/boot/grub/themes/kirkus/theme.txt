@@ -1,4 +1,4 @@
-# Kirk Arch Linux GRUB theme: the boot splash as the background, the menu underneath it.
+# kirkus GRUB theme: the boot splash as the background, the menu underneath it.
 # Fonts: GRUB's built-in Unifont by default. kirk-grub-theme-font swaps in a smoother Noto Sans
 # if it can build one; if a font name here is ever wrong, GRUB just uses its default font.
 

@@ -1,10 +1,10 @@
-# Kirk Arch Linux
+# kirkus
 
 Arch Linux with KDE Plasma, packaged as a bootable ISO with a text installer. Btrfs with Timeshift
 snapshots, a consistent look from power-on to desktop, and hardware support that installs itself
 when it's needed, including Intel Macs.
 
-Kirk Arch Linux is an independent project **based on Arch Linux**. It is not affiliated with or
+kirkus is an independent project **based on Arch Linux**. It is not affiliated with or
 endorsed by Arch Linux.
 
 - **Installs three ways:** erase a disk, use free space alongside macOS or Windows, or format a
@@ -15,7 +15,7 @@ endorsed by Arch Linux.
   About This Computer page.
 - **Hardware detection:** Mac fixes only on Macs, the Broadcom `wl` Wi-Fi driver only on chips
   that need it, and microcode and graphics drivers matched to your CPU and GPU.
-- **Dated versions:** each build is named for the day it was built, e.g. *Kirk Arch Linux 26.11.18*.
+- **Dated versions:** each build is named for the day it was built, e.g. *kirkus 26.11.18*.
 
 ## 1. Build the ISO
 
@@ -34,7 +34,7 @@ machine instead.
 
 Write it to a USB stick:
 
-    sudo dd if=out/kirk-arch-*.iso of=/dev/sdX bs=4M status=progress oflag=sync
+    sudo dd if=out/kirkus-*.iso of=/dev/sdX bs=4M status=progress oflag=sync
 
 macOS: `diskutil unmountDisk /dev/diskN` first, then write to `/dev/rdiskN` with `bs=4m`.
 Windows: Rufus or balenaEtcher, in DD / image mode.
@@ -101,8 +101,8 @@ it insists on one; your account is created afterwards and root is locked.
 
 ## 4. Booting afterwards
 
-**On a PC:** GRUB is installed the normal way, with a firmware boot entry called KirkArch. If another
-system starts instead, pick KirkArch in your firmware's boot menu (often F12, F11 or Esc at power-on),
+**On a PC:** GRUB is installed the normal way, with a firmware boot entry called kirkus. If another
+system starts instead, pick kirkus in your firmware's boot menu (often F12, F11 or Esc at power-on),
 or move it to the top of the boot order in the firmware settings.
 
 **On a Mac:** GRUB goes only at `EFI/BOOT/BOOTX64.EFI`, the path the Option-key startup manager
@@ -129,7 +129,7 @@ draws the image and runs its own Esc-interruptible wait. If that script is remov
 it, you get GRUB's normal hidden wait.
 
 When the menu does show, it uses the splash as its background with the entries underneath. Theme files
-are in `/boot/grub/themes/kirk-arch/`. `kirk-grub-theme-font` builds its font from Space Grotesk,
+are in `/boot/grub/themes/kirkus/`. `kirk-grub-theme-font` builds its font from Space Grotesk,
 falling back to Noto Sans or GRUB's built-in font.
 
 To change it, edit `GRUB_TIMEOUT` / `GRUB_TIMEOUT_STYLE` in `/etc/default/grub` (`menu` shows it every
@@ -146,7 +146,9 @@ It brings an existing install up to date with the current project (name and vers
 screens, login screen, fastfetch, About page, hardware support) without reinstalling. It never touches
 the EFI partition or reinstalls GRUB, so the way the computer boots stays as it is. It also renames
 files that earlier versions installed under other names, putting the new ones in place before removing
-the old.
+the old. Systems installed under the earlier names (Kirk Arch Linux, Kirk's Arch Linux) are moved over
+to the kirkus names: boot splash, GRUB theme, login theme, Plasma splash, icon and wallpaper. The
+hostname you chose isn't changed.
 
 On a Mac, run `facetimehd-setup` once as your normal user to install the webcam driver from the AUR.
 
@@ -168,13 +170,13 @@ that in Timeshift → Settings → Users.
 
 ## Version
 
-Each build is versioned by its date as **YY.MM.DD**, e.g. **Kirk Arch Linux 26.11.18**. The version
-appears in the ISO's boot menu and filename (`kirk-arch-26.11.18-x86_64.iso`), the live USB's
+Each build is versioned by its date as **YY.MM.DD**, e.g. **kirkus 26.11.18**. The version
+appears in the ISO's boot menu and filename (`kirkus-26.11.18-x86_64.iso`), the live USB's
 welcome message, System Settings → About this System, fastfetch, the login banner and the GRUB menu.
 
 - `build.sh` uses the date you build the ISO, and the installer passes it on in `/etc/kirk-release`.
   `apply-to-installed.sh` uses the date you run it. Override either with `KIRK_VERSION=26.11.18`.
-- os-release gets `NAME="Kirk Arch Linux"`, `PRETTY_NAME="Kirk Arch Linux 26.11.18"`, `VERSION` and
+- os-release gets `NAME="kirkus"`, `PRETTY_NAME="kirkus 26.11.18"`, `VERSION` and
   `VERSION_ID`. pacman resets os-release whenever the `filesystem` package updates, so a hook
   rebuilds it from `/etc/kirk-release`.
 - **Never put an apostrophe in the name.** GRUB's config generators read it from `/etc/default/grub`
@@ -192,25 +194,25 @@ graphics and Plasma details, plus four extra lines:
 | Storage | free / total on `/`, and whether it's Btrfs with snapshots |
 | Installed | the install date from `/etc/kirk-release` |
 
-The **About This Computer** entry in the app menu opens it directly. It's wired up by `LOGO=kirk-arch-logo`
+The **About This Computer** entry in the app menu opens it directly. It's wired up by `LOGO=kirkus-logo`
 in os-release and `/etc/xdg/kcm-about-distrorc`, which lists the `kirk-about-*` scripts.
 KInfoCenter **refuses to open** if one of those scripts prints anything other than exactly two lines,
 so keep that rule when editing them.
 
 ## Boot splash
 
-A Plymouth theme, `kirk-arch`, shows the logo on black while the system starts, with the cream dot
-breathing. Files: `/usr/share/plymouth/themes/kirk-arch/`.
+A Plymouth theme, `kirkus`, shows the logo on black while the system starts, with the cream dot
+breathing. Files: `/usr/share/plymouth/themes/kirkus/`.
 
 - **See boot messages:** press Esc while the splash is up.
-- **Change it:** edit `kirk-arch.script`, then `sudo plymouth-set-default-theme -R kirk-arch`.
+- **Change it:** edit `kirkus.script`, then `sudo plymouth-set-default-theme -R kirkus`.
 - **Turn it off:** remove `splash` (and `quiet`, for full messages) from `GRUB_CMDLINE_LINUX_DEFAULT` in
   `/etc/default/grub`, then `sudo grub-mkconfig -o /boot/grub/grub.cfg`.
 - If the theme fails to load, Plymouth falls back to text; it never stops the boot.
 
 ## Login screen
 
-An SDDM theme, `kirk-arch`, continues the boot splash: the logo in the same place, the password field
+An SDDM theme, `kirkus`, continues the boot splash: the logo in the same place, the password field
 under it, the date and time at the top, and the session plus Sleep / Restart / Shut Down along the
 bottom. A wrong password shakes the field; Caps Lock gets a warning.
 
@@ -224,7 +226,7 @@ The lock screen (Super+L) belongs to Plasma, not SDDM, so it's unaffected.
 
 ## Startup splash (after login)
 
-The Plasma splash, `org.kirkarch.splash`, uses the same logo in the same place. When you log in, the
+The Plasma splash, `org.kirkus.splash`, uses the same logo in the same place. When you log in, the
 password field disappears and the logo stays until the desktop appears. It's the default for every
 account via `/etc/xdg/ksplashrc`; change it in System Settings → Colors & Themes → Splash Screen. Plasma
 only loads splashes from "look-and-feel" packages, so it also appears in the Global Theme list. Keep
@@ -234,26 +236,30 @@ Breeze selected there.
 
 `fastfetch` shows the mark (blue K, cream dot) in Unicode half-blocks, with the labels in brand blue.
 The default for everyone is `/etc/xdg/fastfetch/config.jsonc`; your own
-`~/.config/fastfetch/config.jsonc` takes priority. `fastfetch -c kirk-arch` always uses it.
+`~/.config/fastfetch/config.jsonc` takes priority. `fastfetch -c kirkus` always uses it.
 
 ## Branding
 
-Everything visual comes from the logo files in `branding/source/`. `branding/build/` holds what's
-generated from them:
+Everything visual comes from the logo files in `branding/source/` (the original artwork, which read
+"kirk / ARCH LINUX"). `branding/build/` holds what's generated from them:
 
-- `lockup.png`, `lockup-nodot.png`, `dot.png`: the lockup made transparent by separating it from its
-  black background (accurate to 1/255), with the dot split out so it can breathe on its own.
-- `screen-*.png`: the same at screen size. Every screen draws the lockup at
-  `x = floor(W/2 - w/2), y = floor(H/2 - h/2) - 50`, so it's pixel-identical from GRUB to the desktop.
-- `mark.svg`: the K and dot traced to vector outlines, from which the app icon (`kirk-arch-logo.svg`)
-  and wallpaper (`kirk-arch-wallpaper.svg`) are built.
+- `mark-src.png`, `dot-src.png`: the K and its dot, made transparent by separating them from the
+  black background (accurate to 1/255).
+- `lockup.png`, `lockup-nodot.png`: the K plus the **kirkus** wordmark, set in Space Grotesk at the
+  weight, size and spacing that reproduce the original "kirk" lettering. Rebuild them with
+  `python3 branding/tools/make-lockup.py SpaceGrotesk[wght].ttf branding`.
+- `screen-*.png`: the same at screen size, with the dot as its own layer so it can breathe. Every
+  screen draws the lockup at `x = floor(W/2 - w/2), y = floor(H/2 - h/2) - 50`, so it's
+  pixel-identical from GRUB to the desktop.
+- `mark.svg`: the K and dot traced to vector outlines, from which the app icon (`kirkus-logo.svg`)
+  and wallpaper (`kirkus-wallpaper.svg`) are built.
 
-Palette: navy `#0b1020`, blue `#5590b4`, cream `#fff8ec`, slate `#aeb6c8`. The boot-to-desktop screens
+Palette: navy `#0b1020`, blue `#5590b4`, cream `#fff8ec`, slate `#aeb6c8` (secondary text). The boot-to-desktop screens
 are black; the wallpaper and icon tile are navy.
 
 Typeface: **Space Grotesk** (SIL Open Font License), the wordmark's font, used on the login screen and
 in the GRUB menu. It isn't in Arch's repos, so `kirk-install-fonts` downloads the official 2.0.0
-release, checks its SHA-256 and installs it to `/usr/share/fonts/kirk-arch/`. If that fails, nothing
+release, checks its SHA-256 and installs it to `/usr/share/fonts/kirkus/`. If that fails, nothing
 breaks; standard fonts are used instead.
 
 ## Other defaults
@@ -278,6 +284,6 @@ breaks; standard fonts are used instead.
 
 ## License
 
-The code is under the MIT License (see `LICENSE`). The Kirk Arch Linux logo and the files in
+The code is under the MIT License (see `LICENSE`). The kirkus logo and the files in
 `branding/` are **not** covered by it; they may not be reused without permission. Arch Linux is a
 trademark of its respective owners.

@@ -1,12 +1,12 @@
 #!/bin/sh
-# Installs Space Grotesk, the typeface of the kirk wordmark, system-wide (so the login screen,
+# Installs Space Grotesk, the typeface of the kirkus wordmark, system-wide (so the login screen,
 # which runs as its own user, can use it). It's only in the AUR, not Arch's repos, so this fetches
 # the official 2.0.0 release and verifies its checksum (from Homebrew's cask) before installing.
 # Space Grotesk is under the SIL Open Font License. Safe to re-run; never fails the caller.
 set -u
 URL=https://github.com/floriankarsten/space-grotesk/releases/download/2.0.0/SpaceGrotesk-2.0.0.zip
 SHA256=53b415577d4139248555300710bea0d268c7a5be67b93de53b716a9736cabffd
-DEST=/usr/share/fonts/kirk-arch
+DEST=/usr/share/fonts/kirkus
 
 if [ -f "$DEST/SpaceGrotesk-Regular.otf" ]; then echo "Space Grotesk already installed."; exit 0; fi
 T=$(mktemp -d) || exit 0
@@ -25,7 +25,7 @@ for w in Light Regular Medium Bold; do
   [ -n "$f" ] && install -m644 "$f" "$DEST/" && n=$((n + 1))
 done
 lic=$(find "$T/x" -iname 'OFL*.txt' -o -iname 'LICENSE*' | head -1)
-[ -n "$lic" ] && install -Dm644 "$lic" /usr/share/licenses/kirk-arch-fonts/SpaceGrotesk-OFL.txt
+[ -n "$lic" ] && install -Dm644 "$lic" /usr/share/licenses/kirkus-fonts/SpaceGrotesk-OFL.txt
 fc-cache -f "$DEST" >/dev/null 2>&1
 echo "Installed $n Space Grotesk weights."
 exit 0
