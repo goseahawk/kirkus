@@ -1,0 +1,9 @@
+#!/bin/sh
+# Installed on Macs only. Some Intel Macs (e.g. the 2013-2015 MacBook Air) wake immediately after
+# suspend because of USB controller ACPI wake sources. Disable them if they are enabled. The lid
+# (LID0) is left alone so opening the lid still wakes the machine.
+for dev in XHC1 EHC1 EHC2; do
+  if grep -q "^$dev.*\*enabled" /proc/acpi/wakeup; then
+    echo "$dev" > /proc/acpi/wakeup
+  fi
+done

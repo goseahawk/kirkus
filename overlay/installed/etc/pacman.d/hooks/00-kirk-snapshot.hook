@@ -1,0 +1,17 @@
+[Trigger]
+Operation = Upgrade
+Type = Package
+Target = linux
+Target = linux-firmware
+Target = mkinitcpio
+Target = systemd
+Target = grub
+Target = mesa
+Target = plasma-desktop
+Target = broadcom-wl-dkms
+
+[Action]
+Description = Timeshift snapshot before system-critical upgrade...
+When = PreTransaction
+Exec = /usr/local/bin/kirk-pre-snapshot
+AbortOnFail = false

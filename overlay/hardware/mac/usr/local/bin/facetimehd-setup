@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+# Builds and installs the FaceTime HD webcam driver from the AUR.
+# facetimehd-firmware downloads Apple's driver package itself and extracts the firmware,
+# so no macOS install is needed. Review the PKGBUILDs if you want to; this runs makepkg on them.
+set -euo pipefail
+[[ $EUID -ne 0 ]] || { echo "Run as your normal user, not root."; exit 1; }
+work=$(mktemp -d); trap 'rm -rf "$work"' EXIT
+for pkg in facetimehd-firmware facetimehd-dkms; do
+  git clone "https://aur.archlinux.org/$pkg.git" "$work/$pkg"
+  (cd "$work/$pkg" && makepkg -si --noconfirm)
+done
+echo facetimehd | sudo tee /etc/modules-load.d/facetimehd.conf >/dev/null
+sudo modprobe facetimehd
+echo "Webcam driver installed. Test with any app that uses /dev/video0"

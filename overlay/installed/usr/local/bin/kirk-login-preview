@@ -1,0 +1,11 @@
+#!/bin/sh
+# Opens a login screen theme in a window, so you can see it without logging out.
+# In this preview, logging in and the power buttons do nothing.
+#     kirk-login-preview              # Kirk Arch Linux
+#     kirk-login-preview breeze
+T=/usr/share/sddm/themes/${1:-kirk-arch}
+[ -d "$T" ] || { echo "No such theme: $T"; exit 1; }
+for g in sddm-greeter-qt6 sddm-greeter; do
+  if command -v "$g" >/dev/null 2>&1; then exec "$g" --test-mode --theme "$T"; fi
+done
+echo "No SDDM greeter found."; exit 1

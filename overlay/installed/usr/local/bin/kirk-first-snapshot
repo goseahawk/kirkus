@@ -1,0 +1,8 @@
+#!/bin/sh
+# One-time baseline snapshot right after install (btrfs only).
+# Keep the comment free of apostrophes: they have broken grub-btrfs menu generation.
+[ "$(findmnt -no FSTYPE /)" = btrfs ] || { touch /var/lib/kirk-first-snapshot; exit 0; }
+if timeshift --create --comments "Fresh install" --scripted; then
+  touch /var/lib/kirk-first-snapshot
+fi
+exit 0

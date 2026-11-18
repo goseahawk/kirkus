@@ -1,0 +1,55 @@
+// Kirk Arch Linux boot splash (Plymouth "script" theme).
+// Black background and the kirk lockup, with the cream dot breathing while the system starts.
+// The lockup sits exactly where GRUB, the login screen and the Plasma splash draw it.
+// Press Esc during boot to see the normal boot messages behind it.
+
+Window.SetBackgroundTopColor(0, 0, 0);
+Window.SetBackgroundBottomColor(0, 0, 0);
+
+W = Window.GetWidth();
+H = Window.GetHeight();
+
+// ---- lockup, without its dot ----
+lock.image = Image("lockup-nodot.png");
+lock.x = Window.GetX() + Math.Int(W / 2 - lock.image.GetWidth() / 2);
+lock.y = Window.GetY() + Math.Int(H / 2 - lock.image.GetHeight() / 2) - 50;
+lock.sprite = Sprite(lock.image);
+lock.sprite.SetPosition(lock.x, lock.y, 10);
+
+// ---- the dot, as its own layer (same size and position as the lockup) ----
+dot.image = Image("dot.png");
+dot.sprite = Sprite(dot.image);
+dot.sprite.SetPosition(lock.x, lock.y, 11);
+
+tick = 0;
+fun refresh_callback() {
+  tick = tick + 1;
+  dot.sprite.SetOpacity(0.65 + 0.35 * Math.Sin(tick / 20));
+}
+Plymouth.SetRefreshFunction(refresh_callback);
+
+// ---- status messages (e.g. a filesystem check) ----
+msg.sprite = Sprite();
+fun message_callback(text) {
+  msg.image = Image.Text(text, 0.68, 0.71, 0.78);
+  msg.sprite.SetImage(msg.image);
+  msg.sprite.SetPosition(Window.GetX() + W / 2 - msg.image.GetWidth() / 2, Window.GetY() + H - 64, 10);
+}
+Plymouth.SetMessageFunction(message_callback);
+
+// ---- password prompt (only appears if disk encryption is ever added) ----
+prompt.sprite = Sprite();
+fun display_password_callback(prompt_text, bullets) {
+  s = prompt_text + "  ";
+  i = 0;
+  while (i < bullets) { s = s + "*"; i = i + 1; }
+  prompt.image = Image.Text(s, 1, 0.97, 0.93);
+  prompt.sprite.SetImage(prompt.image);
+  prompt.sprite.SetPosition(Window.GetX() + W / 2 - prompt.image.GetWidth() / 2, lock.y + lock.image.GetHeight() + 84, 12);
+  prompt.sprite.SetOpacity(1);
+}
+fun display_normal_callback() {
+  prompt.sprite.SetOpacity(0);
+}
+Plymouth.SetDisplayPasswordFunction(display_password_callback);
+Plymouth.SetDisplayNormalFunction(display_normal_callback);

@@ -1,0 +1,16 @@
+#!/bin/sh
+# KInfoCenter extra info: computer model. MUST print exactly two lines.
+S=${KIRK_SYS:-/sys}
+rd() { cat "$S/class/dmi/id/$1" 2>/dev/null | tr -d '\r\n' | sed 's/^ *//; s/ *$//'; }
+id=$(rd product_name); vendor=$(rd sys_vendor)
+# placeholder strings some firmware ships instead of a real name
+case "$id" in "To be filled by O.E.M."|"System Product Name"|"Default string") id="" ;; esac
+case "$vendor" in "To be filled by O.E.M."|"System manufacturer"|"Default string") vendor="" ;; esac
+case "$id" in
+  MacBookAir7,1) v="MacBook Air (11-inch, Early 2015) - $id" ;;
+  MacBookAir7,2) v="MacBook Air (13-inch, Early 2015 or 2017) - $id" ;;
+  MacBookAir*)   v="MacBook Air - $id" ;;
+  "")            v=${vendor:-Unknown} ;;
+  *)             case "$id" in "$vendor"*) v="$id" ;; *) v="${vendor:+$vendor }$id" ;; esac ;;
+esac
+printf 'Model:\n%s\n' "$(printf '%s' "$v" | tr -d '\r\n')"

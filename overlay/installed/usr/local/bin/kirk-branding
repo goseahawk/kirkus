@@ -1,0 +1,28 @@
+#!/bin/sh
+# Apply the system name, version and logo. Re-run by a pacman hook whenever the 'filesystem'
+# package (which owns os-release) is upgraded, so it must only depend on files that persist:
+# the version comes from /etc/kirk-release (VERSION=YY.MM.DD).
+# Never put an apostrophe in the name: GRUB's config generators read it from os-release, and an
+# ASCII apostrophe there produces a grub.cfg that fails grub-script-check.
+B="Kirk Arch Linux"
+L="kirk-arch-logo"     # icon-theme name; shown in System Settings > About this System
+V=$(sed -n 's/^VERSION=//p' /etc/kirk-release 2>/dev/null | head -1 | tr -d '"[:space:]')
+case "$V" in
+  [0-9][0-9].[0-9][0-9].[0-9][0-9]) PRETTY="$B $V" ;;
+  *) V=""; PRETTY="$B" ;;
+esac
+
+f=/usr/lib/os-release
+# set KEY=VALUE in os-release: replace the line if it's there, otherwise append it
+setkey() { if grep -q "^$1=" "$f"; then sed -i "s|^$1=.*|$1=$2|" "$f"; else echo "$1=$2" >> "$f"; fi; }
+if [ -f "$f" ]; then
+  setkey NAME "\"$B\""                 # os-release convention: NAME without the version...
+  setkey PRETTY_NAME "\"$PRETTY\""     # ...PRETTY_NAME with it (what the About page and fastfetch show)
+  if [ -n "$V" ]; then
+    setkey VERSION "\"$V\""
+    setkey VERSION_ID "$V"
+  fi
+  setkey LOGO "$L"
+fi
+printf "%s \\\\r (\\\\l)\n\n" "$PRETTY" > /etc/issue
+exit 0

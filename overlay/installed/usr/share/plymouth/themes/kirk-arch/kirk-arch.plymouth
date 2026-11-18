@@ -1,0 +1,8 @@
+[Plymouth Theme]
+Name=Kirk Arch Linux
+Description=Kirk Arch Linux boot splash
+ModuleName=script
+
+[script]
+ImageDir=/usr/share/plymouth/themes/kirk-arch
+ScriptFile=/usr/share/plymouth/themes/kirk-arch/kirk-arch.script

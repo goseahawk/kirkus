@@ -1,0 +1,458 @@
+#!/usr/bin/env bash
+# Non-interactive installer for Kirk Arch Linux, configured through environment variables:
+#   KIRK_MODE      wipe | freespace | partition
+#   KIRK_DISK      (wipe, freespace) target disk, e.g. /dev/sda
+#   KIRK_ROOT      (partition) existing partition to FORMAT and use for /
+#   KIRK_ESP       (partition) existing EFI System Partition to reuse (NOT formatted)
+#   KIRK_FS        btrfs (default, Timeshift-ready subvolumes) | ext4
+#   KIRK_ENGINE    archinstall (default) | pacstrap   -- which tool installs the base system
+#   KIRK_HOST KIRK_USER KIRK_PASSWORD KIRK_TZ KIRK_LOCALE
+#   KIRK_IS_MAC / KIRK_BROADCOM_WL   yes|no: override hardware detection (normally from kirk-detect)
+# Emits "##STEP n/total text" lines so frontends can show progress.
+#
+# DIVISION OF LABOUR
+#   This script owns partitioning and the bootloader; archinstall owns everything in between.
+#   - Partitioning: archinstall cannot carve a Linux partition out of free space beside another
+#     system (macOS, Windows) while reusing its EFI partition, so we do that and hand it a
+#     pre-mounted tree.
+#   - Bootloader: archinstall's pre-mounted mode has a known, unfixed bug where grub-install resolves
+#     a doubled path and fails (archinstall issue #2054). The documented workaround is to run
+#     grub-install yourself in the chroot afterwards, which is exactly what step 6 does.
+#   - Everything else (pacstrap, KDE profile, locale, mirrors, fstab) is archinstall's job.
+set -euo pipefail
+
+# Never put an apostrophe in BRAND: GRUB's config generators read it from /etc/default/grub and
+# /etc/os-release, and an ASCII apostrophe there produces a grub.cfg that fails grub-script-check.
+# Version: whatever the ISO was built as (YY.MM.DD), recorded in /etc/kirk-release on the new system.
+VERSION=$(cat /etc/kirk-version 2>/dev/null || true)
+[[ $VERSION =~ ^[0-9]{2}\.[0-9]{2}\.[0-9]{2}$ ]] || VERSION=$(date +%y.%m.%d)
+BRAND="Kirk Arch Linux $VERSION"
+TOTAL=7
+ESP_GUID=c12a7328-f81f-11d2-ba4b-00a0c93ec93b
+MIN_FREE_MIB=15360   # 15 GiB
+
+step() { echo "##STEP $1/$TOTAL $2"; }
+die()  { echo "ERROR: $*"; exit 2; }
+trap 'echo "ERROR: installer failed near line $LINENO"' ERR
+
+partdev()      { if [[ $1 =~ [0-9]$ ]]; then echo "${1}p${2}"; else echo "${1}${2}"; fi; }
+next_partnum() { sgdisk -p "$1" | awk '/^ +[0-9]+ /{n=$1} END{print n+1}'; }
+find_esp()     { lsblk -lnpo NAME,PARTTYPE "$1" | awk -v g="$ESP_GUID" 'tolower($2)==g{print $1; exit}'; }
+settle_parts() { partprobe "$1"; udevadm settle; sleep 1; }
+largest_free_mib() {
+  parted -m -s "$1" unit MiB print free 2>/dev/null |
+    awk -F: '$5=="free;"{gsub("MiB","",$4); if ($4+0>m) m=$4+0} END{printf "%d", m}'
+}
+
+KIRK_MODE=${KIRK_MODE:-wipe}
+KIRK_FS=${KIRK_FS:-btrfs}
+KIRK_ENGINE=${KIRK_ENGINE:-archinstall}
+[[ $KIRK_FS == btrfs || $KIRK_FS == ext4 ]] || die "Unknown filesystem '$KIRK_FS'"
+[[ $KIRK_ENGINE == archinstall || $KIRK_ENGINE == pacstrap ]] || die "Unknown engine '$KIRK_ENGINE'"
+BTRFS_OPTS=noatime,compress=zstd:1,space_cache=v2,discard=async
+
+for v in KIRK_HOST KIRK_USER KIRK_PASSWORD KIRK_TZ KIRK_LOCALE; do
+  [[ -n ${!v-} ]] || die "Missing $v"
+done
+[[ -d /sys/firmware/efi ]] || die "Not booted in UEFI mode"
+command -v archinstall >/dev/null || KIRK_ENGINE=pacstrap
+
+# ---- hardware detection (see kirk-detect); KIRK_IS_MAC / KIRK_BROADCOM_WL set by the caller win ----
+_mac=${KIRK_IS_MAC-}; _wl=${KIRK_BROADCOM_WL-}
+eval "$(/usr/local/bin/kirk-detect)"
+[[ -n $_mac ]] && KIRK_IS_MAC=$_mac
+[[ -n $_wl ]] && KIRK_BROADCOM_WL=$_wl
+echo "Hardware: $(/usr/local/bin/kirk-detect --summary)"
+[[ $KIRK_IS_MAC == yes ]] && echo "  -> installing Mac support (suspend fix, Apple keyboard, webcam helper; no NVRAM writes)"
+[[ $KIRK_BROADCOM_WL == yes ]] && echo "  -> installing the Broadcom wl Wi-Fi driver"
+
+# Packages beyond whatever the base install and the KDE profile bring in.
+EXTRA_PKGS=(
+  linux-headers
+  grub efibootmgr
+  base-devel git dkms sudo nano vim man-db cronie
+  networkmanager wpa_supplicant
+  mesa
+  power-profiles-daemon upower zram-generator
+  bluez bluez-utils
+  firefox noto-fonts noto-fonts-emoji
+  kinfocenter fastfetch
+  plymouth
+)
+case $KIRK_CPU in
+  intel) EXTRA_PKGS+=(intel-ucode thermald) ;;   # thermald is Intel-only
+  amd)   EXTRA_PKGS+=(amd-ucode) ;;
+esac
+[[ $KIRK_GPU_INTEL == yes ]] && EXTRA_PKGS+=(vulkan-intel intel-media-driver)
+[[ $KIRK_GPU_AMD == yes ]] && EXTRA_PKGS+=(vulkan-radeon)
+[[ $KIRK_BROADCOM_WL == yes ]] && EXTRA_PKGS+=(broadcom-wl-dkms)
+if [[ $KIRK_FS == btrfs ]]; then
+  EXTRA_PKGS+=(btrfs-progs timeshift grub-btrfs inotify-tools)
+fi
+
+# ---------------------------------------------------------------- 1. partitions
+step 1 "Preparing partitions ($KIRK_MODE)"
+umount -R /mnt 2>/dev/null || true
+ESP_FORMAT=0
+
+case $KIRK_MODE in
+  wipe)
+    DISK=${KIRK_DISK-}; [[ -b $DISK ]] || die "Bad disk '$DISK'"
+    sgdisk --zap-all "$DISK"
+    sgdisk -n1:0:+512M -t1:ef00 -c1:EFI "$DISK"
+    sgdisk -n2:0:0     -t2:8304 -c2:archroot "$DISK"
+    settle_parts "$DISK"
+    ESP=$(partdev "$DISK" 1); ROOT=$(partdev "$DISK" 2); ESP_FORMAT=1
+    ;;
+  freespace)
+    DISK=${KIRK_DISK-}; [[ -b $DISK ]] || die "Bad disk '$DISK'"
+    ESP=$(find_esp "$DISK" || true)
+    NEED=$MIN_FREE_MIB; [[ -n $ESP ]] || NEED=$((NEED + 512))
+    FREE=$(largest_free_mib "$DISK")
+    (( FREE >= NEED )) || die "Only ${FREE} MiB free on $DISK; need at least ${NEED} MiB. Shrink the other system first."
+    NUM=$(next_partnum "$DISK")
+    if [[ -z $ESP ]]; then
+      sgdisk -n "$NUM:0:+512M" -t "$NUM:ef00" -c "$NUM:EFI" "$DISK"
+      ESP_NEW=$NUM; NUM=$((NUM + 1)); ESP_FORMAT=1
+    fi
+    sgdisk -n "$NUM:0:0" -t "$NUM:8304" -c "$NUM:archroot" "$DISK"
+    settle_parts "$DISK"
+    ROOT=$(partdev "$DISK" "$NUM")
+    [[ -n ${ESP_NEW-} ]] && ESP=$(partdev "$DISK" "$ESP_NEW")
+    ;;
+  partition)
+    ROOT=${KIRK_ROOT-}; ESP=${KIRK_ESP-}
+    [[ -b $ROOT && -b $ESP ]] || die "Bad root/ESP partition"
+    [[ $ROOT != "$ESP" ]] || die "Root and EFI partitions must differ"
+    if findmnt -rn -S "$ROOT" >/dev/null || findmnt -rn -S "$ESP" >/dev/null; then
+      die "A selected partition is currently mounted (is it the live USB?)"
+    fi
+    [[ $(blkid -s TYPE -o value "$ESP" || true) == vfat ]] || die "$ESP is not a FAT EFI partition"
+    name=${ROOT#/dev/}
+    num=$(<"/sys/class/block/$name/partition")
+    pk=/dev/$(lsblk -no PKNAME "$ROOT" | head -1)
+    sgdisk -t "$num:8304" "$pk" || true
+    settle_parts "$pk"
+    ;;
+  *) die "Unknown mode '$KIRK_MODE'" ;;
+esac
+echo "Root: $ROOT   EFI: $ESP (format: $ESP_FORMAT)   Filesystem: $KIRK_FS   Engine: $KIRK_ENGINE"
+
+# ---------------------------------------------------------------- 2. format + mount
+step 2 "Formatting and mounting"
+if [[ $ESP_FORMAT == 1 ]]; then mkfs.fat -F32 -n EFI "$ESP"; fi
+if [[ $KIRK_FS == btrfs ]]; then
+  # Subvolume layout Timeshift expects: @ (/) and @home (/home). @log and @cache stay out of snapshots.
+  mkfs.btrfs -f -L archroot "$ROOT"
+  mount "$ROOT" /mnt
+  for sv in @ @home @log @cache; do btrfs subvolume create "/mnt/$sv"; done
+  umount /mnt
+  mount -o "$BTRFS_OPTS,subvol=@" "$ROOT" /mnt
+  mkdir -p /mnt/home /mnt/var/log /mnt/var/cache/pacman/pkg
+  mount -o "$BTRFS_OPTS,subvol=@home"  "$ROOT" /mnt/home
+  mount -o "$BTRFS_OPTS,subvol=@log"   "$ROOT" /mnt/var/log
+  mount -o "$BTRFS_OPTS,subvol=@cache" "$ROOT" /mnt/var/cache/pacman/pkg
+else
+  mkfs.ext4 -F -L archroot "$ROOT"
+  mount "$ROOT" /mnt
+fi
+# The ESP lives at /efi, not /boot: an existing EFI partition may be small (a Mac's is ~200 MB) and
+# shared with another system, so the kernel and initramfs stay on the root filesystem and GRUB reads
+# them from there.
+mount --mkdir "$ESP" /mnt/efi
+
+# ---------------------------------------------------------------- 3. base system
+step 3 "Installing the base system and KDE Plasma (this takes a while)"
+
+run_archinstall() {
+  local cfg=/tmp/kirk-archinstall.json creds=/tmp/kirk-creds.json
+
+  echo "archinstall version: $(archinstall --version 2>/dev/null || echo unknown)"
+
+  # Only the two simplest disk keys are used, so this stays clear of archinstall's
+  # manual-partitioning schema, which changes shape between releases.
+  #
+  # "No bootloader" is requested because step 6 installs GRUB itself. If this archinstall version
+  # spells that option differently it will install one anyway; step 6 then overwrites it, which is
+  # harmless.
+  python3 - "$cfg" "$creds" <<PYEOF
+import json, os, secrets, sys
+cfg_path, creds_path = sys.argv[1], sys.argv[2]
+extra = os.environ["KIRK_EXTRA_PKGS"].split()
+cfg = {
+    "archinstall-language": "English",
+    "script": "guided",
+    "silent": True,
+    "debug": False,
+    "offline": False,
+    "ntp": True,
+    "no_pkg_lookups": False,
+    "disk_config": {"config_type": "pre_mounted_config", "mountpoint": "/mnt"},
+    "bootloader_config": {"bootloader": "No bootloader", "uki": False, "removable": False},
+    "hostname": os.environ["KIRK_HOST"],
+    "kernels": ["linux"],
+    "timezone": os.environ["KIRK_TZ"],
+    "locale_config": {"kb_layout": "us", "sys_enc": os.environ["SYS_ENC"],
+                      "sys_lang": os.environ["SYS_LANG"]},
+    "audio_config": {"audio": "pipewire"},
+    # zram is configured by our own zram-generator drop-in, so archinstall's swap stays off.
+    "swap": {"enabled": False},
+    "packages": extra,
+    "profile_config": {"gfx_driver": "All open-source", "greeter": "sddm",
+                       "profile": {"main": "Desktop", "details": ["KDE Plasma"]}},
+}
+# archinstall requires a root password or a user. We give it a throwaway root password and create the
+# real account ourselves in step 5, which avoids guessing whether its "enc_password" wants a hash.
+creds = {"root_enc_password": secrets.token_urlsafe(24)}
+with open(cfg_path, "w") as fh:
+    json.dump(cfg, fh, indent=2)
+with open(creds_path, "w") as fh:
+    json.dump(creds, fh, indent=2)
+os.chmod(creds_path, 0o600)
+PYEOF
+
+  archinstall --config "$cfg" --creds "$creds" --silent
+}
+
+installed_ok() { [[ -x /mnt/usr/bin/bash && -s /mnt/etc/fstab ]]; }
+
+run_pacstrap() {
+  echo "Installing with pacstrap."
+  local pkgs=(
+    base linux linux-firmware
+    pipewire pipewire-alsa pipewire-pulse wireplumber
+    plasma-desktop plasma-nm plasma-pa powerdevil bluedevil kscreen kwallet-pam
+    kde-gtk-config breeze-gtk sddm sddm-kcm xdg-desktop-portal-kde xdg-user-dirs
+    konsole dolphin kate ark gwenview okular spectacle
+    "${EXTRA_PKGS[@]}"
+  )
+  pacstrap -K /mnt "${pkgs[@]}"
+  genfstab -U /mnt >> /mnt/etc/fstab
+  sed -i "s/^#\(${KIRK_LOCALE} UTF-8\)/\1/" /mnt/etc/locale.gen
+  echo "LANG=$KIRK_LOCALE" > /mnt/etc/locale.conf
+  echo "KEYMAP=us" > /mnt/etc/vconsole.conf
+  echo "$KIRK_HOST" > /mnt/etc/hostname
+  ln -sf "/usr/share/zoneinfo/$KIRK_TZ" /mnt/etc/localtime
+  arch-chroot /mnt /bin/bash -e -c 'locale-gen; hwclock --systohc'
+  PACSTRAP_USED=1
+}
+
+PACSTRAP_USED=0
+if [[ $KIRK_ENGINE == archinstall ]]; then
+  export KIRK_EXTRA_PKGS="${EXTRA_PKGS[*]}" SYS_LANG="${KIRK_LOCALE%%.*}" SYS_ENC=UTF-8
+  export KIRK_HOST KIRK_TZ
+  if run_archinstall; then
+    echo "archinstall finished."
+  elif installed_ok; then
+    # Almost always the known bootloader bug on the very last step. The system itself is installed,
+    # and step 6 installs GRUB properly, so this is not fatal.
+    echo "WARNING: archinstall exited with an error, but the system is installed."
+    echo "         Continuing; the bootloader is installed by this script in step 6 regardless."
+  else
+    echo "archinstall failed before the system was installed. Falling back to pacstrap."
+    umount -R /mnt 2>/dev/null || true
+    # remount exactly as step 2 left things
+    if [[ $KIRK_FS == btrfs ]]; then
+      mount -o "$BTRFS_OPTS,subvol=@" "$ROOT" /mnt
+      mkdir -p /mnt/home /mnt/var/log /mnt/var/cache/pacman/pkg
+      mount -o "$BTRFS_OPTS,subvol=@home"  "$ROOT" /mnt/home
+      mount -o "$BTRFS_OPTS,subvol=@log"   "$ROOT" /mnt/var/log
+      mount -o "$BTRFS_OPTS,subvol=@cache" "$ROOT" /mnt/var/cache/pacman/pkg
+    else
+      mount "$ROOT" /mnt
+    fi
+    mount --mkdir "$ESP" /mnt/efi
+    run_pacstrap
+  fi
+else
+  run_pacstrap
+fi
+rm -f /tmp/kirk-archinstall.json /tmp/kirk-creds.json
+installed_ok || die "No usable system was installed."
+[[ $KIRK_BROADCOM_WL == yes ]] && { arch-chroot /mnt dkms status || true; }   # did the wl module build?
+
+# Timeshift restores replace the @ subvolume, so fstab must not pin a subvolume ID
+sed -i -E 's/,subvolid=[0-9]+//' /mnt/etc/fstab
+
+# ---------------------------------------------------------------- 4. system files
+step 4 "Applying hardware support and branding"
+cp -a /root/kirk-overlay/. /mnt/
+[[ $KIRK_BROADCOM_WL == yes ]] && cp -a /root/kirk-hardware/broadcom-wl/. /mnt/
+[[ $KIRK_IS_MAC == yes ]] && cp -a /root/kirk-hardware/mac/. /mnt/
+chmod 755 /mnt/usr/local/bin/*
+# archiso drops file modes from overlay files, and grub-mkconfig silently skips non-executable scripts
+chmod 755 /mnt/etc/grub.d/06_kirk_splash
+cat > /mnt/etc/kirk-release <<KREL
+VERSION=$VERSION
+INSTALL_DATE=$(date -I)
+INSTALL_MODE=$KIRK_MODE
+INSTALL_FS=$KIRK_FS
+INSTALL_ENGINE=$KIRK_ENGINE
+HW_MAC=$KIRK_IS_MAC
+HW_BROADCOM_WL=$KIRK_BROADCOM_WL
+KREL
+echo '%wheel ALL=(ALL:ALL) ALL' > /mnt/etc/sudoers.d/10-wheel
+chmod 440 /mnt/etc/sudoers.d/10-wheel
+
+if [[ $KIRK_FS == btrfs ]]; then
+  ROOT_UUID=$(blkid -s UUID -o value "$ROOT")
+  mkdir -p /mnt/etc/timeshift
+  cat > /mnt/etc/timeshift/timeshift.json <<TSJSON
+{
+  "backup_device_uuid" : "$ROOT_UUID",
+  "parent_device_uuid" : "",
+  "do_first_run" : "false",
+  "btrfs_mode" : "true",
+  "include_btrfs_home_for_backup" : "false",
+  "include_btrfs_home_for_restore" : "false",
+  "stop_cron_emails" : "true",
+  "schedule_monthly" : "false",
+  "schedule_weekly" : "true",
+  "schedule_daily" : "true",
+  "schedule_hourly" : "false",
+  "schedule_boot" : "false",
+  "count_monthly" : "2",
+  "count_weekly" : "3",
+  "count_daily" : "5",
+  "count_hourly" : "6",
+  "count_boot" : "5",
+  "snapshot_size" : "0",
+  "snapshot_count" : "0",
+  "date_format" : "%Y-%m-%d %H:%M:%S",
+  "exclude" : [],
+  "exclude-apps" : []
+}
+TSJSON
+fi
+
+# ---------------------------------------------------------------- 5. user + services
+step 5 "Creating your user and enabling services"
+arch-chroot /mnt /bin/bash -e <<CHROOT
+id -u "$KIRK_USER" >/dev/null 2>&1 || useradd -m -G wheel -s /bin/bash "$KIRK_USER"
+/usr/local/bin/kirk-branding
+/usr/local/bin/kirk-install-fonts
+/usr/local/bin/kirk-login-theme kirk-arch
+command -v gtk-update-icon-cache >/dev/null && gtk-update-icon-cache -q -t -f /usr/share/icons/hicolor || true
+if [ "$KIRK_FS" = btrfs ] && ! grep -q grub-btrfs-overlayfs /etc/mkinitcpio.conf; then
+  sed -i -E 's/^(HOOKS=\(.*)\)/\1 grub-btrfs-overlayfs)/' /etc/mkinitcpio.conf
+fi
+# Boot splash: plymouth hook right after udev (or systemd), as the Arch packaging expects.
+sed -i -E '/^HOOKS=/{/[( ]plymouth[ )]/!s/([( ])(udev|systemd)([ )])/\1\2 plymouth\3/}' /etc/mkinitcpio.conf
+plymouth-set-default-theme kirk-arch
+mkinitcpio -P
+systemctl enable NetworkManager sddm bluetooth power-profiles-daemon \\
+  fstrim.timer systemd-timesyncd cronie.service
+if [ "$KIRK_CPU" = intel ]; then systemctl enable thermald; fi
+if [ "$KIRK_IS_MAC" = yes ]; then systemctl enable mac-fix-wakeup.service; fi
+if [ "$KIRK_FS" = btrfs ]; then
+  systemctl enable grub-btrfsd.service kirk-first-snapshot.service
+fi
+CHROOT
+echo "$KIRK_USER:$KIRK_PASSWORD" | arch-chroot /mnt chpasswd
+arch-chroot /mnt passwd -l root >/dev/null   # root locked; the user has sudo
+
+# ---------------------------------------------------------------- 6. bootloader
+step 6 "Installing the bootloader (GRUB)"
+# Set KEY=VALUE in a GRUB defaults file: replace the first (possibly commented-out) line, else append.
+set_grub_var() {
+  local key=$1 val=$2 f=$3
+  if grep -qE "^#?[[:space:]]*$key=" "$f"; then
+    sed -i -E "0,/^#?[[:space:]]*$key=/s|^#?[[:space:]]*$key=.*|$key=$val|" "$f"
+  else
+    echo "$key=$val" >> "$f"
+  fi
+}
+# Menu hidden, 2-second wait: tap Esc during that window to show it. Not 0, which can make the
+# menu unreachable.
+set_grub_var GRUB_TIMEOUT 2 /mnt/etc/default/grub
+set_grub_var GRUB_TIMEOUT_STYLE hidden /mnt/etc/default/grub
+# GRUB theme: the boot splash as the menu background (seen when you press Esc at boot).
+set_grub_var GRUB_THEME '"/boot/grub/themes/kirk-arch/theme.txt"' /mnt/etc/default/grub
+set_grub_var GRUB_TERMINAL_OUTPUT gfxterm /mnt/etc/default/grub
+set_grub_var GRUB_GFXMODE auto /mnt/etc/default/grub
+# keep the graphics mode into Linux, so GRUB hands over to the splash without a flicker
+set_grub_var GRUB_GFXPAYLOAD_LINUX keep /mnt/etc/default/grub
+arch-chroot /mnt /usr/local/bin/kirk-grub-theme-font || true
+sed -i "s|^GRUB_DISTRIBUTOR=.*|GRUB_DISTRIBUTOR=\"$BRAND\"|" /mnt/etc/default/grub
+# "splash" makes Plymouth show the graphical theme; without it you get text boot.
+sed -i -E '/^GRUB_CMDLINE_LINUX_DEFAULT=/{/splash/!s/"$/ splash"/}' /mnt/etc/default/grub
+
+# grub-btrfs names its snapshot submenu from /etc/os-release unless told otherwise. Pin a plain name
+# so GRUB's config generation never depends on the branding text.
+if [[ $KIRK_FS == btrfs ]]; then
+  mkdir -p /mnt/etc/default/grub-btrfs
+  echo "GRUB_BTRFS_SUBMENUNAME=\"$BRAND snapshots\"" >> /mnt/etc/default/grub-btrfs/config
+fi
+
+if [[ $KIRK_IS_MAC == yes ]]; then
+  # Mac: GRUB goes only to the fallback path EFI/BOOT/BOOTX64.EFI, which is what the Option-key boot
+  # picker lists as "EFI Boot". No NVRAM entry: writing Mac NVRAM with efibootmgr has been reported
+  # to damage the firmware. macOS is left completely untouched. Keep a copy of anything already there.
+  if [[ -f /mnt/efi/EFI/BOOT/BOOTX64.EFI && ! -f /mnt/efi/EFI/BOOT/BOOTX64.EFI.pre-kirks ]]; then
+    cp /mnt/efi/EFI/BOOT/BOOTX64.EFI /mnt/efi/EFI/BOOT/BOOTX64.EFI.pre-kirks
+    echo "Existing EFI/BOOT/BOOTX64.EFI backed up as BOOTX64.EFI.pre-kirks"
+  fi
+  arch-chroot /mnt grub-install --target=x86_64-efi --efi-directory=/efi --bootloader-id=KirkArch --removable
+  BOOT_FILE=/mnt/efi/EFI/BOOT/BOOTX64.EFI
+else
+  # PC: the normal way, an EFI/KirkArch folder plus a firmware boot entry. Also the fallback path,
+  # for firmware that forgets boot entries, but only if it's empty, since on a Windows dual-boot
+  # Windows may be using it.
+  arch-chroot /mnt grub-install --target=x86_64-efi --efi-directory=/efi --bootloader-id=KirkArch
+  if [[ ! -f /mnt/efi/EFI/BOOT/BOOTX64.EFI ]]; then
+    arch-chroot /mnt grub-install --target=x86_64-efi --efi-directory=/efi --bootloader-id=KirkArch --removable \
+      || echo "(fallback copy skipped)"
+  fi
+  BOOT_FILE=/mnt/efi/EFI/KirkArch/grubx64.efi
+fi
+
+write_minimal_grub_cfg() {
+  local uuid pfx="" flags=""
+  uuid=$(blkid -s UUID -o value "$ROOT")
+  local ucode=""
+  if [[ $KIRK_FS == btrfs ]]; then pfx=/@; flags="rootflags=subvol=@"; fi
+  for u in intel-ucode.img amd-ucode.img; do [[ -f /mnt/boot/$u ]] && ucode="${pfx}/boot/$u "; done
+  mkdir -p /mnt/boot/grub
+  cat > /mnt/boot/grub/grub.cfg <<MINCFG
+set timeout=2
+set timeout_style=hidden
+set default=0
+insmod part_gpt
+insmod btrfs
+insmod ext2
+search --no-floppy --fs-uuid --set=root $uuid
+menuentry "$BRAND" {
+    linux ${pfx}/boot/vmlinuz-linux root=UUID=$uuid rw $flags quiet splash
+    initrd ${ucode}${pfx}/boot/initramfs-linux.img
+}
+menuentry "$BRAND (fallback initramfs)" {
+    linux ${pfx}/boot/vmlinuz-linux root=UUID=$uuid rw $flags
+    initrd ${ucode}${pfx}/boot/initramfs-linux-fallback.img
+}
+MINCFG
+}
+
+if ! arch-chroot /mnt grub-mkconfig -o /boot/grub/grub.cfg; then
+  echo "---- grub-mkconfig failed. Offending region of grub.cfg.new (for debugging):"
+  sed -n '295,320p' /mnt/boot/grub/grub.cfg.new 2>/dev/null || true
+  echo "---- retry 1: snapshot submenu script disabled"
+  if [[ -f /mnt/etc/grub.d/41_snapshots-btrfs ]]; then chmod -x /mnt/etc/grub.d/41_snapshots-btrfs; fi
+  if ! arch-chroot /mnt grub-mkconfig -o /boot/grub/grub.cfg; then
+    echo "---- retry 2: writing a minimal grub.cfg by hand (the system will still boot)"
+    write_minimal_grub_cfg
+  fi
+fi
+[[ -s /mnt/boot/grub/grub.cfg ]] || die "No grub.cfg was produced."
+[[ -f $BOOT_FILE ]] || die "GRUB was not written to the EFI partition."
+
+# ---------------------------------------------------------------- 7. done
+step 7 "Finishing up"
+sync
+umount -R /mnt
+echo "Installation complete."
+if [[ $KIRK_IS_MAC == yes ]]; then
+  echo "To start it: hold Option at the startup chime and pick \"EFI Boot\"."
+else
+  echo "Remove the USB and restart. If another system starts instead, pick $BRAND (or KirkArch)"
+  echo "in your computer's boot menu (often F12, F11 or Esc at power-on)."
+fi

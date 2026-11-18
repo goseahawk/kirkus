@@ -1,0 +1,12 @@
+#!/bin/sh
+# Takes a Timeshift snapshot before important package changes. Btrfs only. Never blocks pacman.
+[ "$(findmnt -no FSTYPE /)" = btrfs ] || exit 0
+command -v timeshift >/dev/null 2>&1 || exit 0
+[ -f /etc/timeshift/timeshift.json ] || exit 0
+stamp=/var/lib/kirk-last-presnapshot
+# At most one automatic snapshot every 2 hours
+if [ -f "$stamp" ] && [ $(( $(date +%s) - $(stat -c %Y "$stamp") )) -lt 7200 ]; then exit 0; fi
+if timeshift --create --comments "pacman: before package changes" --tags D --scripted >/dev/null 2>&1; then
+  touch "$stamp"
+fi
+exit 0

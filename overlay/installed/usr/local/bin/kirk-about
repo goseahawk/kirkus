@@ -1,0 +1,6 @@
+#!/bin/sh
+# Opens System Settings straight at "About this System", falling back to KInfoCenter.
+if command -v systemsettings >/dev/null 2>&1; then
+  exec systemsettings kcm_about-distro
+fi
+exec kinfocenter

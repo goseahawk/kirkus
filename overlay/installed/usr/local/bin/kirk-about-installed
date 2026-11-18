@@ -1,0 +1,8 @@
+#!/bin/sh
+# KInfoCenter extra info: install date. MUST print exactly two lines.
+E=${KIRK_ETC:-/etc}
+d=$(sed -n 's/^INSTALL_DATE=//p' "$E/kirk-release" 2>/dev/null | head -1 | tr -d '"\r\n')
+v=""
+[ -n "$d" ] && v=$(date -d "$d" '+%B %-d, %Y' 2>/dev/null)
+[ -n "$v" ] || v="Unknown"
+printf 'Installed:\n%s\n' "$(printf '%s' "$v" | tr -d '\r\n')"

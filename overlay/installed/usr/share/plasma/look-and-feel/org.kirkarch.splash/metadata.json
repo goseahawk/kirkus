@@ -1,0 +1,11 @@
+{
+    "KPackageStructure": "Plasma/LookAndFeel",
+    "KPlugin": {
+        "Authors": [ { "Name": "Kirk Arch Linux" } ],
+        "Description": "Startup splash matching the Kirk Arch Linux boot and login screens",
+        "Id": "org.kirkarch.splash",
+        "Name": "Kirk Arch Linux",
+        "Version": "1.0"
+    },
+    "X-Plasma-APIVersion": "2"
+}

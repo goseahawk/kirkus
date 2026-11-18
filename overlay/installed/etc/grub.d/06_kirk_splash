@@ -1,0 +1,44 @@
+#!/bin/sh
+# /etc/grub.d/06_kirk_splash -- Kirk Arch Linux
+# Shows the boot splash image during GRUB's hidden wait instead of a black screen, and keeps
+# "tap Esc to show the menu".
+#
+# Why a script: GRUB's own hidden countdown never draws a background image, and grub-mkconfig
+# won't emit a background at all when a theme is set. So this draws the image itself and runs its
+# own Esc-interruptible wait, the way GRUB's old "hidden timeout" option used to:
+#   - no Esc:  boot right away, with GRUB's "Loading..." lines drawn black so they're invisible
+#   - Esc:     show the themed menu and wait for you
+# Fail-safe: if this script is missing, not executable, or GRUB lacks the sleep command, GRUB's
+# normal hidden wait (GRUB_TIMEOUT) still applies, exactly as before.
+set -e
+prefix="/usr"
+exec_prefix="/usr"
+datarootdir="/usr/share"
+. "${pkgdatadir:-/usr/share/grub}/grub-mkconfig_lib"
+
+BG=/boot/grub/themes/kirk-arch/background.png
+WAIT=${GRUB_TIMEOUT:-2}
+[ "$WAIT" -gt 0 ] 2>/dev/null || exit 0      # timeout 0 or not a number: nothing to wait for
+[ -f "$BG" ] || exit 0
+is_path_readable_by_grub "$BG" || exit 0
+
+echo "### Kirk Arch Linux: boot splash during the hidden wait ###"
+prepare_grub_to_access_device $(${grub_probe:-grub-probe} --target=device "$BG")
+cat <<EOF
+insmod png
+insmod sleep
+if sleep 0 ; then
+  if background_image -m stretch "$(make_system_path_relative_to_its_root "$BG")" ; then
+    clear
+  fi
+  if sleep --interruptible $WAIT ; then
+    set color_normal=black/black
+    set timeout_style=hidden
+    set timeout=0
+  else
+    set color_normal=light-gray/black
+    set timeout_style=menu
+    set timeout=-1
+  fi
+fi
+EOF

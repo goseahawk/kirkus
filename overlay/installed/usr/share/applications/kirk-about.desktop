@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=About This Computer
+Comment=Model, battery, storage and system details
+Exec=/usr/local/bin/kirk-about
+Icon=kirk-arch-logo
+Categories=System;
+Keywords=about;system;info;model;battery;version;

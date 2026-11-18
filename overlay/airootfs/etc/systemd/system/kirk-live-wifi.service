@@ -1,0 +1,12 @@
+[Unit]
+Description=Load the Broadcom wl Wi-Fi driver if this computer needs it
+After=systemd-modules-load.service
+Before=NetworkManager.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/kirk-live-wifi
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target

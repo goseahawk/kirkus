@@ -1,0 +1,12 @@
+#!/bin/sh
+# KInfoCenter extra info: free space and filesystem. MUST print exactly two lines.
+R=${KIRK_ROOT:-/}
+v=$(df -P -B1 "$R" 2>/dev/null | awk 'NR==2 && $2>0 {printf "%.0f GB available of %.0f GB", $4/1e9, $2/1e9}')
+[ -n "$v" ] || v="Unknown"
+fs=$(findmnt -no FSTYPE "$R" 2>/dev/null | head -1 | tr -d '\r\n')
+case "$fs" in
+  btrfs) v="$v (Btrfs, Timeshift snapshots)" ;;
+  "")    ;;
+  *)     v="$v ($fs)" ;;
+esac
+printf 'Storage:\n%s\n' "$(printf '%s' "$v" | tr -d '\r\n')"

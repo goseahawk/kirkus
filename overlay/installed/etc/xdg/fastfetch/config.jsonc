@@ -1,0 +1,23 @@
+// Kirk Arch Linux: fastfetch with the kirk mark and the brand colours.
+// If you create your own ~/.config/fastfetch/config.jsonc, it takes priority over this file.
+// The same config is also installed as a preset: fastfetch -c kirk-arch
+{
+  "$schema": "https://github.com/fastfetch-cli/fastfetch/raw/dev/doc/json_schema.json",
+  "logo": {
+    "type": "file",
+    "source": "/usr/share/kirk-arch/fastfetch-logo.txt",
+    // $1 = blue K, $2 = cream dot (raw ANSI truecolour: 38;2;R;G;B)
+    "color": { "1": "38;2;85;144;180", "2": "38;2;255;248;236" },
+    "padding": { "top": 1, "left": 1, "right": 3 }
+  },
+  "display": {
+    "color": { "keys": "38;2;85;144;180", "title": "38;2;255;248;236" }
+  },
+  "modules": [
+    "title", "separator",
+    "os", "host", "kernel", "uptime", "packages", "shell",
+    "display", "de", "wm", "theme", "icons", "font", "terminal",
+    "cpu", "gpu", "memory", "swap", "disk", "battery", "locale",
+    "break", "colors"
+  ]
+}

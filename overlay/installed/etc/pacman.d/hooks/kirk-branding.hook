@@ -1,0 +1,10 @@
+[Trigger]
+Operation = Install
+Operation = Upgrade
+Type = Package
+Target = filesystem
+
+[Action]
+Description = Re-applying Kirk Arch Linux branding...
+When = PostTransaction
+Exec = /usr/local/bin/kirk-branding

@@ -1,0 +1,19 @@
+#!/bin/sh
+# KInfoCenter extra info: battery health and cycle count. MUST print exactly two lines.
+S=${KIRK_SYS:-/sys}
+b=""
+for d in "$S"/class/power_supply/BAT*; do [ -d "$d" ] && { b=$d; break; }; done
+rd() { cat "$b/$1" 2>/dev/null | tr -cd '0-9'; }
+v="No battery found"
+if [ -n "$b" ]; then
+  full=$(rd energy_full);  design=$(rd energy_full_design)
+  if [ -z "$full" ] || [ -z "$design" ]; then full=$(rd charge_full); design=$(rd charge_full_design); fi
+  if [ -n "$full" ] && [ -n "$design" ] && [ "$design" -gt 0 ] 2>/dev/null; then
+    v="$(( full * 100 / design ))% of original capacity"
+  else
+    v="Health unknown"
+  fi
+  cyc=$(rd cycle_count)
+  if [ -n "$cyc" ] && [ "$cyc" -gt 0 ] 2>/dev/null; then v="$v, $cyc charge cycles"; fi
+fi
+printf 'Battery:\n%s\n' "$(printf '%s' "$v" | tr -d '\r\n')"

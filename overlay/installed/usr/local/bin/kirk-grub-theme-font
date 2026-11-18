@@ -1,0 +1,21 @@
+#!/bin/sh
+# Builds the menu font for the Kirk Arch Linux GRUB theme: Space Grotesk (the wordmark's typeface)
+# if it's installed, otherwise Noto Sans. If any step fails, the theme keeps GRUB's built-in
+# Unifont, so this can never stop the machine from booting. Run grub-mkconfig afterwards.
+T=/boot/grub/themes/kirk-arch
+command -v grub-mkfont >/dev/null 2>&1 || exit 0
+[ -f "$T/theme.txt" ] || exit 0
+SRC=""
+for f in /usr/share/fonts/kirk-arch/SpaceGrotesk-Regular.otf /usr/share/fonts/noto/NotoSans-Regular.ttf; do
+  [ -f "$f" ] && { SRC=$f; break; }
+done
+[ -n "$SRC" ] || exit 0
+rm -f "$T"/*.pf2
+grub-mkfont -s 18 -o "$T/menu_18.pf2" "$SRC" 2>/dev/null || exit 0
+# Read the name GRUB will know the font by, rather than guessing it.
+name=$(strings -n 8 "$T/menu_18.pf2" 2>/dev/null | grep -m1 -E '^(Space Grotesk|Noto Sans)')
+if [ -z "$name" ]; then rm -f "$T/menu_18.pf2"; exit 0; fi
+# Menu items and the hint line only; the terminal font stays Unifont (it must be monospaced).
+sed -i -E "/(item_font|^[[:space:]]*font)[[:space:]]*=/s|\"[^\"]*\"|\"$name\"|" "$T/theme.txt"
+echo "GRUB theme font: $name"
+exit 0

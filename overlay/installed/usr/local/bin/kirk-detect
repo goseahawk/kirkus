@@ -1,0 +1,55 @@
+#!/bin/sh
+# kirk-detect -- works out which hardware-specific setup this computer needs.
+#
+#   eval "$(kirk-detect)"     sets the variables below in the calling shell
+#   kirk-detect --summary     prints a one-line human description
+#
+# KIRK_IS_MAC        yes if the firmware says the maker is Apple: gets the Mac fixes
+#                    (suspend wake fix, Apple keyboard Fn setting, FaceTime HD webcam helper)
+# KIRK_MODEL         the firmware's model name, e.g. MacBookAir7,2
+# KIRK_BROADCOM_WL   yes if there's a Broadcom Wi-Fi chip that only Broadcom's own 'wl' driver runs
+#                    (BCM4331, BCM4352, BCM4360). On ANY computer, not just Macs. Other Broadcom
+#                    chips, e.g. the BCM4350 in later MacBooks, use Linux's built-in drivers, which
+#                    the wl setup would block, so they're deliberately left alone.
+# KIRK_WL_DEVICE     the matching chip's PCI ID, e.g. 14e4:43a0
+# KIRK_CPU           intel | amd | other   (which microcode to install, whether thermald applies)
+# KIRK_GPU_INTEL     yes/no                (Intel Vulkan and video-decode drivers)
+# KIRK_GPU_AMD       yes/no                (AMD Vulkan driver)
+#
+# KIRK_SYS and KIRK_CPUINFO point it at fake files, for testing.
+S=${KIRK_SYS:-/sys}
+C=${KIRK_CPUINFO:-/proc/cpuinfo}
+
+clean() { tr -cd 'A-Za-z0-9 ,._()+-' | sed 's/^ *//; s/ *$//'; }
+vendor=$(cat "$S/class/dmi/id/sys_vendor" 2>/dev/null | clean)
+model=$(cat "$S/class/dmi/id/product_name" 2>/dev/null | clean)
+case "$vendor" in Apple*) mac=yes ;; *) mac=no ;; esac
+
+wl=no; wldev=""; gi=no; ga=no
+for d in "$S"/bus/pci/devices/*; do
+  [ -r "$d/vendor" ] || continue
+  v=$(cat "$d/vendor" 2>/dev/null); p=$(cat "$d/device" 2>/dev/null); c=$(cat "$d/class" 2>/dev/null)
+  v=${v#0x}; p=${p#0x}; c=${c#0x}
+  case "$v:$p" in
+    14e4:4331|14e4:4360|14e4:43a0|14e4:43b1) wl=yes; wldev="$v:$p" ;;
+  esac
+  case "$c" in
+    03*) case "$v" in 8086) gi=yes ;; 1002) ga=yes ;; esac ;;
+  esac
+done
+
+case "$(sed -n 's/^vendor_id[[:space:]]*:[[:space:]]*//p' "$C" 2>/dev/null | head -1)" in
+  GenuineIntel) cpu=intel ;;
+  AuthenticAMD) cpu=amd ;;
+  *) cpu=other ;;
+esac
+
+if [ "${1:-}" = --summary ]; then
+  printf '%s' "${vendor:-Unknown maker} ${model:-unknown model}"
+  [ "$mac" = yes ] && printf '%s' "; Mac support: yes"
+  [ "$wl" = yes ] && printf '%s' "; Broadcom wl Wi-Fi driver: yes ($wldev)"
+  printf '; CPU: %s\n' "$cpu"
+  exit 0
+fi
+printf "KIRK_IS_MAC=%s\nKIRK_MODEL='%s'\nKIRK_BROADCOM_WL=%s\nKIRK_WL_DEVICE=%s\nKIRK_CPU=%s\nKIRK_GPU_INTEL=%s\nKIRK_GPU_AMD=%s\n" \
+  "$mac" "$model" "$wl" "$wldev" "$cpu" "$gi" "$ga"

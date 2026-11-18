@@ -1,0 +1,10 @@
+[Unit]
+Description=Disable USB ACPI wake sources (Mac instant-wake-from-suspend fix)
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/usr/local/bin/mac-fix-wakeup
+
+[Install]
+WantedBy=multi-user.target
