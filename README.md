@@ -273,8 +273,6 @@ Breeze selected there.
 - PipeWire audio
 - `power-profiles-daemon`, which integrates with Plasma's battery controls
 - Discover with Flatpak and Flathub set up, for installing and updating apps
-- The kirkus logo on the Application Launcher, set at your first login unless you have chosen your own
-  icon (change it from the launcher's Configure dialog)
 
 ## Layout
 
