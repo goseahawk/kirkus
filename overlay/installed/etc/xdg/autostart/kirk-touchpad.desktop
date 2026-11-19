@@ -1,0 +1,6 @@
+[Desktop Entry]
+Type=Application
+Name=kirkus touchpad setup
+Exec=/usr/local/bin/kirk-touchpad-setup
+OnlyShowIn=KDE;
+NoDisplay=true

@@ -76,7 +76,7 @@ EXTRA_PKGS=(
   power-profiles-daemon upower zram-generator
   bluez bluez-utils
   firefox noto-fonts noto-fonts-emoji
-  kinfocenter fastfetch discover flatpak
+  kinfocenter fastfetch discover flatpak kdialog xf86-input-libinput
   plymouth
 )
 case $KIRK_CPU in

@@ -46,7 +46,8 @@ echo "This computer: $(sh "$SRC"/usr/local/bin/kirk-detect --summary)"
 
 # ---------------------------------------------------------------------------------------- packages
 echo "== packages =="
-PKGS=(kinfocenter fastfetch discover flatpak plymouth power-profiles-daemon zram-generator)
+PKGS=(kinfocenter fastfetch discover flatpak kdialog xf86-input-libinput plymouth power-profiles-daemon
+      zram-generator)
 case $KIRK_CPU in
   intel) PKGS+=(intel-ucode thermald) ;;
   amd)   PKGS+=(amd-ucode) ;;
