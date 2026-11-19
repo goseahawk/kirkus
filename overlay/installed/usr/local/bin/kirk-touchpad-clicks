@@ -1,0 +1,26 @@
+#!/bin/bash
+# "Touchpad Clicks" in System Settings: choose whether the touchpad's physical click is used or
+# ignored. Ignoring it helps when the click is stuck down or broken; you tap to click instead
+# (two fingers for a right click).
+APPLY=/usr/local/bin/kirk-touchpad-clicks-apply
+now=$("$APPLY" status)
+[[ $now == ignore ]] && { u=off; i=on; } || { u=on; i=off; }
+
+choice=$(kdialog --title "Touchpad Clicks" --icon input-touchpad --radiolist \
+"Pressing the touchpad down clicks. If that click is stuck or broken, kirkus can ignore it, and you tap the touchpad to click instead (tap with two fingers to right-click).
+
+This applies everywhere, including the login screen, after a restart." \
+  use "Use physical clicks (normal)" $u \
+  ignore "Ignore physical clicks, tap to click instead" $i) || exit 0
+[[ $choice == "$now" || -z $choice ]] && exit 0
+
+if ! pkexec "$APPLY" "$choice" >/dev/null; then
+  kdialog --title "Touchpad Clicks" --error "The setting wasn't changed."
+  exit 1
+fi
+# Ignoring clicks means tapping is the only way to click, so make sure it's on.
+[[ $choice == ignore ]] && /usr/local/bin/kirk-touchpad-setup --tap-on
+
+kdialog --title "Touchpad Clicks" --yesno "Saved. Restart now to apply it?" \
+  --yes-label "Restart now" --no-label "Later" && systemctl reboot
+exit 0

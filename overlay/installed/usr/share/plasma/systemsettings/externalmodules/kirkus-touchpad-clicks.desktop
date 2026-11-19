@@ -1,0 +1,12 @@
+[Desktop Entry]
+Type=Service
+Exec=/usr/local/bin/kirk-touchpad-clicks
+Icon=input-touchpad
+Name=Touchpad Clicks
+Comment=Ignore the touchpad's physical click if it is stuck or broken, and tap instead
+Keywords=touchpad;click;stuck;broken;button;tap;trackpad;
+Categories=Settings;HardwareSettings;
+X-KDE-Keywords=touchpad,click,stuck,broken,button,tap,trackpad
+X-KDE-ServiceTypes=SystemSettingsExternalApp
+X-KDE-System-Settings-Parent-Category=input-devices
+X-KDE-Weight=90

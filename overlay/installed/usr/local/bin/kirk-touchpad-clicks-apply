@@ -1,0 +1,39 @@
+#!/bin/sh
+# Root helper for "Touchpad Clicks" in System Settings (run through pkexec):
+#     kirk-touchpad-clicks-apply ignore    ignore the touchpad's physical clicks (tap instead)
+#     kirk-touchpad-clicks-apply use       use them again (the normal setting)
+#     kirk-touchpad-clicks-apply status    prints ignore or use
+# It adds or removes one marked section in libinput's local overrides, which every part of the
+# system reads at startup (desktop, login screen), so a restart applies it.
+set -eu
+F=/etc/libinput/local-overrides.quirks
+BEGIN='# >>> kirkus: ignore physical touchpad clicks (System Settings > Touchpad Clicks)'
+END='# <<< kirkus'
+
+status() { if [ -f "$F" ] && grep -qxF "$BEGIN" "$F"; then echo ignore; else echo use; fi; }
+
+case ${1:-} in
+  status) status; exit 0 ;;
+  ignore|use) ;;
+  *) echo "usage: kirk-touchpad-clicks-apply ignore|use|status" >&2; exit 2 ;;
+esac
+[ "$(id -u)" -eq 0 ] || { echo "Run as root." >&2; exit 1; }
+
+mkdir -p /etc/libinput
+tmp=$(mktemp /etc/libinput/.local-overrides.XXXXXX)
+# everything except our section
+if [ -f "$F" ]; then
+  awk -v b="$BEGIN" -v e="$END" '$0 == b {skip = 1; next} skip && $0 == e {skip = 0; next} !skip' "$F" > "$tmp"
+fi
+if [ "$1" = ignore ]; then
+  cat >> "$tmp" <<QUIRK
+$BEGIN
+[kirkus ignore touchpad clicks]
+MatchUdevType=touchpad
+AttrEventCode=-BTN_LEFT;-BTN_RIGHT;-BTN_MIDDLE;
+$END
+QUIRK
+fi
+chmod 644 "$tmp"
+if [ -s "$tmp" ]; then mv "$tmp" "$F"; else rm -f "$tmp" "$F"; fi
+status

@@ -2,14 +2,17 @@
 # At your first Plasma login on a laptop: makes sure tap to click is on for the touchpad, then asks
 # whether to keep it. Asks once ("Decide later" asks again next login). Change it any time in
 # System Settings > Mouse & Touchpad > Touchpad.
+#     kirk-touchpad-setup --tap-on    just turn tap to click on for every touchpad (no questions)
 flag="$HOME/.config/kirk-touchpad-asked"
-[[ -e $flag ]] && exit 0
+TAP_ON_ONLY=no
+[[ ${1:-} == --tap-on ]] && TAP_ON_ONLY=yes
+[[ $TAP_ON_ONLY == no && -e $flag ]] && exit 0
 
 # laptops only: a battery, or a portable chassis type (laptop, notebook, sub-notebook, convertible...)
 laptop=no
 ls /sys/class/power_supply/BAT* >/dev/null 2>&1 && laptop=yes
 case $(cat /sys/class/dmi/id/chassis_type 2>/dev/null) in 8|9|10|14|30|31|32) laptop=yes ;; esac
-[[ $laptop == yes ]] || { mkdir -p "$HOME/.config"; touch "$flag"; exit 0; }
+[[ $laptop == yes || $TAP_ON_ONLY == yes ]] || { mkdir -p "$HOME/.config"; touch "$flag"; exit 0; }
 
 kwin() {   # kwin OBJECT METHOD ARGS... on KWin's input device interface
   gdbus call --session --dest org.kde.KWin --object-path "$1" --method "$2" "${@:3}" 2>/dev/null
@@ -30,7 +33,10 @@ pads=()
 for d in $devs; do
   [[ $(get "$d" touchpad) == *true* ]] && pads+=("$d")
 done
-(( ${#pads[@]} )) || { mkdir -p "$HOME/.config"; touch "$flag"; exit 0; }   # no touchpad
+if (( ${#pads[@]} == 0 )); then                 # no touchpad
+  [[ $TAP_ON_ONLY == yes ]] || { mkdir -p "$HOME/.config"; touch "$flag"; }
+  exit 0
+fi
 
 set_tap() {   # set_tap true|false, for every touchpad, now and saved for later logins
   local d vendor product name
@@ -47,6 +53,7 @@ set_tap() {   # set_tap true|false, for every touchpad, now and saved for later 
 }
 
 set_tap true
+[[ $TAP_ON_ONLY == yes ]] && exit 0
 kdialog --title "Touchpad" --icon input-touchpad \
   --yesnocancel "Tap to click is on: a light tap on the touchpad clicks, so you don't have to press it down.
 
