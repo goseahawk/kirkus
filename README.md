@@ -94,12 +94,16 @@ one Linux partition in the free space. It needs at least 15 GiB.
 
 ## 3. Install
 
-Boot the USB (on an Intel Mac, hold Option at startup and pick "EFI Boot"), then:
+Boot the USB (on an Intel Mac, hold Option at startup and pick "EFI Boot"). A start screen opens:
+click **Connect to Wi-Fi**, then **Install kirkus**. Each opens a terminal window: the installer asks
+for a mode, filesystem and your user details, then goes.
+
+From the text console (the start screen's **Text console**, or if it can't open), the same steps are:
 
     nmtui          # join Wi-Fi
-    ./install.sh   # pick a mode, filesystem, user details, and go
+    ./install.sh   # install
 
-It downloads packages, so it needs internet. The first thing it shows is what it detected about the
+The installer downloads packages, so it needs internet. The first thing it shows is what it detected about the
 computer.
 
 ### Hardware detection

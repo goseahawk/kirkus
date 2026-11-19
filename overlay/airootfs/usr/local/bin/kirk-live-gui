@@ -1,0 +1,8 @@
+#!/bin/sh
+# The live USB's graphical start screen: run as  startx /usr/local/bin/kirk-live-gui
+# A plain window manager (Openbox) so the terminal windows can be moved, focused and closed, and the
+# launcher behind them. Closing the launcher ("Text console") ends the session.
+xsetroot -solid black -cursor_name left_ptr
+openbox --config-file /usr/share/kirkus/live/openbox.xml &
+sleep 0.5
+exec python3 /usr/share/kirkus/live/launcher.py

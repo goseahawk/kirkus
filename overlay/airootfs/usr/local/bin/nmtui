@@ -1,8 +1,7 @@
 #!/bin/sh
-# nmtui clears the screen when it closes, which wiped the instructions. Run the real nmtui, then
-# show them again with the new connection status.
+# nmtui clears the screen when it closes, which wiped the console instructions. Run the real nmtui,
+# then show them again with the new connection status (not needed in the graphical start screen).
 /usr/bin/nmtui "$@"
 rc=$?
-clear
-/usr/local/bin/kirk-welcome
+if [ -z "$DISPLAY" ]; then clear; /usr/local/bin/kirk-welcome; fi
 exit $rc

@@ -23,6 +23,6 @@ cat <<MSG
 
   2. Install kirkus        ${b}./install.sh${off}
 
-  ${dim}Type ${off}welcome${dim} to see this again.${off}
+  ${dim}Type ${off}welcome${dim} to see this again, or ${off}gui${dim} for the start screen.${off}
 
 MSG

@@ -95,7 +95,7 @@ jobs:
         run: |
           body="${NOTES:-kirkus $VERSION}
 
-          **Install:** write \`$ISO\` to a USB stick, boot it, connect to Wi-Fi with \`nmtui\`, then run \`./install.sh\`.
+          **Install:** write \`$ISO\` to a USB stick and boot it, then click **Connect to Wi-Fi** and **Install kirkus**.
           Check the download with \`sha256sum -c $ISO.sha256\`.
 
           Already running kirkus? This release is applied automatically after your next \`sudo pacman -Syu\`."
