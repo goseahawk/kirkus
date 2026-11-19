@@ -2,7 +2,14 @@
 # Installer for kirkus. Asks a few questions, then runs kirk-install-backend.
 set -euo pipefail
 [[ $EUID -eq 0 ]] || { echo "Run as root."; exit 1; }
-ping -c1 -W3 archlinux.org >/dev/null 2>&1 || { echo "No internet. Run 'nmtui' to join Wi-Fi first."; exit 1; }
+online() { ping -c1 -W3 archlinux.org >/dev/null 2>&1; }
+while ! online; do
+  echo "You're not connected to the internet yet, and the installer needs it."
+  read -rp "Open Wi-Fi setup now? [Y/n] " w
+  [[ ${w:-y} == [Nn]* ]] && { echo "Connect with 'nmtui', then run ./install.sh again."; exit 1; }
+  nmtui     # shows the instructions again when it closes
+  sleep 2   # give the new connection a moment
+done
 
 echo "This computer: $(/usr/local/bin/kirk-detect --summary)"
 echo

@@ -53,9 +53,8 @@ ln -sf /usr/lib/systemd/system/NetworkManager.service \
 
 # ---- Overlays ----
 cp -a "$HERE/overlay/airootfs/." "$P/airootfs/"
-# the version, for the live welcome message and for the installer to pass on
+# the version, for the live welcome message (kirk-welcome) and for the installer to pass on
 echo "$VERSION" > "$P/airootfs/etc/kirk-version"
-sed -i "s|@VERSION@|$VERSION|" "$P/airootfs/etc/motd"
 # Files destined for the INSTALLED system ride along in /root/kirk-overlay (always installed) and
 # /root/kirk-hardware (installed only when kirk-detect finds that hardware)
 mkdir -p "$P/airootfs/root/kirk-overlay" "$P/airootfs/root/kirk-hardware"
@@ -76,6 +75,8 @@ file_permissions+=(
   ["/usr/local/bin/kirk-install-backend"]="0:0:755"
   ["/usr/local/bin/kirk-detect"]="0:0:755"
   ["/usr/local/bin/kirk-live-wifi"]="0:0:755"
+  ["/usr/local/bin/kirk-welcome"]="0:0:755"
+  ["/usr/local/bin/nmtui"]="0:0:755"
 )
 PERMS
 

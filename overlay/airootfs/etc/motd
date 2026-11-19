@@ -1,6 +1,0 @@
-
-  kirkus @VERSION@ -- live environment
-
-  1. Join Wi-Fi:         nmtui
-  2. Run the installer:  ./install.sh
-

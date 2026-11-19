@@ -1,0 +1,28 @@
+#!/usr/bin/env bash
+# The live USB's instructions, with the current network status. Shown at login, again whenever you
+# close nmtui, and any time you type: welcome
+version=$(cat /etc/kirk-version 2>/dev/null || true)
+b=$'\e[1m'; dim=$'\e[2m'; grn=$'\e[32m'; yel=$'\e[33m'; off=$'\e[0m'
+
+net=$(nmcli -t -f TYPE,STATE,CONNECTION device 2>/dev/null | awk -F: '$2=="connected" && ($1=="wifi" || $1=="ethernet") {print $1 ":" $3; exit}')
+if [[ -n $net ]]; then
+  case ${net%%:*} in
+    wifi) status="${grn}Connected to Wi-Fi \"${net#*:}\"${off}" ;;
+    *)    status="${grn}Connected by cable${off}" ;;
+  esac
+else
+  status="${yel}Not connected yet${off}"
+fi
+
+cat <<MSG
+
+  ${b}kirkus ${version}${off} ${dim}-- live USB${off}
+
+  1. Connect to Wi-Fi      ${b}nmtui${off}          $status
+     ${dim}(choose "Activate a connection", pick your network, then Back and Quit)${off}
+
+  2. Install kirkus        ${b}./install.sh${off}
+
+  ${dim}Type ${off}welcome${dim} to see this again.${off}
+
+MSG

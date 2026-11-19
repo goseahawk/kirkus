@@ -1,0 +1,8 @@
+#!/bin/sh
+# nmtui clears the screen when it closes, which wiped the instructions. Run the real nmtui, then
+# show them again with the new connection status.
+/usr/bin/nmtui "$@"
+rc=$?
+clear
+/usr/local/bin/kirk-welcome
+exit $rc
