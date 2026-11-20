@@ -1,14 +1,34 @@
 # Updating kirkus
 
-There are three kinds of updates, each with its own tool:
+**kirkus updates itself every week.** Once a week, when you're plugged in and not on a metered
+connection, it updates the Arch system and your Flatpak apps, and new kirkus releases follow. On Btrfs a
+snapshot is taken first, and a notification tells you when it's done (and whether to restart).
 
-| What | How | How often |
+| What | Automatically | By hand |
 |---|---|---|
-| The Arch Linux system underneath (kernel, Plasma, drivers, apps installed with pacman) | `sudo pacman -Syu` | about once a week |
-| The kirkus release (branding, boot and login screens, About page, hardware support) | automatic, after `sudo pacman -Syu` | nothing to do |
-| Flatpak apps | Discover → **Updates** | whenever Discover says updates are available |
+| The Arch Linux system underneath (kernel, Plasma, drivers, apps installed with pacman) | weekly | `sudo pacman -Syu` |
+| The kirkus release (branding, boot and login screens, About page, hardware support) | after every system update | `sudo kirk-update` |
+| Flatpak apps | weekly | Discover → **Updates** |
 
-So in practice: run `sudo pacman -Syu` now and then, and update apps in Discover.
+## Automatic weekly updates
+
+A timer checks a few times a day and updates once 7 days have passed since the last full update,
+whether that was automatic or one you ran yourself. It waits, and tries again later, if you're on
+battery, on a metered connection, or offline.
+
+**When Arch posts news, you're asked to update by hand.** Now and then an Arch update needs a manual
+step, and it's announced at <https://archlinux.org/news/>. If there's news since your last update,
+kirkus doesn't update on its own; a notification asks you to read the news and run
+`sudo pacman -Syu` yourself. After that, weekly updates carry on.
+
+**To turn automatic updates off** (or back on), open **System Settings → Automatic Updates**, or run:
+
+    sudo kirk-auto-update off      # or: on
+    kirk-auto-update status        # on or off, and when you last updated
+    sudo kirk-auto-update now      # update right now
+    journalctl -u kirk-auto-update # what the automatic updates did
+
+With them off, update with `sudo pacman -Syu` about once a week.
 
 ## 1. The Arch system: `sudo pacman -Syu`
 

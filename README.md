@@ -10,8 +10,8 @@ desktop that just works:
   and set up automatically.
 - **Mistakes can be undone.** With the default Btrfs setup, snapshots are taken before risky updates,
   and you can start from one right from the boot menu.
-- **Updating is one command.** `sudo pacman -Syu` updates the system, and kirkus keeps itself up to
-  date along with it. Apps from Discover update in Discover.
+- **Updates take care of themselves.** Every week kirkus updates the system, your apps and itself.
+  You can turn that off and run `sudo pacman -Syu` yourself instead.
 
 kirkus runs on 64-bit Intel and AMD PCs and on **Intel Macs**. Apple Silicon
 Macs (M1 and later) aren't supported, because kirkus is built for x86_64 only.
@@ -32,8 +32,8 @@ endorsed by Arch Linux.
 - **Btrfs + Timeshift** by default: snapshots before risky upgrades, bootable from the GRUB menu.
 - **Hardware detection:** Mac fixes only on Intel Macs, the Broadcom `wl` Wi-Fi driver only on chips
   that need it, and microcode and graphics drivers matched to your CPU and GPU.
-- **Hands-off updates:** new kirkus releases are applied automatically after `pacman -Syu`
-  (see [UPDATING.md](UPDATING.md)).
+- **Hands-off updates:** the system, Flatpak apps and kirkus itself update automatically every week
+  (turn it off in System Settings → Automatic Updates; see [UPDATING.md](UPDATING.md)).
 
 ## Download
 

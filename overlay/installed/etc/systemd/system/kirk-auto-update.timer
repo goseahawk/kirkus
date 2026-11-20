@@ -1,0 +1,10 @@
+[Unit]
+Description=Check a few times a day whether the weekly kirkus update is due
+
+[Timer]
+OnBootSec=20min
+OnUnitActiveSec=6h
+RandomizedDelaySec=15min
+
+[Install]
+WantedBy=timers.target

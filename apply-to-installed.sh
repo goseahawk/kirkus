@@ -84,6 +84,12 @@ if [[ $KIRK_CPU == intel ]]; then systemctl enable thermald.service || true; fi
 if [[ $KIRK_IS_MAC == yes ]]; then systemctl enable --now mac-fix-wakeup.service || true; fi
 # grub-btrfsd picks up its Timeshift settings on restart
 systemctl try-restart grub-btrfsd.service 2>/dev/null || true
+# weekly automatic updates, unless you've turned them off
+if grep -q '^AUTO_SYSTEM_UPDATE=no' /etc/kirk-update.conf 2>/dev/null; then
+  systemctl disable --now kirk-auto-update.timer 2>/dev/null || true
+else
+  systemctl enable --now kirk-auto-update.timer || true
+fi
 
 # ----------------------------------------------------------------------------------- desktop & apps
 echo "== desktop =="

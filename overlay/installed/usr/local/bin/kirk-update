@@ -65,13 +65,4 @@ mkdir -p "$(dirname "$STATE")"
 echo "$tag" > "$STATE"
 echo "kirkus $tag applied. Restart to see everything."
 
-# Let anyone logged in to Plasma know (best effort)
-for bus in /run/user/*/bus; do
-  [[ -S $bus ]] || continue
-  uid=$(basename "$(dirname "$bus")"); user=$(id -nu "$uid" 2>/dev/null) || continue
-  runuser -u "$user" -- env DBUS_SESSION_BUS_ADDRESS="unix:path=$bus" \
-    gdbus call --session --dest org.freedesktop.Notifications \
-      --object-path /org/freedesktop/Notifications --method org.freedesktop.Notifications.Notify \
-      kirkus 0 kirkus-logo "kirkus $tag installed" "Restart your computer to finish updating." \
-      '[]' '{}' 10000 >/dev/null 2>&1 || true
-done
+/usr/local/bin/kirk-notify "kirkus $tag installed" "Restart your computer to finish updating."

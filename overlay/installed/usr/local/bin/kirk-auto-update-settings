@@ -1,0 +1,22 @@
+#!/bin/bash
+# "Automatic Updates" in System Settings: turn the weekly automatic updates on or off.
+now=$(/usr/local/bin/kirk-auto-update status | head -1)
+last=$(/usr/local/bin/kirk-auto-update status | sed -n 2p)
+[[ $now == *on ]] && { a=on; b=off; cur=on; } || { a=off; b=on; cur=off; }
+
+choice=$(kdialog --title "Automatic Updates" --icon system-software-update --radiolist \
+"Once a week, kirkus can update your system and your Flatpak apps for you. It waits until you're plugged in and not on a metered connection, takes a snapshot first, and lets you know when it's done.
+
+If Arch has posted news that may need your attention, it asks you to read it and update by hand instead.
+${last:+
+$last}" \
+  on "Update automatically every week" $a \
+  off "Don't update automatically (update with sudo pacman -Syu)" $b) || exit 0
+[[ -z $choice || $choice == "$cur" ]] && exit 0
+
+if pkexec /usr/local/bin/kirk-auto-update "$choice" >/dev/null; then
+  [[ $choice == on ]] && msg="Automatic weekly updates are on." || msg="Automatic weekly updates are off."
+  kdialog --title "Automatic Updates" --msgbox "$msg"
+else
+  kdialog --title "Automatic Updates" --error "The setting wasn't changed."
+fi

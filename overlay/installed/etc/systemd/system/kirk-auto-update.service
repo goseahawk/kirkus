@@ -1,0 +1,13 @@
+[Unit]
+Description=kirkus automatic weekly update
+Documentation=file:///usr/local/bin/kirk-auto-update
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/kirk-auto-update --auto
+Nice=10
+IOSchedulingClass=idle
+TimeoutStartSec=3h
+Environment=HOME=/root

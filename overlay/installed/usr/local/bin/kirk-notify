@@ -1,0 +1,12 @@
+#!/bin/sh
+# kirk-notify TITLE BODY: show a desktop notification to everyone logged in to Plasma (best effort).
+# For root services, which have no desktop session of their own.
+for bus in /run/user/*/bus; do
+  [ -S "$bus" ] || continue
+  uid=$(basename "$(dirname "$bus")"); user=$(id -nu "$uid" 2>/dev/null) || continue
+  runuser -u "$user" -- env DBUS_SESSION_BUS_ADDRESS="unix:path=$bus" \
+    gdbus call --session --dest org.freedesktop.Notifications \
+      --object-path /org/freedesktop/Notifications --method org.freedesktop.Notifications.Notify \
+      kirkus 0 kirkus-logo "$1" "$2" '[]' '{}' 15000 >/dev/null 2>&1 || true
+done
+exit 0

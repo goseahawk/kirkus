@@ -1,0 +1,105 @@
+#!/bin/bash
+# Weekly automatic updates: the Arch system (pacman -Syu), then Flatpak apps. kirkus releases follow
+# on their own after the pacman upgrade (kirk-update).
+#
+#   sudo kirk-auto-update on       turn weekly updates on (the default)
+#   sudo kirk-auto-update off      turn them off
+#   kirk-auto-update status        on or off, and when the system was last updated
+#   sudo kirk-auto-update now      update now, skipping the weekly and battery checks
+#
+# A timer checks a few times a day and updates once 7 days have passed since the last full update
+# (yours or this one's). It skips, and tries again later, on battery power, on a metered connection
+# or while pacman is busy. If Arch has posted news since your last update it doesn't update; it asks
+# you to read the news and update by hand, since that's where Arch announces upgrades that need a
+# manual step. Logs: journalctl -u kirk-auto-update
+set -uo pipefail
+CONF=/etc/kirk-update.conf
+TIMER=kirk-auto-update.timer
+DAYS=7
+
+AUTO_SYSTEM_UPDATE=yes
+[[ -r $CONF ]] && . "$CONF"
+
+set_conf() {   # set_conf KEY VALUE in the config file
+  touch "$CONF"
+  if grep -q "^$1=" "$CONF"; then sed -i "s|^$1=.*|$1=$2|" "$CONF"
+  else printf '\n# Weekly automatic updates (pacman -Syu and Flatpak apps): yes or no\n%s=%s\n' "$1" "$2" >> "$CONF"; fi
+}
+
+# when the system was last fully upgraded, from pacman's log (epoch seconds)
+last_upgrade() {
+  local t
+  t=$(grep -a 'starting full system upgrade' /var/log/pacman.log 2>/dev/null | tail -1 | grep -o '^\[[^]]*\]' | tr -d '[]')
+  [[ -z $t ]] && t=$(head -1 /var/log/pacman.log 2>/dev/null | grep -o '^\[[^]]*\]' | tr -d '[]')
+  [[ -n $t ]] && date -d "$t" +%s 2>/dev/null || echo 0
+}
+
+need_root() { [[ $EUID -eq 0 ]] || exec sudo "$0" "$@"; }
+
+case ${1:-} in
+  on)
+    need_root "$@"; set_conf AUTO_SYSTEM_UPDATE yes; systemctl enable --now "$TIMER" >/dev/null 2>&1
+    echo "Automatic weekly updates are on."; exit 0 ;;
+  off)
+    need_root "$@"; set_conf AUTO_SYSTEM_UPDATE no; systemctl disable --now "$TIMER" >/dev/null 2>&1
+    echo "Automatic weekly updates are off. Update by hand with: sudo pacman -Syu"; exit 0 ;;
+  status)
+    l=$(last_upgrade)
+    echo "Automatic weekly updates: $([[ $AUTO_SYSTEM_UPDATE == yes ]] && echo on || echo off)"
+    (( l > 0 )) && echo "Last full update: $(date -d "@$l" '+%A %-d %B %Y, %H:%M')"
+    exit 0 ;;
+  now) need_root "$@"; FORCE=yes ;;
+  --auto) FORCE=no ;;
+  *) echo "usage: kirk-auto-update on|off|status|now"; exit 2 ;;
+esac
+
+if [[ $FORCE == no ]]; then
+  [[ $AUTO_SYSTEM_UPDATE == yes ]] || { echo "Automatic updates are off."; exit 0; }
+  last=$(last_upgrade); now=$(date +%s)
+  if (( now - last < DAYS * 86400 )); then
+    echo "Last full update was $(( (now - last) / 86400 )) days ago; nothing to do yet."; exit 0
+  fi
+  # on battery? (a battery exists and no charger is plugged in)
+  if ls /sys/class/power_supply/BAT* >/dev/null 2>&1; then
+    plugged=no
+    for p in /sys/class/power_supply/*; do
+      [[ $(cat "$p/type" 2>/dev/null) == Mains && $(cat "$p/online" 2>/dev/null) == 1 ]] && plugged=yes
+    done
+    [[ $plugged == yes ]] || { echo "On battery; trying again later."; exit 0; }
+  fi
+  if nmcli -t -f GENERAL.METERED device show 2>/dev/null | grep -q ':yes'; then
+    echo "Metered connection; trying again later."; exit 0
+  fi
+  # Arch news since the last update means a possible manual step: leave it to the user
+  news=$(curl -fsSL --max-time 30 https://archlinux.org/feeds/news/ 2>/dev/null \
+           | grep -o '<pubDate>[^<]*' | head -1 | sed 's/<pubDate>//')
+  if [[ -z $news ]]; then echo "Couldn't reach archlinux.org; trying again later."; exit 0; fi
+  if (( $(date -d "$news" +%s 2>/dev/null || echo 0) > last )); then
+    echo "Arch has posted news since the last update ($news); not updating automatically."
+    /usr/local/bin/kirk-notify "Updates are waiting for you" \
+      "Arch Linux posted news since your last update. Read it at archlinux.org/news, then update with: sudo pacman -Syu"
+    exit 0
+  fi
+fi
+
+# wait for any running pacman (up to 30 minutes)
+for _ in $(seq 360); do [[ -e /var/lib/pacman/db.lck ]] || break; sleep 5; done
+[[ -e /var/lib/pacman/db.lck ]] && { echo "pacman is busy; trying again later."; exit 0; }
+
+kernel_before=$(pacman -Q linux 2>/dev/null)
+echo "== Updating the system =="
+if ! { pacman -Sy --needed --noconfirm archlinux-keyring && pacman -Su --noconfirm; }; then
+  echo "The system update failed."
+  /usr/local/bin/kirk-notify "Automatic update didn't finish" \
+    "The weekly update stopped with an error. Run sudo pacman -Syu in Konsole to see what's wrong."
+  exit 1
+fi
+echo "== Updating Flatpak apps =="
+command -v flatpak >/dev/null && { flatpak update -y --noninteractive || echo "Flatpak update failed."; }
+
+if [[ $(pacman -Q linux 2>/dev/null) != "$kernel_before" ]]; then
+  /usr/local/bin/kirk-notify "Updates installed" "Restart your computer to finish updating."
+else
+  /usr/local/bin/kirk-notify "Updates installed" "Your system and apps are up to date."
+fi
+echo "Done."
