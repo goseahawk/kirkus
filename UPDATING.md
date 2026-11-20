@@ -78,15 +78,20 @@ Useful commands:
 
     sudo kirk-update --check     # is there a newer release?
     sudo kirk-update             # check and install it now
+    sudo kirk-update --main      # install the newest changes on GitHub, even unreleased ones
     journalctl -u kirk-update    # what the automatic updates did
+
+`--main` applies whatever is on GitHub's main branch right now, so you get changes before they're
+released. Your version becomes today's date, and `grep SOURCE /etc/kirk-release` shows which commit
+you're on. Later releases still install as normal once they're newer than that.
 
 **To turn automatic updates off**, edit `/etc/kirk-update.conf` and set `AUTO_UPDATE=no`. Updates
 won't change that setting. You can still update with `sudo kirk-update`.
 
 ### Updating by hand from the project folder
 
-You can also apply the project directly, for example to try changes that haven't been released yet.
-First get the latest version of the project.
+You can also apply a copy of the project directly, for example one you've changed yourself. (To get
+the newest changes from GitHub, `sudo kirk-update --main` is simpler.) First get the project.
 
 **If you cloned it with git:**
 

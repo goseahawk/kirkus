@@ -3,6 +3,7 @@
 #
 #   sudo kirk-update            check now and apply if there's a newer release
 #   sudo kirk-update --check    only say whether there's one
+#   sudo kirk-update --main     apply the newest changes on GitHub (the main branch), released or not
 #
 # Started automatically (as kirk-update.service) after pacman upgrades packages; see
 # /etc/kirk-update.conf to turn that off. Logs: journalctl -u kirk-update
@@ -20,8 +21,9 @@ mode=apply
 case ${1:-} in
   --check) mode=check ;;
   --auto)  mode=auto ;;     # used by the service
+  --main)  mode=main ;;
   "")      ;;
-  *) echo "usage: kirk-update [--check]"; exit 2 ;;
+  *) echo "usage: kirk-update [--check | --main]"; exit 2 ;;
 esac
 if [[ $mode == auto && $AUTO_UPDATE != yes ]]; then
   echo "Automatic kirkus updates are off (AUTO_UPDATE in /etc/kirk-update.conf)."; exit 0
@@ -31,6 +33,42 @@ fi
 for _ in $(seq 720); do [[ -e /var/lib/pacman/db.lck ]] || break; sleep 5; done
 [[ -e /var/lib/pacman/db.lck ]] && { echo "pacman is still busy; trying again after the next upgrade."; exit 0; }
 
+installed=$(sed -n 's/^VERSION=//p' /etc/kirk-release 2>/dev/null | head -1)
+# Versions are YY.MM.DD, with .1, .2... for later builds the same day; sort -V orders them.
+newer() { [[ $1 != "$2" && $(printf '%s\n%s\n' "$1" "$2" | sort -V | tail -1) == "$1" ]]; }
+
+# apply_source TARBALL_URL VERSION LABEL: download the project and run its apply-to-installed.sh
+apply_source() {
+  local url=$1 version=$2 label=$3 src
+  # work stays global so the cleanup on exit can still see it
+  echo "Updating kirkus ${installed:-?} -> $label"
+  mkdir -p "$CACHE"
+  work=$(mktemp -d "$CACHE/update.XXXXXX")
+  trap 'rm -rf "$work"' EXIT
+  curl -fsSL --max-time 300 -o "$work/src.tar.gz" "$url"
+  tar -xzf "$work/src.tar.gz" -C "$work" --no-same-owner
+  src=$(find "$work" -mindepth 2 -maxdepth 2 -name apply-to-installed.sh -printf '%h\n' | head -1)
+  [[ -n $src ]] || { echo "That download has no apply-to-installed.sh; nothing was changed."; exit 1; }
+  KIRK_VERSION=$version bash "$src/apply-to-installed.sh"
+  # where this version came from, for: grep SOURCE /etc/kirk-release
+  if grep -q '^SOURCE=' /etc/kirk-release; then sed -i "s|^SOURCE=.*|SOURCE=$label|" /etc/kirk-release
+  else echo "SOURCE=$label" >> /etc/kirk-release; fi
+  echo "kirkus $version applied ($label). Restart to see everything."
+  /usr/local/bin/kirk-notify "kirkus $version installed" "Restart your computer to finish updating."
+}
+
+if [[ $mode == main ]]; then
+  # the main branch's newest commit, so the download and the label match exactly
+  sha=$(curl -fsSL --max-time 30 -H 'Accept: application/vnd.github.sha' \
+          "https://api.github.com/repos/$REPO/commits/main") || { echo "Couldn't reach GitHub."; exit 1; }
+  [[ $sha =~ ^[0-9a-f]{40}$ ]] || { echo "GitHub gave an unexpected answer: $sha"; exit 1; }
+  # version: today's date, but never lower than what's installed
+  version=$(date +%y.%m.%d)
+  [[ $installed =~ $ver_re ]] && newer "$installed" "$version" && version=$installed
+  apply_source "https://github.com/$REPO/archive/$sha.tar.gz" "$version" "main ${sha:0:7}"
+  exit 0
+fi
+
 # The newest release: github.com/<repo>/releases/latest redirects to .../releases/tag/<tag>
 url=$(curl -fsSL --max-time 30 -o /dev/null -w '%{url_effective}' "https://github.com/$REPO/releases/latest") \
   || { echo "Couldn't reach GitHub; skipping."; exit 0; }
@@ -39,10 +77,7 @@ if [[ $url != */tag/* || ! $tag =~ $ver_re ]]; then
   echo "No kirkus release found on github.com/$REPO (got '$url')."; exit 0
 fi
 
-installed=$(sed -n 's/^VERSION=//p' /etc/kirk-release 2>/dev/null | head -1)
 applied=$(cat "$STATE" 2>/dev/null || true)
-# Versions are YY.MM.DD, with .1, .2... for later builds the same day; sort -V orders them.
-newer() { [[ $1 != "$2" && $(printf '%s\n%s\n' "$1" "$2" | sort -V | tail -1) == "$1" ]]; }
 if [[ $tag == "$applied" ]] || { [[ $installed =~ $ver_re ]] && ! newer "$tag" "$installed"; }; then
   echo "kirkus ${installed:-?} is up to date (latest release: $tag)."; exit 0
 fi
@@ -51,18 +86,6 @@ if [[ $mode == check ]]; then
   exit 0
 fi
 
-echo "Updating kirkus ${installed:-?} -> $tag"
-mkdir -p "$CACHE"
-work=$(mktemp -d "$CACHE/$tag.XXXXXX")
-trap 'rm -rf "$work"' EXIT
-curl -fsSL --max-time 300 -o "$work/src.tar.gz" "https://github.com/$REPO/archive/refs/tags/$tag.tar.gz"
-tar -xzf "$work/src.tar.gz" -C "$work" --no-same-owner
-src=$(find "$work" -mindepth 2 -maxdepth 2 -name apply-to-installed.sh -printf '%h\n' | head -1)
-[[ -n $src ]] || { echo "The $tag release has no apply-to-installed.sh; skipping."; exit 1; }
-
-KIRK_VERSION=$tag bash "$src/apply-to-installed.sh"
 mkdir -p "$(dirname "$STATE")"
+apply_source "https://github.com/$REPO/archive/refs/tags/$tag.tar.gz" "$tag" "release $tag"
 echo "$tag" > "$STATE"
-echo "kirkus $tag applied. Restart to see everything."
-
-/usr/local/bin/kirk-notify "kirkus $tag installed" "Restart your computer to finish updating."
