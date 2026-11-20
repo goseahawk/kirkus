@@ -1,21 +1,36 @@
 #!/usr/bin/env python3
 """Build the kirkus lockup (mark + "kirkus" wordmark) and its screen-size layers.
 
-usage: make-lockup.py SPACE_GROTESK_VARIABLE_TTF BRANDING_DIR
+usage: make-lockup.py FONT.ttf BRANDING_DIR [--weight W] [--track EM] [--height PX] [--max-width PX]
+                      [--out DIR]
 
-Takes the mark (the K and its dot) from branding/build/mark-src.png and dot-src.png, sets
-"kirkus" in Space Grotesk (wght 680, 208px, -8px tracking: the settings that reproduce the
-original "kirk" artwork), and writes:
-  build/lockup.png, build/lockup-nodot.png            full size, 308px tall
-  build/screen-lockup.png, screen-lockup-nodot.png,   132px tall, what every screen draws
-  build/screen-dot.png                                (dot layer is the same size as the lockup)
+Takes the mark (the K and its dot) from branding/build/mark-src.png and dot-src.png, sets "kirkus"
+in the given font and writes, to BRANDING_DIR/build (or --out):
+  lockup.png, lockup-nodot.png                      full size, 308px tall
+  screen-lockup.png, screen-lockup-nodot.png,       132px tall, what every screen draws
+  screen-dot.png                                    (dot layer is the same size as the lockup)
+
+--weight   for variable fonts (default 680)
+--track    letter spacing in em, negative is tighter (default -0.04)
+--height   height of the word's ink, ascender to baseline (default 148, as the original "kirk")
+--max-width  the word is scaled down to fit this width if needed (default 640)
 """
-import sys, os
+import sys, os, argparse
 import numpy as np
 from PIL import Image, ImageDraw, ImageFont
 
-font_path, root = sys.argv[1], sys.argv[2]
+ap = argparse.ArgumentParser()
+ap.add_argument("font"); ap.add_argument("root")
+ap.add_argument("--weight", type=float, default=680)
+ap.add_argument("--track", type=float, default=-0.04)
+ap.add_argument("--height", type=int, default=148)
+ap.add_argument("--max-width", type=int, default=640)
+ap.add_argument("--out")
+a = ap.parse_args()
+font_path, root = a.font, a.root
 b = os.path.join(root, "build")
+out = a.out or b
+os.makedirs(out, exist_ok=True)
 CREAM = (0xff, 0xf8, 0xec)
 H, SCREEN_H = 308, 132                     # 308 * 3/7 = 132
 GAP_X = 376                                # where the wordmark starts (as in the original)
@@ -24,19 +39,31 @@ mark = Image.open(os.path.join(b, "mark-src.png")).convert("RGBA")       # 330 x
 dot = Image.open(os.path.join(b, "dot-src.png")).convert("RGBA")
 dx, dy = (int(v) for v in open(os.path.join(b, "dot-offset.txt")).read().split())
 
-# ---- wordmark coverage, 4x supersampled ----
-S = 4
-f = ImageFont.truetype(font_path, 208 * S)
-f.set_variation_by_axes([680])
-cov = Image.new("L", (1400 * S, 400 * S))
-d = ImageDraw.Draw(cov)
-x = 20 * S
-for ch in "kirkus":
-    d.text((x, 20 * S), ch, font=f, fill=255)
-    x += f.getlength(ch) - 8 * S
-c = np.array(cov)
-ys, xs = np.nonzero(c > 0)
-c = c[ys.min():ys.max() + 1, xs.min():xs.max() + 1]
+S = 4                                      # 4x supersampling
+
+def ink(size):
+    """'kirkus' set at size (supersampled px); returns the cropped coverage array."""
+    f = ImageFont.truetype(font_path, int(size))
+    try:
+        axes = f.get_variation_axes()
+        f.set_variation_by_axes([min(max(a.weight, ax["minimum"]), ax["maximum"]) if i == 0
+                                 else ax["default"] for i, ax in enumerate(axes)])
+    except (OSError, AttributeError):
+        pass                               # not a variable font
+    cov = Image.new("L", (int(size * 9), int(size * 2)))
+    d = ImageDraw.Draw(cov)
+    x = size * 0.2
+    for ch in "kirkus":
+        d.text((x, size * 0.3), ch, font=f, fill=255)
+        x += f.getlength(ch) + a.track * size
+    c = np.array(cov)
+    ys, xs = np.nonzero(c > 0)
+    return c[ys.min():ys.max() + 1, xs.min():xs.max() + 1]
+
+# pick the size that gives the requested ink height, within the maximum width
+probe = ink(200 * S)
+scale = min(a.height * S / probe.shape[0], a.max_width * S / probe.shape[1])
+c = ink(200 * S * scale)
 tw, th = (c.shape[1] + S - 1) // S, (c.shape[0] + S - 1) // S
 pad = np.zeros((th * S, tw * S), np.uint8)
 pad[:c.shape[0], :c.shape[1]] = c
@@ -79,9 +106,9 @@ def shrink(im):
 
 full, nodot = canvas(True), canvas(False)
 dotonly = canvas(True, with_word=False, with_mark=False)
-full.save(os.path.join(b, "lockup.png"))
-nodot.save(os.path.join(b, "lockup-nodot.png"))
-shrink(full).save(os.path.join(b, "screen-lockup.png"))
-shrink(nodot).save(os.path.join(b, "screen-lockup-nodot.png"))
-shrink(dotonly).save(os.path.join(b, "screen-dot.png"))
+full.save(os.path.join(out, "lockup.png"))
+nodot.save(os.path.join(out, "lockup-nodot.png"))
+shrink(full).save(os.path.join(out, "screen-lockup.png"))
+shrink(nodot).save(os.path.join(out, "screen-lockup-nodot.png"))
+shrink(dotonly).save(os.path.join(out, "screen-dot.png"))
 print(f"lockup {W}x{H}, screen {sw}x{SCREEN_H}, word {tw}x{th} at ({GAP_X},{top})")

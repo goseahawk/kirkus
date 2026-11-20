@@ -1,0 +1,5 @@
+The kirkus wordmark: Lexend (Google Fonts, SIL Open Font License), variable font at weight 600
+(SemiBold), letter spacing -0.05 em, scaled so the word's ink is 148px tall in the full-size lockup.
+
+Rebuild every lockup image with:
+    python3 branding/tools/make-lockup.py "Lexend[wght].ttf" branding --weight 600 --track -0.05
