@@ -1,5 +1,5 @@
 // kirkus boot splash (Plymouth "script" theme).
-// Black background and the kirkus lockup, with the cream dot breathing while the system starts.
+// Black background and the kirkus lockup, with the K's chevron gently pulsing while the system starts.
 // The lockup sits exactly where GRUB, the login screen and the Plasma splash draw it.
 // Press Esc during boot to see the normal boot messages behind it.
 
@@ -9,22 +9,22 @@ Window.SetBackgroundBottomColor(0, 0, 0);
 W = Window.GetWidth();
 H = Window.GetHeight();
 
-// ---- lockup, without its dot ----
-lock.image = Image("lockup-nodot.png");
+// ---- lockup, without the chevron ----
+lock.image = Image("lockup-base.png");
 lock.x = Window.GetX() + Math.Int(W / 2 - lock.image.GetWidth() / 2);
 lock.y = Window.GetY() + Math.Int(H / 2 - lock.image.GetHeight() / 2) - 50;
 lock.sprite = Sprite(lock.image);
 lock.sprite.SetPosition(lock.x, lock.y, 10);
 
-// ---- the dot, as its own layer (same size and position as the lockup) ----
-dot.image = Image("dot.png");
-dot.sprite = Sprite(dot.image);
-dot.sprite.SetPosition(lock.x, lock.y, 11);
+// ---- the chevron, as its own layer (same size and position as the lockup) ----
+accent.image = Image("accent.png");
+accent.sprite = Sprite(accent.image);
+accent.sprite.SetPosition(lock.x, lock.y, 11);
 
 tick = 0;
 fun refresh_callback() {
   tick = tick + 1;
-  dot.sprite.SetOpacity(0.65 + 0.35 * Math.Sin(tick / 20));
+  accent.sprite.SetOpacity(0.825 + 0.175 * Math.Sin(tick / 20));   // between 65% and 100%
 }
 Plymouth.SetRefreshFunction(refresh_callback);
 

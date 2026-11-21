@@ -6,7 +6,7 @@
   "logo": {
     "type": "file",
     "source": "/usr/share/kirkus/fastfetch-logo.txt",
-    // $1 = blue K, $2 = cream dot (raw ANSI truecolour: 38;2;R;G;B)
+    // $1 = blue K, $2 = cream (raw ANSI truecolour: 38;2;R;G;B)
     "color": { "1": "38;2;85;144;180", "2": "38;2;255;248;236" },
     "padding": { "top": 1, "left": 1, "right": 3 }
   },
