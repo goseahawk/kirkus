@@ -2,8 +2,8 @@
 Type=Application
 Exec=/usr/local/bin/kirk-auto-update-settings
 Icon=system-software-update
-Name=Automatic Updates
-Comment=Update the system and Flatpak apps automatically every week, or turn that off
+Name=System Update
+Comment=Update the system automatically every week, or turn that off
 Keywords=update;updates;automatic;upgrade;pacman;weekly;
 Categories=Settings;System;
 X-KDE-Keywords=update,updates,automatic,upgrade,pacman,weekly

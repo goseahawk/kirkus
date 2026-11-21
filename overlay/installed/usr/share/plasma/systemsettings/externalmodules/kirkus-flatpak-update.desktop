@@ -1,0 +1,12 @@
+[Desktop Entry]
+Type=Service
+Exec=plasma-discover --mode update
+Icon=plasmadiscover
+Name=Flatpak Update
+Comment=Check for and install updates to your Flatpak apps in Discover
+Keywords=flatpak;update;updates;apps;discover;
+Categories=Settings;System;
+X-KDE-Keywords=flatpak,update,updates,apps,discover
+X-KDE-ServiceTypes=SystemSettingsExternalApp
+X-KDE-System-Settings-Parent-Category=system-administration
+X-KDE-Weight=41

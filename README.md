@@ -33,7 +33,7 @@ endorsed by Arch Linux.
 - **Hardware detection:** Mac fixes only on Intel Macs, the Broadcom `wl` Wi-Fi driver only on chips
   that need it, and microcode and graphics drivers matched to your CPU and GPU.
 - **Hands-off updates:** the system, Flatpak apps and kirkus itself update automatically every week
-  (turn it off in System Settings → Automatic Updates; see [UPDATING.md](UPDATING.md)).
+  (turn it off in System Settings → System Update; see [UPDATING.md](UPDATING.md)).
 
 ## Download
 

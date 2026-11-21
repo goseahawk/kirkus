@@ -21,7 +21,7 @@ step, and it's announced at <https://archlinux.org/news/>. If there's news since
 kirkus doesn't update on its own; a notification asks you to read the news and run
 `sudo pacman -Syu` yourself. After that, weekly updates carry on.
 
-**To turn automatic updates off** (or back on), open **System Settings → Automatic Updates**, or run:
+**To turn automatic updates off** (or back on), open **System Settings → System Update**, or run:
 
     sudo kirk-auto-update off      # or: on
     kirk-auto-update status        # on or off, and when you last updated
@@ -122,7 +122,7 @@ To see which kirkus version you have, open **System Settings → About this Syst
 
 Apps installed from **Discover** come from Flathub as Flatpaks, and Discover keeps them up to date:
 
-1. Open **Discover**.
+1. Open **Discover** (or **System Settings → Flatpak Update**, which opens it on the Updates page).
 2. Click **Updates** at the bottom left.
 3. Click **Update All**.
 
