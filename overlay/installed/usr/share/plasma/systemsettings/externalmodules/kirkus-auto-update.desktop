@@ -9,4 +9,4 @@ Categories=Settings;System;
 X-KDE-Keywords=update,updates,automatic,upgrade,pacman,weekly
 X-KDE-ServiceTypes=SystemSettingsExternalApp
 X-KDE-System-Settings-Parent-Category=system-administration
-X-KDE-Weight=40
+X-KDE-Weight=9001

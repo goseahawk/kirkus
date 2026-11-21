@@ -9,4 +9,4 @@ Categories=Settings;System;
 X-KDE-Keywords=flatpak,update,updates,apps,discover
 X-KDE-ServiceTypes=SystemSettingsExternalApp
 X-KDE-System-Settings-Parent-Category=system-administration
-X-KDE-Weight=41
+X-KDE-Weight=9000
