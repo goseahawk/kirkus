@@ -11,6 +11,10 @@ writes to BRANDING_DIR/build (or --out):
   screen-lockup.png, screen-lockup-base.png,           132px tall, what every screen draws
   screen-accent.png                                    (the accent layer is the same size as the
                                                        lockup, so it lines up when drawn on top)
+  screen-mark.png                                      the K on its own (GRUB, login, Plasma splash)
+  screen-wordmark.png                                  "kirkus" on its own (boot splash, live USB)
+Every screen draws its image centred at x = W/2, y = H/2 - 50, and these have even sizes, so the
+K on the login screen and on the Plasma splash land on exactly the same pixels.
 
 --weight     for variable fonts (default 680)
 --track      letter spacing in em, negative is tighter (default -0.04)
@@ -39,12 +43,14 @@ H, SCREEN_H = 308, 132                     # 308 * 3/7 = 132
 
 # ---- the mark's two layers, each rendered on its own at full size ----
 svg = open(os.path.join(b, "mark.svg")).read()
-def layer(keep):
-    hide = "accent" if keep == "base" else "base"
-    body = re.sub(r'(<g id="%s")' % hide, r'\1 display="none"', svg)
+def layer(keep, height=None):
+    hide = {"base": ["accent"], "accent": ["base"], "both": []}[keep]
+    body = svg
+    for g in hide:
+        body = re.sub(r'(<g id="%s")' % g, r'\1 display="none"', body)
     with tempfile.TemporaryDirectory() as t:
         p = os.path.join(t, "m.svg"); open(p, "w").write(body)
-        subprocess.run(["rsvg-convert", "-h", str(H), p, "-o", p + ".png"], check=True)
+        subprocess.run(["rsvg-convert", "-h", str(height or H), p, "-o", p + ".png"], check=True)
         return Image.open(p + ".png").convert("RGBA")
 base, accent = layer("base"), layer("accent")
 mark = base.copy(); mark.alpha_composite(accent)
@@ -122,3 +128,28 @@ shrink(full).save(os.path.join(out, "screen-lockup.png"))
 shrink(still).save(os.path.join(out, "screen-lockup-base.png"))
 shrink(canvas(with_base=False, with_word=False)).save(os.path.join(out, "screen-accent.png"))
 print(f"lockup {W}x{H}, screen {sw}x{SCREEN_H}, word {tw}x{th} at ({GAP_X},{top})")
+
+# ---- the K and the word on their own, at screen size ----
+def tidy(im, margin=4):
+    """crop to the ink plus a margin, then pad to even width and height"""
+    al = np.array(im)[..., 3]
+    ys, xs = np.nonzero(al > 0)
+    im = im.crop((xs.min() - margin, ys.min() - margin, xs.max() + 1 + margin, ys.max() + 1 + margin))
+    w, h = im.width + im.width % 2, im.height + im.height % 2
+    out_im = Image.new("RGBA", (w, h)); out_im.alpha_composite(im, (0, 0)); return out_im
+
+MARK_INK = 120                              # the K's height on screen, px
+svg_ink = 256 / 300                         # the K's ink is 256 of mark.svg's 300 units
+k = tidy(layer("both", round(MARK_INK / svg_ink)))
+k.save(os.path.join(out, "screen-mark.png"))
+
+WORD_INK = 64                               # the word's height on screen, ascender to baseline
+probe = ink(200 * S)
+c = ink(200 * S * WORD_INK * S / probe.shape[0])
+ww, wh = (c.shape[1] + S - 1) // S, (c.shape[0] + S - 1) // S
+pad = np.zeros((wh * S, ww * S), np.uint8); pad[:c.shape[0], :c.shape[1]] = c
+cov = pad.reshape(wh, S, ww, S).mean(axis=(1, 3)).round().astype(np.uint8)
+wl = Image.new("RGBA", (ww + 8, wh + 8), CREAM + (0,))
+al = Image.new("L", (ww + 8, wh + 8)); al.paste(Image.fromarray(cov), (4, 4)); wl.putalpha(al)
+tidy(wl).save(os.path.join(out, "screen-wordmark.png"))
+print(f"mark {k.width}x{k.height}, wordmark {tidy(wl).width}x{tidy(wl).height}")

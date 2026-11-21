@@ -58,7 +58,7 @@ class Launcher:
         page = tk.Frame(root, bg=BG)
         page.place(relx=0.5, rely=0.47, anchor="center")
 
-        self.logo = tk.PhotoImage(file=os.path.join(HERE, "lockup.png"))
+        self.logo = tk.PhotoImage(file=os.path.join(HERE, "wordmark.png"))
         tk.Label(page, image=self.logo, bg=BG).pack()
         tk.Label(page, text=f"LIVE USB  {version()}".strip(), bg=BG, fg=SLATE,
                  font=(FONT, int(9 * k))).pack(pady=(int(10 * k), int(44 * k)))

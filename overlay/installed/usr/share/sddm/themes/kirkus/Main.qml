@@ -1,8 +1,9 @@
 // kirkus login screen for SDDM (Qt 6).
 //
-// The kirkus lockup is drawn with exactly the same arithmetic as the Plymouth boot splash, the GRUB
-// menu background and the Plasma startup splash, so from power-on to desktop it never moves. Under
-// it, the password field, which carries your name. Clock at the top, session, user and power
+// The kirkus K, faded so it doesn't compete with the password field, drawn with exactly the same
+// arithmetic as the GRUB background and the Plasma startup splash. When you log in, the splash
+// starts from this same faded K and brightens it. Under it, the password field, which carries your
+// name. Clock at the top, session, user and power
 // controls along the bottom, so nothing competes with the centre. Colours are the brand palette:
 // navy #0b1020, blue #5590b4, cream #fff8ec, slate #aeb6c8.
 import QtQuick
@@ -102,15 +103,16 @@ Rectangle {
         font.pixelSize: 15
     }
 
-    // ---- the lockup: identical to the boot splash ----
+    // ---- the K, faded (the Plasma splash starts from this same opacity) ----
     Image {
         id: lockup
-        source: "lockup.png"
+        source: "mark.png"
+        opacity: 0.3
         x: Math.floor(root.width / 2 - implicitWidth / 2)
         y: Math.floor(root.height / 2 - implicitHeight / 2) - 50
     }
 
-    // ---- login form, under the lockup ----
+    // ---- login form, under the K ----
     Column {
         id: form
         anchors.horizontalCenter: parent.horizontalCenter

@@ -1,8 +1,7 @@
 // kirkus startup splash (shown after login while Plasma loads).
 //
-// Same as the boot splash: the kirkus lockup at exactly the spot every other screen draws it, so when
-// you log in the password field simply disappears, and the K's chevron pulses until the desktop
-// arrives.
+// The kirkus K, in exactly the spot and at exactly the size the login screen draws it. It starts at
+// the login screen's faded opacity and brightens to full, so logging in looks like the K lighting up.
 import QtQuick
 
 Rectangle {
@@ -13,22 +12,15 @@ Rectangle {
     property int stage
 
     Image {
-        id: lockup
-        source: "images/lockup-base.png"
+        source: "images/mark.png"
         x: Math.floor(root.width / 2 - implicitWidth / 2)
         y: Math.floor(root.height / 2 - implicitHeight / 2) - 50
-    }
+        opacity: 0.3                      // the login screen's opacity
 
-    // the chevron is its own layer, the same size and position as the lockup
-    Image {
-        source: "images/accent.png"
-        x: lockup.x
-        y: lockup.y
-
-        SequentialAnimation on opacity {
-            loops: Animation.Infinite
-            NumberAnimation { to: 0.65; duration: 1250; easing.type: Easing.InOutSine }
-            NumberAnimation { to: 1.0; duration: 1250; easing.type: Easing.InOutSine }
+        NumberAnimation on opacity {
+            from: 0.3; to: 1.0
+            duration: 1200
+            easing.type: Easing.InOutSine
         }
     }
 }

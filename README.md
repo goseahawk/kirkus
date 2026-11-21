@@ -246,8 +246,8 @@ so keep that rule when editing them.
 
 ## Boot splash
 
-A Plymouth theme, `kirkus`, shows the logo on black while the system starts, with the K's
-chevron gently pulsing. Files: `/usr/share/plymouth/themes/kirkus/`.
+A Plymouth theme, `kirkus`, shows the word "kirkus" fading in on black while the system
+starts. Files: `/usr/share/plymouth/themes/kirkus/`.
 
 - **See boot messages:** press Esc while the splash is up.
 - **Change it:** edit `kirkus.script`, then `sudo plymouth-set-default-theme -R kirkus`.
