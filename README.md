@@ -158,12 +158,6 @@ standard login screen.
 **Wi-Fi doesn't work.** Run `kirk-detect --summary` in Konsole to see which Wi-Fi chip kirkus found.
 Please [open an issue](https://github.com/goseahawk/kirkus/issues) with the result.
 
-## License
-
-The code is under the MIT License (see `LICENSE`). The kirkus logo and the files in `branding/` are
-**not** covered by it; they may not be reused without permission. Arch Linux is a trademark of its
-respective owners.
-
 ## Building the ISO yourself
 
 Most people should just download the ISO from Releases. To build your own, for example with your
@@ -176,3 +170,9 @@ own changes:
 The ISO lands in `out/`, named for today's date (set `KIRK_VERSION=26.11.18` to choose
 the version). Expect 30–60 minutes. See [DEVELOPMENT.md](DEVELOPMENT.md) for how kirkus is put
 together.
+
+## License
+
+The code is under the MIT License (see `LICENSE`). The kirkus logo and the files in `branding/` are
+**not** covered by it; they may not be reused without permission. Arch Linux is a trademark of its
+respective owners.
