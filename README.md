@@ -39,42 +39,11 @@ endorsed by Arch Linux.
 
 The ready-made ISO is in the **[Releases](https://github.com/goseahawk/kirkus/releases/latest)**
 section of this GitHub page. Download the newest `kirkus-YY.MM.DD-x86_64.iso`, write it to a USB
-stick (for example with [balenaEtcher](https://etcher.balena.io/) or `dd`), and skip ahead to
-[Pick an install style](#2-pick-an-install-style). Each release also has a `.sha256` file; download it
+stick (for example with [balenaEtcher](https://etcher.balena.io/) or `dd`), then
+[pick an install style](#1-pick-an-install-style). Each release also has a `.sha256` file; download it
 too and check your ISO with `sha256sum -c kirkus-*.iso.sha256`.
 
-You only need to build the ISO yourself if you want to change something or try unreleased work.
-
-## 1. Build the ISO
-
-**On GitHub (easiest):** open the repo's **Actions** tab, pick **Build ISO** and click
-**Run workflow**. GitHub builds the ISO on its own servers (30–60 minutes) and publishes it as a release
-with its `.sha256` file. You can set the version (it defaults to today's date) and choose to make a
-draft release to test first, or just build without releasing.
-
-To build on your own computer instead:
-
-**On Arch:**
-
-    sudo ./build.sh
-
-**On any other OS (Fedora, Debian, macOS, Windows + WSL2):** needs Docker or Podman, on an x86_64
-machine:
-
-    ./build-docker.sh
-
-The whole Arch build runs inside a throwaway privileged container; only the ISO comes back, in `out/`.
-On Apple Silicon it would run under emulation and be impractically slow, so build on an x86_64
-machine instead.
-
-Write it to a USB stick:
-
-    sudo dd if=out/kirkus-*.iso of=/dev/sdX bs=4M status=progress oflag=sync
-
-macOS: `diskutil unmountDisk /dev/diskN` first, then write to `/dev/rdiskN` with `bs=4m`.
-Windows: Rufus or balenaEtcher, in DD / image mode.
-
-## 2. Pick an install style
+## 1. Pick an install style
 
 **A. Erase a whole disk.** Simplest; everything on that disk is removed.
 
@@ -92,7 +61,7 @@ one Linux partition in the free space. It needs at least 15 GiB.
 **C. A partition you prepared.** Choose "Install to an existing partition", give it that partition
 (it's **formatted**) and the existing EFI partition.
 
-## 3. Install
+## 2. Install
 
 Boot the USB (on an Intel Mac, hold Option at startup and pick "EFI Boot"). A start screen opens:
 click **Connect to Wi-Fi**, then **Install kirkus**. Each opens a terminal window: the installer asks
@@ -138,7 +107,7 @@ archinstall fails, the installer falls back to plain `pacstrap` automatically; `
 forces that. Both produce the same system. archinstall is given a throwaway root password because
 it insists on one; your account is created afterwards and root is locked.
 
-## 4. Booting afterwards
+## 3. Booting afterwards
 
 **On a PC:** GRUB is installed the normal way, with a firmware boot entry called kirkus. If another
 system starts instead, pick kirkus in your firmware's boot menu (often F12, F11 or Esc at power-on),
@@ -175,7 +144,7 @@ To change it, edit `GRUB_TIMEOUT` / `GRUB_TIMEOUT_STYLE` in `/etc/default/grub` 
 time), then `sudo grub-mkconfig -o /boot/grub/grub.cfg`. Don't set the timeout to 0: the menu can
 become unreachable.
 
-## 5. Updating an installed system
+## 4. Updating an installed system
 
 **See [UPDATING.md](UPDATING.md)** for the full guide. In short: `sudo pacman -Syu` updates the Arch
 system underneath, and afterwards kirkus checks GitHub and applies any newer published release on its
