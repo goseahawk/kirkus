@@ -284,5 +284,4 @@ own changes:
   or Podman on an x86_64 computer, and runs the whole Arch build in a throwaway container.
 
 Either way the ISO lands in `out/`, named for today's date (set `KIRK_VERSION=26.11.18` to choose
-the version). Expect 30–60 minutes. You can also build on GitHub's servers instead: **Actions →
-Build ISO → Run workflow**.
+the version). Expect 30–60 minutes.
