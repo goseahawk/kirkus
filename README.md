@@ -273,3 +273,16 @@ Breeze selected there.
 The code is under the MIT License (see `LICENSE`). The kirkus logo and the files in
 `branding/` are **not** covered by it; they may not be reused without permission. Arch Linux is a
 trademark of its respective owners.
+
+## Building the ISO yourself
+
+Most people should just download the ISO from Releases. To build your own, for example with your
+own changes:
+
+- **On Arch:** `sudo ./build.sh` (needs the `archiso` package).
+- **On any other OS** (Fedora, Debian, macOS, Windows with WSL2): `./build-docker.sh`. It needs Docker
+  or Podman on an x86_64 computer, and runs the whole Arch build in a throwaway container.
+
+Either way the ISO lands in `out/`, named for today's date (set `KIRK_VERSION=26.11.18` to choose
+the version). Expect 30–60 minutes. You can also build on GitHub's servers instead: **Actions →
+Build ISO → Run workflow**.
