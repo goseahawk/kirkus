@@ -7,7 +7,7 @@ snapshot is taken first, and a notification tells you when it's done (and whethe
 | What | Automatically | By hand |
 |---|---|---|
 | The Arch Linux system underneath (kernel, Plasma, drivers, apps installed with pacman) | weekly | `sudo pacman -Syu` |
-| The kirkus release (branding, boot and login screens, About page, hardware support) | after every system update | `sudo kirk-update` |
+| The kirkus release | after every system update | `sudo kirk-update` |
 | Flatpak apps | weekly | Discover → **Updates** |
 
 ## Automatic weekly updates
@@ -64,8 +64,8 @@ it lists and type `Y` to go ahead.
 
 ## 2. The kirkus release: automatic
 
-kirkus's own files (branding, boot and login screens, About page, hardware support) don't come from
-Arch's packages. They're updated by kirkus itself, and it happens on its own: whenever
+kirkus's own files don't come from Arch's packages. They're updated by kirkus itself, and it
+happens on its own: whenever
 `sudo pacman -Syu` upgrades something, kirkus checks GitHub for a newer published release once pacman
 has finished. If there is one, it downloads that release and applies it in the background, and a
 notification tells you to restart when it's done.
