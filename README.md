@@ -1,276 +1,168 @@
 # kirkus
 
-**kirkus is meant to be a simple, easy-to-use Arch system.** Arch Linux is fast, up to date and
-flexible, but setting it up yourself takes a lot of decisions and a lot of time on the command line.
-kirkus makes those decisions for you, with sensible defaults, so you get a complete, good-looking
-desktop that just works:
+**kirkus is a simple, easy-to-use Arch Linux system.** Arch is fast, up to date and flexible, but
+setting it up yourself takes a lot of decisions and a lot of time on the command line. kirkus makes
+those decisions for you, so you get a complete, good-looking KDE Plasma desktop that just works.
 
-- **Installing** is a few questions in a guided installer, not an afternoon with the Arch wiki.
-- **Your hardware is handled for you.** Drivers and fixes (including for Intel Macs) are detected
-  and set up automatically.
-- **Mistakes can be undone.** With the default Btrfs setup, snapshots are taken before risky updates,
-  and you can start from one right from the boot menu.
+- **Easy to install.** A start screen and a guided installer that asks a few questions.
+- **Your hardware is set up for you.** Wi-Fi, graphics and CPU drivers, and Mac-specific fixes, are
+  detected and installed automatically.
+- **Mistakes can be undone.** Snapshots are taken before risky updates, and you can start your
+  computer from one right from the boot menu.
 - **Updates take care of themselves.** Every week kirkus updates the system, your apps and itself.
-  You can turn that off and run `sudo pacman -Syu` yourself instead.
 
-kirkus runs on 64-bit Intel and AMD PCs and on **Intel Macs**. Apple Silicon
-Macs (M1 and later) aren't supported, because kirkus is built for x86_64 only.
+It's still Arch underneath, so nothing is hidden or locked down: pacman, the AUR and the
+[Arch wiki](https://wiki.archlinux.org/) all work as usual whenever you want to go further.
 
-It's still Arch underneath. Nothing is hidden or locked down, so pacman, the AUR and the Arch wiki all
-work as usual whenever you want to go further.
+kirkus is an independent project **based on Arch Linux**. It is not affiliated with or endorsed by
+Arch Linux.
 
-## What's included
+## What you need
 
-Arch Linux with KDE Plasma, packaged as a bootable ISO with a text installer. Btrfs with Timeshift
-snapshots and hardware support that installs itself when it's needed, including Intel Macs.
+- A **64-bit Intel or AMD PC**, or an **Intel Mac**. Apple Silicon Macs (M1 and later) aren't
+  supported.
+- At least **15 GB** of free disk space (30 GB or more is comfortable), and 4 GB of memory or more.
+- A **USB stick** of 4 GB or more. Everything on it will be erased.
+- An **internet connection** while installing (Wi-Fi is fine).
 
-kirkus is an independent project **based on Arch Linux**. It is not affiliated with or
-endorsed by Arch Linux.
+## 1. Download kirkus and make a USB stick
 
-- **Installs three ways:** erase a disk, use free space alongside macOS or Windows, or format a
-  partition you prepared.
-- **Btrfs + Timeshift** by default: snapshots before risky upgrades, bootable from the GRUB menu.
-- **Hardware detection:** Mac fixes only on Intel Macs, the Broadcom `wl` Wi-Fi driver only on chips
-  that need it, and microcode and graphics drivers matched to your CPU and GPU.
-- **Hands-off updates:** the system, Flatpak apps and kirkus itself update automatically every week
-  (turn it off in System Settings → System Update; see [UPDATING.md](UPDATING.md)).
+1. Go to **[Releases](https://github.com/goseahawk/kirkus/releases/latest)** and download the newest
+   `kirkus-YY.MM.DD-x86_64.iso`, plus the `.sha256` file next to it.
+2. Optional, but a good idea: check that the download isn't damaged. In a terminal, in the folder you
+   downloaded both files to, run `sha256sum -c kirkus-*.iso.sha256` (on a Mac:
+   `shasum -a 256 -c kirkus-*.iso.sha256`). It should say `OK`.
+3. Write the ISO to the USB stick with [balenaEtcher](https://etcher.balena.io/) (Windows, macOS or
+   Linux): pick the ISO, pick the USB stick, click Flash.
 
-## Download
+## 2. Make room for kirkus
 
-The ready-made ISO is in the **[Releases](https://github.com/goseahawk/kirkus/releases/latest)**
-section of this GitHub page. Download the newest `kirkus-YY.MM.DD-x86_64.iso`, write it to a USB
-stick (for example with [balenaEtcher](https://etcher.balena.io/) or `dd`), then
-[pick an install style](#1-pick-an-install-style). Each release also has a `.sha256` file; download it
-too and check your ISO with `sha256sum -c kirkus-*.iso.sha256`.
+The installer can do this three ways. Decide which before you start, and **back up anything
+important** first.
 
-## 1. Pick an install style
+- **Use the whole disk.** The simplest. Everything on that disk is erased.
+- **Keep Windows or macOS alongside it (dual boot).** First make some free space from the other
+  system. kirkus installs into that free space and leaves the rest alone.
+  - **Windows:** open Disk Management, right-click your main partition, choose Shrink Volume, and
+    shrink it by at least 15 GB.
+  - **macOS:** update macOS fully first (this also updates the Mac's firmware). Then in Disk Utility,
+    choose your disk, click Partition and make the macOS part smaller.
+- **Use a partition you've already made.** For people who like to set up their disk themselves. That
+  partition is erased.
 
-**A. Erase a whole disk.** Simplest; everything on that disk is removed.
+## 3. Install
 
-**B. Alongside another system (dual boot).** Make free space from the other system first. Linux
-can't safely shrink macOS's APFS or Windows' BitLocker-encrypted NTFS:
+1. **Start from the USB stick.**
+   - **On a PC:** plug it in and turn the computer on while pressing its boot menu key. That's often
+     F12, F11, F8 or Esc, and it's usually shown briefly at power-on. Choose the USB stick.
+   - **On a Mac:** plug it in, turn the Mac on while holding **Option (⌥)**, and choose **EFI Boot**.
+2. **A start screen opens.** Click **Connect to Wi-Fi**, choose "Activate a connection", pick your
+   network and enter its password, then choose Back and Quit. (With a network cable plugged in,
+   you're already connected.)
+3. Click **Install kirkus**. The installer shows what it found about your computer and a list of
+   your disks with their sizes, then asks, one at a time:
+   - **how to install:** 1 for the whole disk, 2 for free space beside another system, 3 for a
+     partition (see step 2)
+   - **which disk**, typed as its name from the list, such as `/dev/sda` or `/dev/nvme0n1`. Go by the
+     size to tell your disks apart. (With 3, it asks for the partition and your existing EFI
+     partition instead.)
+   - **the filesystem:** press Enter for the default, **Btrfs**, which gives you snapshots (see
+     "Undoing a bad update")
+   - **the installer engine:** press Enter for the default
+   - **a name for the computer, your username, your time zone** (such as `America/New_York` or
+     `Europe/London`), **your language setting** (press Enter for US English) **and a password**
 
-- **macOS:** back up, and update macOS fully (that also updates the firmware). Then shrink it in Disk
-  Utility → Partition, or in Terminal: `diskutil apfs resizeContainer disk1 100g`, which keeps 100 GB
-  for macOS. Use `diskutil list` to find the container's name.
-- **Windows:** back up, then Disk Management → right-click the main partition → Shrink Volume.
+   Nothing is changed until you type `yes` at the end to confirm. Installing usually takes 10 to 30
+   minutes, depending on your internet connection.
+4. When it says it's finished, click **Restart** at the bottom of the start screen and remove the USB
+   stick.
 
-Then choose "Install in free space" in the installer. It reuses the existing EFI partition and makes
-one Linux partition in the free space. It needs at least 15 GiB.
+If the start screen doesn't appear, you'll see text instructions instead: type `nmtui` to connect to
+Wi-Fi, then `./install.sh` to install.
 
-**C. A partition you prepared.** Choose "Install to an existing partition", give it that partition
-(it's **formatted**) and the existing EFI partition.
+## 4. Starting kirkus
 
-## 2. Install
+After a short black screen with the kirkus logo, you'll see the login screen. Log in with the
+password you chose.
 
-Boot the USB (on an Intel Mac, hold Option at startup and pick "EFI Boot"). A start screen opens:
-click **Connect to Wi-Fi**, then **Install kirkus**. Each opens a terminal window: the installer asks
-for a mode, filesystem and your user details, then goes.
+- **On a PC with another system:** if your computer starts the other system instead, open its boot
+  menu (the same key as in step 3) and choose **kirkus**, or move kirkus to the top of the boot order
+  in your computer's firmware settings.
+- **On a Mac:** hold **Option (⌥)** when you turn it on to choose between macOS and kirkus (shown as
+  "EFI Boot"). If it isn't listed, see "Troubleshooting".
+- **The boot menu is hidden.** To see it (for example to start from a snapshot), tap **Esc** while
+  the kirkus logo is on screen at power-on.
 
-From the text console (the start screen's **Text console**, or if it can't open), the same steps are:
+## 5. First steps
 
-    nmtui          # join Wi-Fi
-    ./install.sh   # install
+- **Touchpad:** on a laptop you're asked once whether to keep tap to click. You can change it later in
+  System Settings → Mouse & Touchpad.
+- **Apps:** install apps from **Discover**, in the app menu.
+- **Your computer's details:** System Settings → **About this System** shows the model, battery
+  health, storage and when kirkus was installed.
+- **Mac webcam:** to use the FaceTime HD camera, open Konsole and run `facetimehd-setup` once.
 
-The installer downloads packages, so it needs internet. The first thing it shows is what it detected about the
-computer.
+## Updates
 
-### Hardware detection
+kirkus updates itself once a week: the system, your Flatpak apps and kirkus itself. It waits until
+you're plugged in and not on a metered connection, and a notification tells you when it's done and
+whether to restart.
 
-`kirk-detect` decides what to install, both on the live USB and in the installed system:
+- **To turn this off:** System Settings → **System Update**.
+- **To update Flatpak apps right now:** System Settings → **Flatpak Update**, or Discover → Updates.
+- **To update the system right now:** open Konsole and run `sudo pacman -Syu`.
 
-| Detected | What gets installed |
-|---|---|
-| Broadcom **BCM4331, BCM4352 or BCM4360** Wi-Fi (on any computer) | Broadcom's `wl` driver, with the open-source drivers that would grab the chip blocked. Other Broadcom chips, e.g. the BCM4350 in later MacBooks, keep Linux's built-in drivers, which `wl` would break. |
-| An **Intel Mac** | Mac support: the instant-wake-from-suspend fix, the Apple keyboard Fn setting, a FaceTime HD webcam helper, and a bootloader setup that never writes to the Mac's firmware settings (see below) |
-| Intel / AMD **CPU** | `intel-ucode` + `thermald`, or `amd-ucode` |
-| Intel / AMD **graphics** | `vulkan-intel` + `intel-media-driver`, or `vulkan-radeon` |
+If Arch announces something that needs your attention, kirkus doesn't update on its own. A
+notification asks you to read the news at [archlinux.org/news](https://archlinux.org/news/) and then
+run `sudo pacman -Syu` yourself.
 
-Run `kirk-detect --summary` to see what it finds. To override it, set `KIRK_IS_MAC=yes|no` or
-`KIRK_BROADCOM_WL=yes|no` before running `./install.sh`. The results are recorded in
-`/etc/kirk-release`.
+See [UPDATING.md](UPDATING.md) for the details.
 
-### How the install is split up
+## Undoing a bad update
 
-This project does as little of the installing itself as it can:
+With the default Btrfs filesystem, kirkus keeps **snapshots** of the system: one right after
+installing, daily and weekly ones, and one just before any important update. They cover the system,
+not your personal files in your home folder (you can add those in Timeshift → Settings → Users).
 
-| Stage | Who does it | Why |
-|---|---|---|
-| Partitioning, btrfs subvolumes, mounting | this project | archinstall can't carve a partition out of free space beside another system while reusing its EFI partition |
-| Base system, KDE Plasma, locale, mirrors, fstab | **archinstall** | Arch's own maintained installer |
-| Bootloader | this project | archinstall's pre-mounted mode has an open bug where `grub-install` fails ([#2054](https://github.com/archlinux/archinstall/issues/2054)); the documented workaround is to run `grub-install` yourself |
-| Hardware support, Timeshift, branding, your user account | this project | |
+If something stops working after an update:
 
-The config given to archinstall uses only `pre_mounted_config`, whose two keys have stayed stable
-across releases, rather than its manual-partitioning schema, which changes between versions. If
-archinstall fails, the installer falls back to plain `pacstrap` automatically; `KIRK_ENGINE=pacstrap`
-forces that. Both produce the same system. archinstall is given a throwaway root password because
-it insists on one; your account is created afterwards and root is locked.
+1. Restart, and tap **Esc** while the kirkus logo is on screen to show the boot menu.
+2. Choose the **snapshots** entry, then the snapshot from just before the update. Your computer starts
+   as it was then. Changes you make while it's running are temporary.
+3. If everything works, open the **Timeshift** app, select that snapshot and click **Restore** to
+   make it permanent. Then restart.
 
-## 3. Booting afterwards
+Snapshots are stored on the same disk, so they protect against a bad update, not a broken disk. Keep
+real backups of your files.
 
-**On a PC:** GRUB is installed the normal way, with a firmware boot entry called kirkus. If another
-system starts instead, pick kirkus in your firmware's boot menu (often F12, F11 or Esc at power-on),
-or move it to the top of the boot order in the firmware settings.
+## Troubleshooting
 
-**On an Intel Mac:** GRUB goes only at `EFI/BOOT/BOOTX64.EFI`, the path the Option-key startup manager
-lists as "EFI Boot". The installer never writes boot entries to a Mac's firmware with `efibootmgr`,
-which has been reported to damage Mac firmware, and never touches macOS's boot files. Hold Option at
-startup to choose. If the startup manager doesn't list Linux, make it the default from macOS
-Recovery (Cmd+R → Utilities → Terminal):
+**My Mac doesn't show kirkus when I hold Option.** Start macOS Recovery (hold Cmd+R at power-on),
+open Utilities → Terminal, and run:
 
     diskutil mount disk0s1
     bless --mount /Volumes/EFI --setBoot --nextonly --shortform --file /Volumes/EFI/EFI/BOOT/BOOTX64.EFI
 
-`--nextonly` tries it for one boot; run it again without `--nextonly` to keep it. `tools/` has a
-read-only diagnosis script and a repair script for this situation.
+Restart. That starts kirkus once. If it works, run the same commands without `--nextonly` to make
+kirkus start by default. (Hold Option at power-on to choose macOS instead.)
 
-### The GRUB menu is hidden
+**My touchpad's click is stuck or broken.** Tap to click instead. To stop a stuck click from getting
+in the way, open System Settings → **Touchpad Clicks** and choose to ignore physical clicks.
 
-GRUB waits 2 seconds with the menu hidden, then boots. **Tap Esc** during that moment to show it (for
-the fallback entry or the snapshots submenu). Use Esc rather than F4: on many laptop keyboards the
-F-keys are media keys unless you hold Fn.
+**The login screen is blank.** Press Ctrl+Alt+F2, log in with your username and password, and run
+`sudo kirk-login-theme breeze` and then `sudo systemctl restart sddm`. That switches to KDE's
+standard login screen.
 
-Those 2 seconds already show the boot splash, so the boot looks like one continuous screen. GRUB can't
-do that on its own (its hidden countdown never draws a background), so `/etc/grub.d/06_kirk_splash`
-draws the image and runs its own Esc-interruptible wait. If that script is removed or GRUB can't run
-it, you get GRUB's normal hidden wait.
+**I want to see what's happening while it starts.** Press Esc while the kirkus logo is on screen.
 
-When the menu does show, it uses the splash as its background with the entries underneath. Theme files
-are in `/boot/grub/themes/kirkus/`. `kirk-grub-theme-font` builds its font from Space Grotesk,
-falling back to Noto Sans or GRUB's built-in font.
-
-To change it, edit `GRUB_TIMEOUT` / `GRUB_TIMEOUT_STYLE` in `/etc/default/grub` (`menu` shows it every
-time), then `sudo grub-mkconfig -o /boot/grub/grub.cfg`. Don't set the timeout to 0: the menu can
-become unreachable.
-
-## 4. Updating an installed system
-
-**See [UPDATING.md](UPDATING.md)** for the full guide. In short: `sudo pacman -Syu` updates the Arch
-system underneath, and afterwards kirkus checks GitHub and applies any newer published release on its
-own (`kirk-update`; turn it off in `/etc/kirk-update.conf`). Flatpak apps update in Discover.
-
-To apply the project by hand instead (for example to try unreleased changes), run this from its
-folder on the installed computer:
-
-    sudo ./apply-to-installed.sh
-
-It installs the same files and settings as the installer (branding, splash screens, login screen,
-About page, update hooks, hardware support) without reinstalling. It never touches the EFI partition
-or reinstalls GRUB, so the way the computer boots stays as it is.
-
-On an Intel Mac, run `facetimehd-setup` once as your normal user to install the webcam driver from the AUR.
-
-## Btrfs + Timeshift (default filesystem)
-
-Subvolumes: `@` (/), `@home` (/home), `@log`, `@cache` (pacman cache). Timeshift is pre-configured in
-Btrfs mode with daily and weekly snapshots of `@`. Your `/home` is **not** included by default; change
-that in Timeshift → Settings → Users.
-
-- A baseline "Fresh install" snapshot is made on first boot.
-- A snapshot is taken before upgrades of the kernel, systemd, GRUB, mesa, Plasma and the Wi-Fi driver
-  (at most one every 2 hours).
-- `grub-btrfs` adds a snapshots submenu to GRUB. Boot any snapshot read-only to test it, then restore
-  it for real from Timeshift.
-- `sudo timeshift --list`, `sudo timeshift --create`, or the Timeshift app.
-- Snapshots live on the same disk, so they protect against a bad update, not a dead disk. Keep real
-  backups of /home.
-- ext4 skips all of this; choose it in the installer.
-
-## Version
-
-Each build is versioned by its date as **YY.MM.DD**, e.g. **kirkus 26.11.18**. More builds on the
-same day add a number: **26.11.18.1**, **26.11.18.2** and so on. The version
-appears in the ISO's boot menu and filename (`kirkus-26.11.18-x86_64.iso`), the live USB's
-welcome message, System Settings → About this System, fastfetch, the login banner and the GRUB menu.
-
-- `build.sh` uses the date you build the ISO, and the installer passes it on in `/etc/kirk-release`.
-  `apply-to-installed.sh` uses the date you run it. Override either with `KIRK_VERSION=26.11.18`.
-- **Publishing a release:** tag it with the version exactly, e.g. `26.11.18` or `26.11.18.1` (no `v`
-  in front), and publish it on GitHub. Installed systems pick up the newest published release
-  automatically after their next `pacman -Syu`. Drafts and pre-releases aren't picked up, so you can
-  test one first.
-- os-release gets `NAME="kirkus"`, `PRETTY_NAME="kirkus 26.11.18"`, `VERSION` and
-  `VERSION_ID`. pacman resets os-release whenever the `filesystem` package updates, so a hook
-  rebuilds it from `/etc/kirk-release`.
-
-## About This Computer
-
-System Settings → **About this System** shows the logo and name with the usual CPU, memory,
-graphics and Plasma details, plus four extra lines:
-
-| Line | Source |
-|---|---|
-| Model | maker and model from the firmware, with friendly names for some Macs (e.g. `MacBookAir7,2` → "MacBook Air (13-inch, Early 2015 or 2017)") |
-| Battery | health as % of design capacity, plus charge cycles when the firmware reports them |
-| Storage | free / total on `/`, and whether it's Btrfs with snapshots |
-| Installed | the install date from `/etc/kirk-release` |
-
-The **About This Computer** entry in the app menu opens it directly. It's wired up by `LOGO=kirkus-logo`
-in os-release and `/etc/xdg/kcm-about-distrorc`, which lists the `kirk-about-*` scripts.
-KInfoCenter **refuses to open** if one of those scripts prints anything other than exactly two lines,
-so keep that rule when editing them.
-
-## Boot splash
-
-A Plymouth theme, `kirkus`, shows the word "kirkus" fading in on black while the system
-starts. Files: `/usr/share/plymouth/themes/kirkus/`.
-
-- **See boot messages:** press Esc while the splash is up.
-- **Change it:** edit `kirkus.script`, then `sudo plymouth-set-default-theme -R kirkus`.
-- **Turn it off:** remove `splash` (and `quiet`, for full messages) from `GRUB_CMDLINE_LINUX_DEFAULT` in
-  `/etc/default/grub`, then `sudo grub-mkconfig -o /boot/grub/grub.cfg`.
-- If the theme fails to load, Plymouth falls back to text; it never stops the boot.
-
-## Login screen
-
-An SDDM theme, `kirkus`, continues the boot splash: the logo in the same place, the password field
-under it, the date and time at the top, and the session plus Sleep / Restart / Shut Down along the
-bottom. A wrong password shakes the field; Caps Lock gets a warning.
-
-- **Preview without logging out:** `kirk-login-preview`.
-- **Switch theme:** `sudo kirk-login-theme breeze`, and back with `sudo kirk-login-theme`. This also
-  updates System Settings' own config, so the two always agree.
-- **If the login screen is ever blank:** press Ctrl+Alt+F2, log in, run `sudo kirk-login-theme breeze`,
-  then `sudo systemctl restart sddm`.
-
-The lock screen (Super+L) belongs to Plasma, not SDDM, so it's unaffected.
-
-## Startup splash (after login)
-
-The Plasma splash, `org.kirkus.splash`, uses the same logo in the same place. When you log in, the
-password field disappears and the logo stays until the desktop appears. It's the default for every
-account via `/etc/xdg/ksplashrc`; change it in System Settings → Colors & Themes → Splash Screen. Plasma
-only loads splashes from "look-and-feel" packages, so it also appears in the Global Theme list. Keep
-Breeze selected there.
-
-## Other defaults
-
-- zram swap with zstd, capped at 4 GB
-- PipeWire audio
-- `power-profiles-daemon`, which integrates with Plasma's battery controls
-- Discover with Flatpak and Flathub set up, for installing and updating apps
-
-## Layout
-
-| Path | What it is |
-|---|---|
-| `build.sh` | builds the ISO on Arch |
-| `build-docker.sh` | builds the ISO on any other OS, in a container |
-| `apply-to-installed.sh` | updates an existing install to the current project |
-| `UPDATING.md` | how to keep an installed system up to date |
-| `overlay/airootfs/` | files for the live USB: `install.sh`, `kirk-install-backend`, live Wi-Fi detection |
-| `overlay/installed/` | files copied into every installed system (incl. `kirk-detect`) |
-| `overlay/hardware/broadcom-wl/` | added only when a chip needs the `wl` driver |
-| `overlay/hardware/mac/` | added only on Intel Macs |
-| `branding/` | logo sources and everything generated from them |
-| `tools/` | Intel Mac boot troubleshooting: a read-only diagnosis script and a repair script |
+**Wi-Fi doesn't work.** Run `kirk-detect --summary` in Konsole to see which Wi-Fi chip kirkus found.
+Please [open an issue](https://github.com/goseahawk/kirkus/issues) with the result.
 
 ## License
 
-The code is under the MIT License (see `LICENSE`). The kirkus logo and the files in
-`branding/` are **not** covered by it; they may not be reused without permission. Arch Linux is a
-trademark of its respective owners.
+The code is under the MIT License (see `LICENSE`). The kirkus logo and the files in `branding/` are
+**not** covered by it; they may not be reused without permission. Arch Linux is a trademark of its
+respective owners.
 
 ## Building the ISO yourself
 
@@ -282,4 +174,5 @@ own changes:
   or Podman on an x86_64 computer, and runs the whole Arch build in a throwaway container.
 
 Either way the ISO lands in `out/`, named for today's date (set `KIRK_VERSION=26.11.18` to choose
-the version). Expect 30–60 minutes.
+the version). Expect 30–60 minutes. See [DEVELOPMENT.md](DEVELOPMENT.md) for how kirkus is put
+together.
