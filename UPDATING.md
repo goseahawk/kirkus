@@ -64,11 +64,10 @@ it lists and type `Y` to go ahead.
 
 ## 2. The kirkus release: automatic
 
-kirkus's own files don't come from Arch's packages. They're updated by kirkus itself, and it
-happens on its own: whenever
-`sudo pacman -Syu` upgrades something, kirkus checks GitHub for a newer published release once pacman
-has finished. If there is one, it downloads that release and applies it in the background, and a
-notification tells you to restart when it's done.
+kirkus's own files don't come from Arch's packages. They're updated by kirkus itself, and it happens
+on its own: whenever `sudo pacman -Syu` upgrades something, kirkus checks GitHub for a newer
+published release once pacman has finished. If there is one, it downloads that release and applies
+it in the background, and a notification tells you to restart when it's done.
 
 - Only **published releases** are installed, never unfinished work.
 - It never goes backwards to an older release.
