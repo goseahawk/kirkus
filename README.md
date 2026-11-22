@@ -279,7 +279,7 @@ trademark of its respective owners.
 Most people should just download the ISO from Releases. To build your own, for example with your
 own changes:
 
-- **On Arch:** `sudo ./build.sh` (needs the `archiso` package).
+- **On Arch:** `sudo ./build.sh` (it installs `archiso` if you don't have it).
 - **On any other OS** (Fedora, Debian, macOS, Windows with WSL2): `./build-docker.sh`. It needs Docker
   or Podman on an x86_64 computer, and runs the whole Arch build in a throwaway container.
 
