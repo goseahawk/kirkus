@@ -173,6 +173,6 @@ own changes:
 - **On any other OS** (Fedora, Debian, macOS, Windows with WSL2): `./build-docker.sh`. It needs Docker
   or Podman on an x86_64 computer, and runs the whole Arch build in a throwaway container.
 
-Either way the ISO lands in `out/`, named for today's date (set `KIRK_VERSION=26.11.18` to choose
+The ISO lands in `out/`, named for today's date (set `KIRK_VERSION=26.11.18` to choose
 the version). Expect 30–60 minutes. See [DEVELOPMENT.md](DEVELOPMENT.md) for how kirkus is put
 together.
