@@ -193,8 +193,6 @@ welcome message, System Settings → About this System, fastfetch, the login ban
 - os-release gets `NAME="kirkus"`, `PRETTY_NAME="kirkus 26.11.18"`, `VERSION` and
   `VERSION_ID`. pacman resets os-release whenever the `filesystem` package updates, so a hook
   rebuilds it from `/etc/kirk-release`.
-- **Never put an apostrophe in the name.** GRUB's config generators read it from `/etc/default/grub`
-  and os-release, and an ASCII apostrophe produces a `grub.cfg` that fails `grub-script-check`.
 
 ## About This Computer
 
