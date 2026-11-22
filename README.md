@@ -23,7 +23,7 @@ Arch Linux.
   supported.
 - At least **15 GB** of free disk space (30 GB or more is comfortable), and 4 GB of memory or more.
 - A **USB stick** of 4 GB or more. Everything on it will be erased.
-- An **internet connection** while installing (Wi-Fi is fine).
+- An **internet connection** while installing.
 
 ## 1. Download kirkus and make a USB stick
 
