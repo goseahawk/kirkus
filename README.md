@@ -187,9 +187,9 @@ welcome message, System Settings → About this System, fastfetch, the login ban
 - `build.sh` uses the date you build the ISO, and the installer passes it on in `/etc/kirk-release`.
   `apply-to-installed.sh` uses the date you run it. Override either with `KIRK_VERSION=26.11.18`.
 - **Publishing a release:** tag it with the version exactly, e.g. `26.11.18` or `26.11.18.1` (no `v`
-  in front), and
-  publish it on GitHub. Installed systems pick up the newest published release automatically after
-  their next `pacman -Syu`. Drafts and pre-releases aren't picked up, so you can test one first.
+  in front), and publish it on GitHub. Installed systems pick up the newest published release
+  automatically after their next `pacman -Syu`. Drafts and pre-releases aren't picked up, so you can
+  test one first.
 - os-release gets `NAME="kirkus"`, `PRETTY_NAME="kirkus 26.11.18"`, `VERSION` and
   `VERSION_ID`. pacman resets os-release whenever the `filesystem` package updates, so a hook
   rebuilds it from `/etc/kirk-release`.
