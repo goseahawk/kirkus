@@ -32,15 +32,34 @@ the version). Expect 30–60 minutes.
 
 ## Applying changes to an installed system
 
-Run this from the project folder on an installed computer:
+Get the project onto the installed computer (`git clone https://github.com/goseahawk/kirkus.git`,
+or `git pull` in an existing copy), then run from its folder:
 
     sudo ./apply-to-installed.sh
 
 It installs the same files and settings as the installer (branding, splash screens, login screen,
-About page, update hooks, hardware support) without reinstalling. It never touches the EFI partition
-or reinstalls GRUB, so the way the computer boots stays as it is.
+About page, update hooks, hardware support) without reinstalling. On Btrfs it takes a snapshot before
+rebuilding the boot image. It never touches the EFI partition or reinstalls GRUB, so the way the
+computer boots stays as it is, and it's safe to run more than once. The version it records is today's
+date; set `KIRK_VERSION=26.11.18` to choose it.
 
-`sudo kirk-update --main` does the same with the newest code on GitHub's main branch.
+`sudo kirk-update --main` does the same with the newest commit on GitHub's main branch, without a
+local copy. It records today's date as the version (never lower than what's installed) and the
+commit in `/etc/kirk-release` as `SOURCE=main <commit>`; release updates record
+`SOURCE=release <tag>`. Later releases still install once they're newer.
+
+## How updates work
+
+- **Weekly updates:** `kirk-auto-update.timer` runs `kirk-auto-update --auto` 20 minutes after boot
+  and every 6 hours. It updates only when 7 days have passed since the last "full system upgrade" in
+  `/var/log/pacman.log`, on mains power, not metered, and when no Arch news is newer than that
+  upgrade. Then `pacman -Sy archlinux-keyring` and `pacman -Su`, then `flatpak update`. Settings:
+  `AUTO_SYSTEM_UPDATE` in `/etc/kirk-update.conf`.
+- **kirkus releases:** the pacman hook `zz-kirk-update.hook` starts `kirk-update.service` after any
+  upgrade. It waits for pacman to finish, follows `github.com/<repo>/releases/latest`, and applies the
+  release with its own `apply-to-installed.sh` if it's newer (compared with `sort -V`). Settings:
+  `AUTO_UPDATE` and `REPO` in `/etc/kirk-update.conf`. Updates never overwrite that file.
+- Notifications come from `kirk-notify`, which sends to every logged-in Plasma session.
 
 ## The installer
 
