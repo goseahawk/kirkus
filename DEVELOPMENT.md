@@ -12,6 +12,7 @@ install and use kirkus, see the [README](README.md).
 | `apply-to-installed.sh` | updates an existing install to the current project |
 | `UPDATING.md` | how to keep an installed system up to date |
 | `DEVELOPMENT.md` | this file |
+| `CLAUDE.md` | project notes that Claude Code reads automatically |
 | `overlay/airootfs/` | files for the live USB: `install.sh`, `kirk-install-backend`, live Wi-Fi detection |
 | `overlay/installed/` | files copied into every installed system (incl. `kirk-detect`) |
 | `overlay/hardware/broadcom-wl/` | added only when a chip needs the `wl` driver |
