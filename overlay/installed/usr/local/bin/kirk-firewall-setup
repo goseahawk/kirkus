@@ -1,0 +1,16 @@
+#!/bin/sh
+# One-time firewall setup (run by kirk-firewall-setup.service, on the first start after installing
+# or after the update that added the firewall). Blocks incoming connections, allows outgoing ones,
+# and lets KDE Connect through so phones can still pair. ufw's own rules already allow DHCP and
+# network discovery (mDNS), which printers and file sharing use.
+# Runs only once: if you switch the firewall off in System Settings, it stays off.
+MARK=/var/lib/kirk-firewall-setup
+command -v ufw >/dev/null || exit 0          # not installed yet; try again next start
+ufw default deny incoming >/dev/null &&
+  ufw default allow outgoing >/dev/null &&
+  ufw allow 1714:1764/tcp comment 'KDE Connect' >/dev/null &&
+  ufw allow 1714:1764/udp comment 'KDE Connect' >/dev/null &&
+  ufw --force enable >/dev/null &&
+  systemctl enable ufw.service >/dev/null 2>&1 &&
+  touch "$MARK" && echo "Firewall on: incoming connections blocked, KDE Connect allowed."
+exit 0

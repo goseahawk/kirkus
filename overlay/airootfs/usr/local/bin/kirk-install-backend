@@ -84,6 +84,7 @@ EXTRA_PKGS=(
   firefox noto-fonts noto-fonts-emoji
   kinfocenter fastfetch discover flatpak kdialog xf86-input-libinput
   plymouth
+  ufw plasma-firewall
 )
 case $KIRK_CPU in
   intel) EXTRA_PKGS+=(intel-ucode thermald) ;;   # thermald is Intel-only
@@ -358,7 +359,7 @@ sed -i -E '/^HOOKS=/{/[( ]plymouth[ )]/!s/([( ])(udev|systemd)([ )])/\1\2 plymou
 plymouth-set-default-theme kirkus
 mkinitcpio -P
 systemctl enable NetworkManager sddm bluetooth power-profiles-daemon \\
-  fstrim.timer systemd-timesyncd cronie.service kirk-auto-update.timer
+  fstrim.timer systemd-timesyncd cronie.service kirk-auto-update.timer kirk-firewall-setup.service
 if [ "$KIRK_CPU" = intel ]; then systemctl enable thermald; fi
 if [ "$KIRK_IS_MAC" = yes ]; then systemctl enable mac-fix-wakeup.service; fi
 if [ "$KIRK_FS" = btrfs ]; then
