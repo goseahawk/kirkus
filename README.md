@@ -27,8 +27,10 @@ Arch Linux.
 
 ## 1. Download kirkus and make a USB stick
 
-1. Go to **[Releases](https://github.com/goseahawk/kirkus/releases/latest)** and download the newest
-   `kirkus-YY.MM.DD-x86_64.iso`, plus the `.sha256` file next to it.
+1. Go to the **[kirkus website](https://goseahawk.github.io/kirkus/)** and click **Download**. (Or get
+   the newest `kirkus-YY.MM.DD-x86_64.iso` from
+   [Releases](https://github.com/goseahawk/kirkus/releases/latest), plus the `.sha256` file next to
+   it.)
 2. Optional, but a good idea: check that the download isn't damaged. In a terminal, in the folder you
    downloaded both files to, run `sha256sum -c kirkus-*.iso.sha256` (on a Mac:
    `shasum -a 256 -c kirkus-*.iso.sha256`). It should say `OK`.

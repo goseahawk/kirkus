@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="300" height="300" viewBox="0 0 300 300">
+  <!-- the kirkus mark: a stem (base) and a chevron (accent), which pulses on the boot screen -->
+  <g id="base" stroke="#5590b4" stroke-width="48" stroke-linecap="round" fill="none">
+    <line x1="58" y1="46" x2="58" y2="254"/>
+  </g>
+  <g id="accent" stroke="#5590b4" stroke-width="48" stroke-linecap="round" stroke-linejoin="round" fill="none">
+    <polyline points="200,52 120,150 200,248"/>
+  </g>
+</svg>
