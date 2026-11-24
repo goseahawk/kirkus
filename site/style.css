@@ -13,27 +13,12 @@
   --blue-hi: #6aa5c9;
   --cream: #fff8ec;
   --slate: #aeb6c8;
-  --ink: #0b1020;
-  --ink-soft: #4a5368;
   --head: "Lexend", system-ui, sans-serif;
   --body: system-ui, -apple-system, "Segoe UI", "Noto Sans", sans-serif;
-}
-
-/* ---- the three looks: night (dark), day (light), split (dark top, light below) ---- */
-[data-look="night"] {
   --bg: var(--navy); --text: var(--cream); --muted: var(--slate); --line: #222a44;
   --card: var(--navy-2); --hero-bg: var(--navy); --hero-text: var(--cream); --hero-muted: var(--slate);
   --link: var(--blue-hi); --mark: var(--blue);
-}
-[data-look="day"] {
-  --bg: var(--cream); --text: var(--ink); --muted: var(--ink-soft); --line: #e9dfcc;
-  --card: #fffdf8; --hero-bg: var(--cream); --hero-text: var(--ink); --hero-muted: var(--ink-soft);
-  --link: #3c7398; --mark: var(--blue);
-}
-[data-look="split"] {
-  --bg: var(--cream); --text: var(--ink); --muted: var(--ink-soft); --line: #e9dfcc;
-  --card: #fffdf8; --hero-bg: var(--navy); --hero-text: var(--cream); --hero-muted: var(--slate);
-  --link: #3c7398; --mark: var(--blue);
+  color-scheme: dark;
 }
 
 * { box-sizing: border-box; }

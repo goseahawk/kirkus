@@ -18,6 +18,7 @@ install and use kirkus, see the [README](README.md).
 | `overlay/hardware/broadcom-wl/` | added only when a chip needs the `wl` driver |
 | `overlay/hardware/mac/` | added only on Intel Macs |
 | `branding/` | logo sources and everything generated from them |
+| `site/` | the download website, published to GitHub Pages by `.github/workflows/website.yml` |
 | `tools/` | Intel Mac boot troubleshooting: a read-only diagnosis script and a repair script |
 
 ## Building the ISO
@@ -164,6 +165,17 @@ welcome message, System Settings → About this System, fastfetch, the login ban
 - os-release gets `NAME="kirkus"`, `PRETTY_NAME="kirkus 26.11.18"`, `VERSION` and
   `VERSION_ID`. pacman resets os-release whenever the `filesystem` package updates, so a hook
   rebuilds it from `/etc/kirk-release`.
+
+## The website
+
+`site/` is the download website, at https://goseahawk.github.io/kirkus/. It's plain HTML and CSS,
+with the Lexend font (SIL Open Font License, `site/fonts/OFL.txt`) bundled so nothing loads from
+other sites. `download.js` asks GitHub's API for the latest release and points the button at its
+ISO, with the version, size and date; if that fails, the button links to the latest release page.
+So publishing a release updates the website by itself.
+
+Any change to `site/` on main is published by the **Website** workflow. One-time setup: Settings →
+Pages → Source: **GitHub Actions**.
 
 ## Btrfs layout and snapshots
 
