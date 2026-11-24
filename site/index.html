@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="en" data-look="split">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>kirkus: a simple, easy-to-use Arch Linux</title>
+  <meta name="description" content="kirkus is a simple, easy-to-use Arch Linux with KDE Plasma. A guided installer, hardware set up for you, and updates that take care of themselves.">
+  <link rel="icon" href="mark.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="style.css">
+  <script src="download.js" defer></script>
+</head>
+<body>
+  <div class="hero">
+  <header class="top wrap">
+    <a class="brand" href="./" aria-label="kirkus home">
+      <svg class="mark" viewBox="0 0 300 300" aria-hidden="true"><g stroke="currentColor" stroke-width="48" stroke-linecap="round" stroke-linejoin="round" fill="none"><line x1="58" y1="46" x2="58" y2="254"/><polyline points="200,52 120,150 200,248"/></g></svg>
+      <span class="word">kirkus</span>
+    </a>
+    <nav>
+      <a href="#install">Install</a>
+      <a href="https://github.com/goseahawk/kirkus#readme">Guide</a>
+      <a href="https://github.com/goseahawk/kirkus">GitHub</a>
+    </nav>
+  </header>
+
+    <section aria-label="Download">
+      <div class="wrap hero-inner">
+        <svg class="hero-mark" viewBox="0 0 300 300" aria-hidden="true"><g stroke="currentColor" stroke-width="48" stroke-linecap="round" stroke-linejoin="round" fill="none"><line x1="58" y1="46" x2="58" y2="254"/><polyline points="200,52 120,150 200,248"/></g></svg>
+        <h1>Arch Linux,<br>made simple.</h1>
+        <p class="lead">kirkus gives you a complete, good-looking KDE Plasma desktop that sets itself up and
+          keeps itself up to date. It's still Arch underneath, so nothing is hidden or locked down.</p>
+
+        <div class="get">
+          <a class="button" id="download" href="https://github.com/goseahawk/kirkus/releases/latest">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11m0 0-4.5-4.5M12 15l4.5-4.5M5 19.5h14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <span id="download-label">Download kirkus</span>
+          </a>
+          <p class="meta" id="download-meta">For 64-bit Intel and AMD PCs, and Intel Macs</p>
+          <p class="links">
+            <a id="checksum" href="https://github.com/goseahawk/kirkus/releases/latest">Checksum</a>
+            <span aria-hidden="true">·</span>
+            <a href="https://github.com/goseahawk/kirkus/releases">All releases</a>
+          </p>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <main>
+    <section class="features wrap" aria-label="What you get">
+      <article>
+        <h2>Easy to install</h2>
+        <p>Start from a USB stick, connect to Wi-Fi and answer a few questions. Nothing changes until
+          you say yes.</p>
+      </article>
+      <article>
+        <h2>Your hardware, set up</h2>
+        <p>Wi-Fi, graphics and processor drivers are found and installed for you, including the fixes
+          Intel Macs need.</p>
+      </article>
+      <article>
+        <h2>Mistakes can be undone</h2>
+        <p>Snapshots are taken before risky updates, and you can start your computer from one right
+          from the boot menu.</p>
+      </article>
+      <article>
+        <h2>Updates take care of themselves</h2>
+        <p>Once a week kirkus updates the system, your apps and itself, when you're plugged in and
+          it won't get in your way.</p>
+      </article>
+    </section>
+
+    <section class="install" id="install">
+      <div class="wrap">
+        <h2 class="section-title">Install in three steps</h2>
+        <ol class="steps">
+          <li>
+            <h3>Make a USB stick</h3>
+            <p>Download kirkus above, then write it to a USB stick of 4 GB or more with
+              <a href="https://etcher.balena.io/">balenaEtcher</a>. Everything on the stick is erased.</p>
+          </li>
+          <li>
+            <h3>Start from it</h3>
+            <p>On a PC, press its boot menu key at power-on (often F12, F11 or Esc). On a Mac, hold
+              <kbd>Option ⌥</kbd> and choose <b>EFI Boot</b>.</p>
+          </li>
+          <li>
+            <h3>Click Install kirkus</h3>
+            <p>Pick your keyboard and disk, choose a username and password, and in 10 to 30 minutes
+              you're done.</p>
+          </li>
+        </ol>
+        <p class="more">Keeping Windows or macOS alongside it? <a href="https://github.com/goseahawk/kirkus#readme">Read the full guide</a> first.</p>
+      </div>
+    </section>
+
+    <section class="needs wrap" aria-labelledby="needs-title">
+      <h2 class="section-title" id="needs-title">What you need</h2>
+      <ul>
+        <li><b>A 64-bit Intel or AMD PC, or an Intel Mac.</b> Apple Silicon Macs (M1 and later) aren't supported.</li>
+        <li><b>15 GB of free disk space</b> (30 GB is comfortable) and 4 GB of memory.</li>
+        <li><b>A USB stick</b> of 4 GB or more.</li>
+        <li><b>An internet connection</b> while installing.</li>
+      </ul>
+    </section>
+  </main>
+
+  <footer class="wrap">
+    <p>kirkus is an independent project based on <a href="https://archlinux.org/">Arch Linux</a>. It is
+      not affiliated with or endorsed by Arch Linux.</p>
+    <p><a href="https://github.com/goseahawk/kirkus">Source code on GitHub</a> · MIT License (the kirkus
+      logo excepted)</p>
+  </footer>
+</body>
+</html>
