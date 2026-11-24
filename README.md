@@ -59,21 +59,19 @@ important** first.
 2. **A start screen opens.** Click **Connect to Wi-Fi**, choose "Activate a connection", pick your
    network and enter its password, then choose Back and Quit. (With a network cable plugged in,
    you're already connected.)
-3. Click **Install kirkus**. The installer shows what it found about your computer and a list of
-   your disks with their sizes, then asks, one at a time:
+3. Click **Install kirkus**. The installer asks, one at a time:
+   - **your keyboard**, picked from a list
    - **how to install:** 1 for the whole disk, 2 for free space beside another system, 3 for a
      partition (see step 2)
-   - **which disk**, typed as its name from the list, such as `/dev/sda` or `/dev/nvme0n1`. Go by the
-     size to tell your disks apart. (With 3, it asks for the partition and your existing EFI
-     partition instead.)
-   - **the filesystem:** press Enter for the default, **Btrfs**, which gives you snapshots (see
-     "Undoing a bad update")
-   - **the installer engine:** press Enter for the default
-   - **a name for the computer, your username, your time zone** (such as `America/New_York` or
-     `Europe/London`), **your language setting** (press Enter for US English) **and a password**
+   - **which disk**, picked from a list that shows each disk's size and what's on it. (With 3, you
+     pick the partition instead.)
+   - **a name for the computer, your username and a password**
+   - **your time zone** and **language setting**. It suggests both, so you can usually just press
+     Enter. For the time zone you can also type a city, such as `London`.
 
-   Nothing is changed until you type `yes` at the end to confirm. Installing usually takes 10 to 30
-   minutes, depending on your internet connection.
+   If an answer doesn't work, it tells you why and asks again. At the end it shows a summary, and
+   nothing is changed until you type `yes`. Installing usually takes 10 to 30 minutes, depending on
+   your internet connection.
 4. When it says it's finished, click **Restart** at the bottom of the start screen and remove the USB
    stick.
 
