@@ -79,6 +79,23 @@ Run `kirk-detect --summary` to see what it finds. To override it, set `KIRK_IS_M
 `KIRK_BROADCOM_WL=yes|no` before running `./install.sh`. The results are recorded in
 `/etc/kirk-release`.
 
+### The questions
+
+`install.sh` asks the questions and checks each answer straight away (asking again rather than
+quitting), then hands everything to `kirk-install-backend` as `KIRK_*` environment variables.
+
+- **Keyboard:** a short list of common layouts, or any XKB layout code. It's applied to the live
+  session at once (`setxkbmap`, `loadkeys`), so the password is typed in the same layout it will be
+  used with. The backend writes it to `vconsole.conf` (`KIRK_KEYMAP`) and
+  `/etc/X11/xorg.conf.d/00-keyboard.conf` (`KIRK_XKB_LAYOUT`), which SDDM and Plasma use.
+- **Disks** are listed with `lsblk`, leaving out the USB stick kirkus is running from
+  (`/run/archiso/bootmnt`). Free-space installs check there's room before going on.
+- **Time zone:** suggested from `https://ipapi.co/timezone` (5-second timeout, UTC if it fails).
+  Typing a city finds the matching zone.
+- **Language setting:** suggested from the keyboard, checked against `/usr/share/i18n/SUPPORTED`.
+- **Filesystem and install method** are behind "advanced options". `KIRK_FS` and `KIRK_ENGINE` set
+  beforehand become their defaults.
+
 ### How the install is split up
 
 This project does as little of the installing itself as it can:

@@ -7,6 +7,8 @@
 #   KIRK_FS        btrfs (default, Timeshift-ready subvolumes) | ext4
 #   KIRK_ENGINE    archinstall (default) | pacstrap   -- which tool installs the base system
 #   KIRK_HOST KIRK_USER KIRK_PASSWORD KIRK_TZ KIRK_LOCALE
+#   KIRK_KEYMAP    console keymap, e.g. uk (default us)
+#   KIRK_XKB_LAYOUT  keyboard layout for the desktop and login screen, e.g. gb (default us)
 #   KIRK_IS_MAC / KIRK_BROADCOM_WL   yes|no: override hardware detection (normally from kirk-detect)
 # Emits "##STEP n/total text" lines so frontends can show progress.
 #
@@ -47,6 +49,10 @@ largest_free_mib() {
 KIRK_MODE=${KIRK_MODE:-wipe}
 KIRK_FS=${KIRK_FS:-btrfs}
 KIRK_ENGINE=${KIRK_ENGINE:-archinstall}
+KIRK_KEYMAP=${KIRK_KEYMAP:-us}
+KIRK_XKB_LAYOUT=${KIRK_XKB_LAYOUT:-us}
+[[ $KIRK_KEYMAP =~ ^[A-Za-z0-9_-]+$ ]] || die "Bad keymap '$KIRK_KEYMAP'"
+[[ $KIRK_XKB_LAYOUT =~ ^[a-z]+$ ]] || die "Bad keyboard layout '$KIRK_XKB_LAYOUT'"
 [[ $KIRK_FS == btrfs || $KIRK_FS == ext4 ]] || die "Unknown filesystem '$KIRK_FS'"
 [[ $KIRK_ENGINE == archinstall || $KIRK_ENGINE == pacstrap ]] || die "Unknown engine '$KIRK_ENGINE'"
 BTRFS_OPTS=noatime,compress=zstd:1,space_cache=v2,discard=async
@@ -192,7 +198,7 @@ cfg = {
     "hostname": os.environ["KIRK_HOST"],
     "kernels": ["linux"],
     "timezone": os.environ["KIRK_TZ"],
-    "locale_config": {"kb_layout": "us", "sys_enc": os.environ["SYS_ENC"],
+    "locale_config": {"kb_layout": os.environ["KIRK_KEYMAP"], "sys_enc": os.environ["SYS_ENC"],
                       "sys_lang": os.environ["SYS_LANG"]},
     "audio_config": {"audio": "pipewire"},
     # zram is configured by our own zram-generator drop-in, so archinstall's swap stays off.
@@ -230,7 +236,7 @@ run_pacstrap() {
   genfstab -U /mnt >> /mnt/etc/fstab
   sed -i "s/^#\(${KIRK_LOCALE} UTF-8\)/\1/" /mnt/etc/locale.gen
   echo "LANG=$KIRK_LOCALE" > /mnt/etc/locale.conf
-  echo "KEYMAP=us" > /mnt/etc/vconsole.conf
+  echo "KEYMAP=$KIRK_KEYMAP" > /mnt/etc/vconsole.conf
   echo "$KIRK_HOST" > /mnt/etc/hostname
   ln -sf "/usr/share/zoneinfo/$KIRK_TZ" /mnt/etc/localtime
   arch-chroot /mnt /bin/bash -e -c 'locale-gen; hwclock --systohc'
@@ -240,7 +246,7 @@ run_pacstrap() {
 PACSTRAP_USED=0
 if [[ $KIRK_ENGINE == archinstall ]]; then
   export KIRK_EXTRA_PKGS="${EXTRA_PKGS[*]}" SYS_LANG="${KIRK_LOCALE%%.*}" SYS_ENC=UTF-8
-  export KIRK_HOST KIRK_TZ
+  export KIRK_HOST KIRK_TZ KIRK_KEYMAP
   if run_archinstall; then
     echo "archinstall finished."
   elif installed_ok; then
@@ -291,6 +297,15 @@ INSTALL_ENGINE=$KIRK_ENGINE
 HW_MAC=$KIRK_IS_MAC
 HW_BROADCOM_WL=$KIRK_BROADCOM_WL
 KREL
+# Keyboard layout for the login screen and Plasma (what "localectl set-x11-keymap" writes)
+mkdir -p /mnt/etc/X11/xorg.conf.d
+cat > /mnt/etc/X11/xorg.conf.d/00-keyboard.conf <<KBD
+Section "InputClass"
+        Identifier "system-keyboard"
+        MatchIsKeyboard "on"
+        Option "XkbLayout" "$KIRK_XKB_LAYOUT"
+EndSection
+KBD
 echo '%wheel ALL=(ALL:ALL) ALL' > /mnt/etc/sudoers.d/10-wheel
 chmod 440 /mnt/etc/sudoers.d/10-wheel
 

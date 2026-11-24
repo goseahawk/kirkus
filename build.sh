@@ -41,7 +41,7 @@ sed -i '/^broadcom-wl$/d' "$P/packages.x86_64"
 # linux-headers + dkms are needed so broadcom-wl-dkms can build the 'wl' module into the ISO.
 for pkg in networkmanager wpa_supplicant broadcom-wl-dkms dkms linux-headers gptfdisk dosfstools \
            e2fsprogs btrfs-progs arch-install-scripts archinstall parted \
-           xorg-server xorg-xinit xorg-xsetroot xf86-input-libinput mesa openbox xterm tk noto-fonts; do
+           xorg-server xorg-xinit xorg-xsetroot xorg-setxkbmap xf86-input-libinput mesa openbox xterm tk noto-fonts; do
   # the second line is the small graphical start screen (kirk-live-gui)
   grep -qx "$pkg" "$P/packages.x86_64" || echo "$pkg" >> "$P/packages.x86_64"
 done

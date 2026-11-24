@@ -10,6 +10,8 @@ and keeps itself updated. Public repo: github.com/goseahawk/kirkus. How it works
 - The owner usually wants each change committed and pushed to `main` when it's done, with a clear
   commit message. Commits use the owner's GitHub noreply address. Never put the owner's personal
   email address in the repo, commits or anything sent to an outside service.
+- For appearance and branding changes (logo, colours, splash, login screen, wallpaper, themes), keep
+  commit messages vague, e.g. "Update branding" or "Appearance tweaks". Don't describe the details.
 - Keep replies short and plain: what changed, anything to watch out for, and what the owner needs to
   do (usually: publish a release, or run `sudo kirk-update --main` on the computer).
 - For visual changes (logo, splash, login screen), render previews and offer a few options to choose
