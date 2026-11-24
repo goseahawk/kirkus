@@ -96,6 +96,8 @@ password you chose.
 - **Touchpad:** on a laptop you're asked once whether to keep tap to click. You can change it later in
   System Settings → Mouse & Touchpad.
 - **Apps:** install apps from **Discover**, in the app menu.
+- **Firewall:** on from the start. It blocks other computers from connecting in, without getting in
+  the way of anything you do. Change it in System Settings → **Firewall**.
 - **Your computer's details:** System Settings → **About this System** shows the model, battery
   health, storage and when kirkus was installed.
 - **Mac webcam:** to use the FaceTime HD camera, open Konsole and run `facetimehd-setup` once.

@@ -1,0 +1,11 @@
+[Unit]
+Description=Turn on the firewall (once)
+ConditionPathExists=!/var/lib/kirk-firewall-setup
+After=ufw.service local-fs.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/kirk-firewall-setup
+
+[Install]
+WantedBy=multi-user.target

@@ -235,5 +235,9 @@ Breeze selected there.
 
 - zram swap with zstd, capped at 4 GB
 - PipeWire audio
+- A firewall (ufw): incoming connections blocked, outgoing allowed, KDE Connect (ports 1714–1764)
+  let through. `kirk-firewall-setup.service` turns it on once, at the first start after installing or
+  after the update that added it, and leaves `/var/lib/kirk-firewall-setup` so it never overrides
+  you afterwards. Switch it on or off in System Settings → Firewall (`plasma-firewall`).
 - `power-profiles-daemon`, which integrates with Plasma's battery controls
 - Discover with Flatpak and Flathub set up, for installing and updating apps

@@ -8,7 +8,7 @@
 # is today's date, or set KIRK_VERSION=26.11.18 to choose it.
 #
 # It installs the same files and settings as the installer: branding, boot splash, GRUB theme, login
-# screen, Plasma splash, About page, update hooks and hardware support. It never touches the EFI
+# screen, Plasma splash, About page, update hooks, firewall and hardware support. It never touches the EFI
 # partition or reinstalls GRUB, so the way your computer boots stays as it is. Safe to run again.
 set -euo pipefail
 [[ $EUID -eq 0 ]] || exec sudo KIRK_VERSION="${KIRK_VERSION:-}" "$0" "$@"
@@ -47,7 +47,7 @@ echo "This computer: $(sh "$SRC"/usr/local/bin/kirk-detect --summary)"
 # ---------------------------------------------------------------------------------------- packages
 echo "== packages =="
 PKGS=(kinfocenter fastfetch discover flatpak kdialog xf86-input-libinput plymouth power-profiles-daemon
-      zram-generator)
+      zram-generator ufw plasma-firewall)
 case $KIRK_CPU in
   intel) PKGS+=(intel-ucode thermald) ;;
   amd)   PKGS+=(amd-ucode) ;;
@@ -82,6 +82,8 @@ set_release_key HW_BROADCOM_WL "$KIRK_BROADCOM_WL"
 systemctl enable power-profiles-daemon.service || true
 if [[ $KIRK_CPU == intel ]]; then systemctl enable thermald.service || true; fi
 if [[ $KIRK_IS_MAC == yes ]]; then systemctl enable --now mac-fix-wakeup.service || true; fi
+# firewall: turned on once (see kirk-firewall-setup); after that it's left as you set it
+systemctl enable --now kirk-firewall-setup.service || true
 # grub-btrfsd picks up its Timeshift settings on restart
 systemctl try-restart grub-btrfsd.service 2>/dev/null || true
 # weekly automatic updates, unless you've turned them off
