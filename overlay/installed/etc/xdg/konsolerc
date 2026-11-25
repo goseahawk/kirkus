@@ -1,0 +1,4 @@
+# kirkus: the kirkus profile (kirkus colours) is Konsole's default. Pick another in
+# Konsole → Settings → Manage Profiles; your choice goes in ~/.config/konsolerc.
+[Desktop Entry]
+DefaultProfile=kirkus.profile

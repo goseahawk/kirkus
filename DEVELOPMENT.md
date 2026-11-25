@@ -247,6 +247,10 @@ New accounts get kirkus Dark from `/etc/xdg/kdeglobals`. `kirk-set-theme` (autos
 existing accounts over once at login, but only if they still use one of KDE's Breeze schemes, and
 leaves `~/.config/kirk-theme-1-done` so it never runs again.
 
+Konsole uses the **kirkus** profile and colour scheme (`/usr/share/konsole/`): Ink background, Bone
+text, Marigold for yellow, softened versions of the other colours. `/etc/xdg/konsolerc` makes it the
+default; anyone who picks another profile keeps theirs. The same script writes these.
+
 The Application Launcher button shows the bird on its own (`kirkus-mark`). `kirk-set-launcher-icon`
 sets it once per account, replacing only KDE's stock icon or the older kirkus app icon.
 

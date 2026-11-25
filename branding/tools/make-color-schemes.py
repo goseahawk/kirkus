@@ -6,6 +6,7 @@ usage: make-color-schemes.py [PROJECT_DIR]        (default: the project this scr
   overlay/installed/usr/share/color-schemes/KirkusDark.colors    Ink, Bone and Marigold (default)
   overlay/installed/usr/share/color-schemes/KirkusLight.colors   Bone, Ink and Marigold
   overlay/installed/etc/xdg/kdeglobals                           the dark scheme as everyone's default
+  overlay/installed/usr/share/konsole/kirkus.colorscheme, .profile, etc/xdg/konsolerc   Konsole
 
 Selected items are Marigold with Ink text, as everywhere else in kirkus.
 """
@@ -93,4 +94,39 @@ colours, icons = scheme(True)
 block = (start + "[General]\nColorScheme=KirkusDark\n\n[Icons]\nTheme=" + icons + "\n\n" + colours
          + "[KDE]\ncontrast=4\n" + end)
 open(p, "w").write((old + "\n\n" if old else "") + block)
+print("wrote", os.path.relpath(p, ROOT))
+
+# ---- Konsole: the kirkus colours for the terminal, as everyone's default profile ----
+ANSI = [  # normal, intense
+    ((46, 47, 53), (98, 96, 92)),        # black
+    ((232, 98, 90), (240, 128, 118)),    # red
+    ((138, 190, 120), (162, 210, 142)),  # green
+    (MARIGOLD, (247, 196, 110)),         # yellow
+    ((108, 156, 212), (140, 180, 230)),  # blue
+    ((196, 128, 196), (216, 156, 216)),  # magenta
+    ((96, 184, 176), (130, 206, 198)),   # cyan
+    ((200, 196, 188), BONE),             # white
+]
+faint = lambda c: tuple(round(v * 0.6 + INK[i] * 0.4) for i, v in enumerate(c))
+rgb = lambda c: ",".join(map(str, c))
+out = []
+def entry(name, normal, intense):
+    out.append(f"[{name}]\nColor={rgb(normal)}\n\n[{name}Intense]\nColor={rgb(intense)}\n\n"
+               f"[{name}Faint]\nColor={rgb(faint(normal))}\n\n")
+entry("Background", INK, INK)
+entry("Foreground", BONE, (255, 252, 245))
+for i, (n, it) in enumerate(ANSI):
+    entry(f"Color{i}", n, it)
+p = os.path.join(INST, "usr/share/konsole/kirkus.colorscheme")
+os.makedirs(os.path.dirname(p), exist_ok=True)
+open(p, "w").write("".join(out) + "[General]\nBlur=false\nColorRandomization=false\n"
+                   "Description=kirkus\nOpacity=1\nWallpaper=\n")
+print("wrote", os.path.relpath(p, ROOT))
+p = os.path.join(INST, "usr/share/konsole/kirkus.profile")
+open(p, "w").write("[Appearance]\nColorScheme=kirkus\n\n[General]\nName=kirkus\nParent=FALLBACK/\n")
+print("wrote", os.path.relpath(p, ROOT))
+p = os.path.join(INST, "etc/xdg/konsolerc")
+open(p, "w").write("# kirkus: the kirkus profile (kirkus colours) is Konsole's default. Pick another in\n"
+                   "# Konsole → Settings → Manage Profiles; your choice goes in ~/.config/konsolerc.\n"
+                   "[Desktop Entry]\nDefaultProfile=kirkus.profile\n")
 print("wrote", os.path.relpath(p, ROOT))
