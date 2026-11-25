@@ -237,15 +237,21 @@ The lock screen (Super+L) belongs to Plasma, not SDDM, so it's unaffected.
 
 ## Desktop colours
 
+The default Global Theme is **kirkus** (`org.kirkus.splash`, named so because it began as the splash
+alone). Its `contents/defaults` sets kirkus Dark colours, Breeze Dark icons, the Breeze Plasma style
+and window borders (both take their colours from kirkus Dark) and the kirkus splash. It never touches
+panels or widgets. `/etc/xdg/kdeglobals` names it as everyone's Global Theme.
+
 The default colour scheme is **kirkus Dark**: Ink backgrounds, Bone text, Marigold for selections and
 focus (with Ink text on it), and Breeze Dark icons. **kirkus Light** (Bone backgrounds, Ink text) is
 there too. Both are in `/usr/share/color-schemes/`; change them in System Settings → Colors & Themes →
 Colors. `branding/tools/make-color-schemes.py` writes both files and the default in
 `/etc/xdg/kdeglobals`.
 
-New accounts get kirkus Dark from `/etc/xdg/kdeglobals`. `kirk-set-theme` (autostart) switches
-existing accounts over once at login, but only if they still use one of KDE's Breeze schemes, and
-leaves `~/.config/kirk-theme-1-done` so it never runs again.
+New accounts get all of this from `/etc/xdg/kdeglobals`. `kirk-set-theme` (autostart) applies the
+kirkus Global Theme to existing accounts once at login (`plasma-apply-lookandfeel`), but only if
+they still use one of KDE's Breeze schemes or kirkus Dark, and leaves `~/.config/kirk-theme-2-done`
+so it never runs again.
 
 Konsole uses the **kirkus** profile and colour scheme (`/usr/share/konsole/`): Ink background, Bone
 text, Marigold for yellow, softened versions of the other colours. `/etc/xdg/konsolerc` makes it the
@@ -258,9 +264,8 @@ sets it once per account, replacing only KDE's stock icon or the older kirkus ap
 
 The Plasma splash, `org.kirkus.splash`, uses the same logo in the same place. When you log in, the
 password field disappears and the logo stays until the desktop appears. It's the default for every
-account via `/etc/xdg/ksplashrc`; change it in System Settings → Colors & Themes → Splash Screen. Plasma
-only loads splashes from "look-and-feel" packages, so it also appears in the Global Theme list. Keep
-Breeze selected there.
+account via `/etc/xdg/ksplashrc`; change it in System Settings → Colors & Themes → Splash Screen. The same
+package is the kirkus Global Theme (see "Desktop colours").
 
 ## Other defaults
 

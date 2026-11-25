@@ -151,5 +151,7 @@ inactiveBlend=26,27,32
 inactiveForeground=120,117,110
 
 [KDE]
+LookAndFeelPackage=org.kirkus.splash
 contrast=4
+widgetStyle=Breeze
 # ---- end of kirkus colours ----

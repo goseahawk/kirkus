@@ -2,7 +2,7 @@
     "KPackageStructure": "Plasma/LookAndFeel",
     "KPlugin": {
         "Authors": [ { "Name": "kirkus" } ],
-        "Description": "Startup splash matching the kirkus boot and login screens",
+        "Description": "The kirkus look: kirkus Dark colours, Breeze Dark icons and the kirkus startup splash",
         "Id": "org.kirkus.splash",
         "Name": "kirkus",
         "Version": "1.0"

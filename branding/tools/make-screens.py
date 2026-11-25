@@ -8,6 +8,7 @@ Needs rsvg-convert (librsvg), Pillow and numpy. Writes straight into overlay/:
   plymouth/themes/kirkus/wordmark.png, live/wordmark.png       the word "kirkus" for dark screens
   grub/themes/kirkus/background.png                            Ink, with the bird
   sddm preview.png, plasma splash preview.png                  previews shown in System Settings
+  look-and-feel previews/preview.png, fullscreenpreview.jpg    the Global Theme's previews
   backgrounds/kirkus.svg                                       the wallpaper
   icons/.../kirkus-logo.svg                                    the app icon
   icons/.../kirkus-mark.svg                                    the bird alone (launcher button)
@@ -161,6 +162,29 @@ square = re.sub(r'width="[^"]*" height="[^"]*" viewBox="[^"]*"',
 p = os.path.join(INST, "usr/share/icons/hicolor/scalable/apps/kirkus-mark.svg")
 open(p, "w").write(square)
 print("wrote", os.path.relpath(p, ROOT))
+
+# ---- Global Theme previews: the wallpaper with a kirkus Dark panel and the launcher bird ----
+def lnf_preview(W, H):
+    wp = render(open(os.path.join(INST, "usr/share/backgrounds/kirkus.svg")).read(), H)
+    wp = wp.resize((W, H), Image.LANCZOS) if wp.size != (W, H) else wp
+    ph = round(H * 0.045)
+    d = ImageDraw.Draw(wp)
+    d.rectangle([0, H - ph, W, H], fill=(31, 32, 37, 255))
+    bird = render(square, round(ph * 0.8))
+    wp.alpha_composite(bird, (round(ph * 0.4), H - ph + round(ph * 0.1)))
+    buttons = Image.new("RGBA", (W, H))
+    bd = ImageDraw.Draw(buttons)
+    for i in range(3):                          # a few app buttons, faint
+        x = round(ph * 2.0 + i * ph * 1.1)
+        bd.rounded_rectangle([x, H - ph + round(ph * .2), x + round(ph * .6), H - round(ph * .2)],
+                             radius=round(ph * .12), fill=BONE + (70 if i else 140,))
+    wp.alpha_composite(buttons)
+    f = ImageFont.truetype(os.path.join(FONTS, "DMSans-Regular.ttf"), round(ph * 0.36))
+    d.text((W - round(ph * .5), H - ph / 2), "9:41 AM", font=f, fill=BONE, anchor="rm")
+    return wp.convert("RGB")
+LNF = os.path.join(INST, "usr/share/plasma/look-and-feel/org.kirkus.splash/contents/previews")
+save(lnf_preview(640, 360), LNF, "preview.png")
+save(lnf_preview(1920, 1080), LNF, "fullscreenpreview.jpg")
 
 # ---- app icon ----
 p = os.path.join(INST, "usr/share/icons/hicolor/scalable/apps/kirkus-logo.svg")

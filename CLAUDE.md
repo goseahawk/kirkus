@@ -51,6 +51,9 @@ and keeps itself updated. Public repo: github.com/goseahawk/kirkus. How it works
 - `branding/tools/make-screens.py` builds every screen image, the wallpaper and the app icon from
   those files; `make-fastfetch-logo.py` and `make-live-icons.py` do the rest. Rerun them after any
   logo change, and check that the login and splash bird are pixel-identical.
+- The default Global Theme is kirkus (`org.kirkus.splash`): kirkus Dark colours, Breeze Dark icons,
+  Breeze Plasma style and window borders, and the kirkus splash. Its previews come from
+  `make-screens.py`.
 - The desktop colours are the kirkus Dark scheme (default) and kirkus Light, both written by
   `branding/tools/make-color-schemes.py`, which also puts the dark one in `/etc/xdg/kdeglobals` and
   writes Konsole's kirkus profile and colour scheme.
