@@ -1,9 +1,0 @@
-The kirkus wordmark: Lexend (Google Fonts, SIL Open Font License), variable font at weight 600
-(SemiBold), letter spacing -0.05 em, scaled so the word's ink is 148px tall in the full-size lockup.
-
-Rebuild every lockup image with:
-    python3 branding/tools/make-lockup.py "Lexend[wght].ttf" branding --weight 600 --track -0.05
-
-The mark (the K) is branding/build/mark.svg: a stem (base) and a chevron (accent). The fastfetch
-text logo comes from it too: python3 branding/tools/make-fastfetch-logo.py branding \
-    overlay/installed/usr/share/kirkus/fastfetch-logo.txt

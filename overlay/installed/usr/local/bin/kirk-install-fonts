@@ -1,31 +1,8 @@
 #!/bin/sh
-# Installs Space Grotesk, the typeface of the kirkus wordmark, system-wide (so the login screen,
-# which runs as its own user, can use it). It's only in the AUR, not Arch's repos, so this fetches
-# the official 2.0.0 release and verifies its checksum (from Homebrew's cask) before installing.
-# Space Grotesk is under the SIL Open Font License. Safe to re-run; never fails the caller.
-set -u
-URL=https://github.com/floriankarsten/space-grotesk/releases/download/2.0.0/SpaceGrotesk-2.0.0.zip
-SHA256=53b415577d4139248555300710bea0d268c7a5be67b93de53b716a9736cabffd
-DEST=/usr/share/fonts/kirkus
-
-if [ -f "$DEST/SpaceGrotesk-Regular.otf" ]; then echo "Space Grotesk already installed."; exit 0; fi
-T=$(mktemp -d) || exit 0
-trap 'rm -rf "$T"' EXIT
-if ! curl -fsSL --retry 3 -o "$T/sg.zip" "$URL"; then
-  echo "WARNING: couldn't download Space Grotesk; the login screen will use its fallback font."; exit 0
-fi
-if [ "$(sha256sum "$T/sg.zip" | cut -d' ' -f1)" != "$SHA256" ]; then
-  echo "WARNING: Space Grotesk download failed its checksum, so it was NOT installed."; exit 0
-fi
-mkdir -p "$T/x" && bsdtar -xf "$T/sg.zip" -C "$T/x" || { echo "WARNING: couldn't unpack Space Grotesk."; exit 0; }
-mkdir -p "$DEST"
-n=0
-for w in Light Regular Medium Bold; do
-  f=$(find "$T/x" -name "SpaceGrotesk-$w.otf" | head -1)
-  [ -n "$f" ] && install -m644 "$f" "$DEST/" && n=$((n + 1))
-done
-lic=$(find "$T/x" -iname 'OFL*.txt' -o -iname 'LICENSE*' | head -1)
-[ -n "$lic" ] && install -Dm644 "$lic" /usr/share/licenses/kirkus-fonts/SpaceGrotesk-OFL.txt
-fc-cache -f "$DEST" >/dev/null 2>&1
-echo "Installed $n Space Grotesk weights."
+# Makes the kirkus typeface, DM Sans, available system-wide (so the login screen, which runs as its
+# own user, can use it). The fonts ship with kirkus in /usr/share/fonts/kirkus; this refreshes the
+# font cache so they're found straight away. DM Sans is under the SIL Open Font License
+# (/usr/share/licenses/kirkus-fonts). Safe to re-run; never fails the caller.
+fc-cache -f /usr/share/fonts/kirkus >/dev/null 2>&1
+echo "DM Sans is ready."
 exit 0

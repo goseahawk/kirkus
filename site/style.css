@@ -1,23 +1,29 @@
-/* kirkus website. Palette: navy #0b1020, blue #5590b4, cream #fff8ec, slate #aeb6c8. */
+/* kirkus website. Palette: Ink #16171b, Bone #f3efe6, Marigold #f2a93b. Type: DM Sans. */
 @font-face {
-  font-family: "Lexend";
-  src: url("fonts/lexend.woff2") format("woff2");
-  font-weight: 100 900;
+  font-family: "DM Sans";
+  src: url("fonts/dm-sans-regular.woff2") format("woff2");
+  font-weight: 400;
+  font-display: swap;
+}
+@font-face {
+  font-family: "DM Sans";
+  src: url("fonts/dm-sans-bold.woff2") format("woff2");
+  font-weight: 700;
   font-display: swap;
 }
 
 :root {
-  --navy: #0b1020;
-  --navy-2: #131a30;
-  --blue: #5590b4;
-  --blue-hi: #6aa5c9;
-  --cream: #fff8ec;
-  --slate: #aeb6c8;
-  --head: "Lexend", system-ui, sans-serif;
-  --body: system-ui, -apple-system, "Segoe UI", "Noto Sans", sans-serif;
-  --bg: var(--navy); --text: var(--cream); --muted: var(--slate); --line: #222a44;
-  --card: var(--navy-2); --hero-bg: var(--navy); --hero-text: var(--cream); --hero-muted: var(--slate);
-  --link: var(--blue-hi); --mark: var(--blue);
+  --ink: #16171b;
+  --ink-2: #1f2025;
+  --bone: #f3efe6;
+  --marigold: #f2a93b;
+  --marigold-hi: #f5ba60;
+  --dim: #a29e95;
+  --head: "DM Sans", system-ui, sans-serif;
+  --body: "DM Sans", system-ui, -apple-system, "Segoe UI", "Noto Sans", sans-serif;
+  --bg: var(--ink); --text: var(--bone); --muted: var(--dim); --line: #2e2f35;
+  --card: var(--ink-2); --hero-bg: var(--ink); --hero-text: var(--bone); --hero-muted: var(--dim);
+  --link: var(--marigold);
   color-scheme: dark;
 }
 
@@ -32,7 +38,7 @@ body {
 a { color: var(--link); text-underline-offset: 3px; }
 a:hover { text-decoration-thickness: 2px; }
 .wrap { width: min(1080px, 100% - 32px); margin-inline: auto; }
-h1, h2, h3, .word { font-family: var(--head); letter-spacing: -0.02em; }
+h1, h2, h3 { font-family: var(--head); letter-spacing: -0.015em; }
 
 /* ---- header ---- */
 .top {
@@ -40,9 +46,8 @@ h1, h2, h3, .word { font-family: var(--head); letter-spacing: -0.02em; }
   padding-block: 22px;
   color: var(--hero-text);
 }
-.brand { display: flex; align-items: center; gap: 10px; color: inherit; text-decoration: none; }
-.brand .mark { width: 30px; height: 30px; color: var(--mark); }
-.brand .word { font-size: 24px; font-weight: 600; letter-spacing: -0.05em; }
+.brand { display: flex; align-items: center; }
+.brand .logo { display: block; height: 35px; width: auto; }
 nav { display: flex; gap: 22px; }
 nav a { color: var(--hero-muted); text-decoration: none; font-size: 15px; }
 nav a:hover { color: var(--hero-text); }
@@ -50,23 +55,23 @@ nav a:hover { color: var(--hero-text); }
 /* ---- hero ---- */
 .hero { background: var(--hero-bg); color: var(--hero-text); }
 .hero-inner { text-align: center; padding: 56px 0 88px; }
-.hero-mark { width: 92px; height: 92px; color: var(--mark); margin-bottom: 18px; }
+.hero-mark { display: block; width: auto; height: 131px; margin: 0 auto 22px; }
 h1 {
   margin: 0 0 18px;
-  font-size: clamp(40px, 7vw, 68px); line-height: 1.05; font-weight: 600; letter-spacing: -0.04em;
+  font-size: clamp(40px, 7vw, 68px); line-height: 1.05; font-weight: 700; letter-spacing: -0.03em;
 }
 .lead { max-width: 600px; margin: 0 auto 36px; color: var(--hero-muted); font-size: 19px; }
 .get { display: flex; flex-direction: column; align-items: center; gap: 10px; }
 .button {
   display: inline-flex; align-items: center; gap: 10px;
   padding: 16px 30px; border-radius: 14px;
-  background: var(--blue); color: #fff; text-decoration: none;
-  font: 600 19px/1 var(--head); letter-spacing: -0.01em;
-  box-shadow: 0 8px 24px -8px rgba(85, 144, 180, .6);
+  background: var(--marigold); color: var(--ink); text-decoration: none;
+  font: 700 19px/1 var(--head); letter-spacing: -0.01em;
+  box-shadow: 0 8px 24px -8px rgba(242, 169, 59, .5);
   transition: background .15s, transform .15s;
 }
-.button:hover { background: var(--blue-hi); transform: translateY(-1px); }
-.button:focus-visible { outline: 3px solid var(--cream); outline-offset: 3px; }
+.button:hover { background: var(--marigold-hi); transform: translateY(-1px); }
+.button:focus-visible { outline: 3px solid var(--bone); outline-offset: 3px; }
 .button svg { width: 22px; height: 22px; }
 .meta { margin: 4px 0 0; color: var(--hero-muted); font-size: 15px; }
 .links { margin: 0; font-size: 15px; color: var(--hero-muted); }
@@ -81,21 +86,21 @@ h1 {
 .features article {
   background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 24px;
 }
-.features h2 { margin: 0 0 8px; font-size: 19px; font-weight: 600; line-height: 1.25; }
+.features h2 { margin: 0 0 8px; font-size: 19px; font-weight: 700; line-height: 1.25; }
 .features p { margin: 0; color: var(--muted); font-size: 16px; }
 
 /* ---- install ---- */
 .install { padding-block: 56px; }
-.section-title { font-size: 30px; font-weight: 600; margin: 0 0 28px; }
+.section-title { font-size: 30px; font-weight: 700; margin: 0 0 28px; }
 .steps { list-style: none; counter-reset: step; padding: 0; margin: 0;
   display: grid; grid-template-columns: repeat(3, 1fr); gap: 28px; }
 .steps li { counter-increment: step; }
 .steps li::before {
   content: counter(step);
   display: grid; place-items: center; width: 38px; height: 38px; margin-bottom: 14px;
-  border-radius: 50%; background: var(--blue); color: #fff; font: 600 18px/1 var(--head);
+  border-radius: 50%; background: var(--marigold); color: var(--ink); font: 700 18px/1 var(--head);
 }
-.steps h3 { margin: 0 0 6px; font-size: 20px; font-weight: 600; }
+.steps h3 { margin: 0 0 6px; font-size: 20px; font-weight: 700; }
 .steps p { margin: 0; color: var(--muted); }
 .more { margin: 32px 0 0; color: var(--muted); }
 kbd {
@@ -107,10 +112,10 @@ kbd {
 .needs { padding-block: 24px 64px; }
 .needs ul { margin: 0; padding: 0; list-style: none; display: grid; gap: 12px; }
 .needs li { padding-left: 28px; position: relative; color: var(--muted); }
-.needs li b { color: var(--text); font-weight: 600; }
+.needs li b { color: var(--text); font-weight: 700; }
 .needs li::before {
   content: ""; position: absolute; left: 4px; top: .62em; width: 10px; height: 10px;
-  border-radius: 50%; background: var(--blue);
+  border-radius: 50%; background: var(--marigold);
 }
 
 /* ---- footer ---- */

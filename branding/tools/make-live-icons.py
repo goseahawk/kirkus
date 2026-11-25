@@ -4,7 +4,7 @@ import sys, os
 from PIL import Image, ImageDraw
 out = sys.argv[1]
 S, N = 4, 112                                  # 4x supersampling, 112px icons
-CREAM, BLUE = (0xff, 0xf8, 0xec, 255), (0x55, 0x90, 0xb4, 255)
+CREAM, BLUE = (0xf3, 0xef, 0xe6, 255), (0xf2, 0xa9, 0x3b, 255)   # Bone, Marigold
 
 def canvas():
     im = Image.new("RGBA", (N * S, N * S)); return im, ImageDraw.Draw(im)

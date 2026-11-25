@@ -43,14 +43,18 @@ and keeps itself updated. Public repo: github.com/goseahawk/kirkus. How it works
 
 ## Branding
 
-- The K is `branding/build/mark.svg` (a stem and a chevron). The wordmark is Lexend SemiBold; the
-  exact settings and the rebuild command are in `branding/build/wordmark.txt`
-  (`branding/tools/make-lockup.py`). The fastfetch logo comes from `make-fastfetch-logo.py`.
-- Every screen centres its image at `x = W/2`, `y = H/2 - 50`, and images have even sizes:
-  GRUB background = the K; boot splash (Plymouth) = the word "kirkus", fading in; login screen (SDDM)
-  = the K at 30% opacity; Plasma splash = the same K brightening from 30% to full. After changing
-  the logo, regenerate every image and check that the login and splash K are pixel-identical.
-- Palette: navy `#0b1020`, blue `#5590b4`, cream `#fff8ec`, slate `#aeb6c8`.
+- The mark is a vulture (the bird) with a Marigold head. The logo files are in `branding/build/`:
+  `logo.svg` (lockup on light), `logo-dark.svg` (on dark), `logo-one-color.svg`, `icon.svg` (app
+  icon: the bird on a Marigold rounded square), `mark.svg` (one-colour bird), `mark-color.svg` and
+  `mark-dark.svg` (the bird cut out of the two lockups). The wordmark is DM Sans Bold, always
+  lowercase; DM Sans is bundled in `overlay/installed/usr/share/fonts/kirkus/`.
+- `branding/tools/make-screens.py` builds every screen image, the wallpaper and the app icon from
+  those files; `make-fastfetch-logo.py` and `make-live-icons.py` do the rest. Rerun them after any
+  logo change, and check that the login and splash bird are pixel-identical.
+- Every screen is Ink and centres its image at `x = W/2`, `y = H/2 - 50`, with even image sizes:
+  GRUB background = the bird; boot splash (Plymouth) = the word "kirkus", fading in; login screen
+  (SDDM) = the bird at 30% opacity; Plasma splash = the same bird brightening from 30% to full.
+- Palette: Ink `#16171b`, Bone `#f3efe6`, Marigold `#f2a93b`. Text on Marigold is Ink.
 
 ## Testing
 

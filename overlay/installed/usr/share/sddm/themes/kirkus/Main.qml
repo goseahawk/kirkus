@@ -1,18 +1,18 @@
 // kirkus login screen for SDDM (Qt 6).
 //
-// The kirkus K, faded so it doesn't compete with the password field, drawn with exactly the same
+// The kirkus bird, faded so it doesn't compete with the password field, drawn with exactly the same
 // arithmetic as the GRUB background and the Plasma startup splash. When you log in, the splash
-// starts from this same faded K and brightens it. Under it, the password field, which carries your
+// starts from this same faded bird and brightens it. Under it, the password field, which carries your
 // name. Clock at the top, session, user and power
 // controls along the bottom, so nothing competes with the centre. Colours are the brand palette:
-// navy #0b1020, blue #5590b4, cream #fff8ec, slate #aeb6c8.
+// Ink #16171b, Bone #f3efe6, Marigold #f2a93b.
 import QtQuick
 
 Rectangle {
     id: root
     width: 1440
     height: 900
-    color: "black"
+    color: "#16171b"                    // Ink
 
     // ---- shared layout (same numbers as kirkus.script and the GRUB background) ----
 
@@ -24,13 +24,13 @@ Rectangle {
     property date now: new Date()
     readonly property bool capsOn: (typeof keyboard !== "undefined") && keyboard.capsLock
 
-    readonly property color textColor: "#fff8ec"      // cream
-    readonly property color dimColor: "#8a92a4"       // slate, dimmed
-    readonly property color accent: "#5590b4"         // brand blue
-    readonly property color accentHover: "#6aa3c6"
-    // the wordmark's typeface; installed by kirk-install-fonts. If it's missing, Qt substitutes a
+    readonly property color textColor: "#f3efe6"      // Bone
+    readonly property color dimColor: "#8f8b83"       // Bone, dimmed
+    readonly property color accent: "#f2a93b"         // Marigold
+    readonly property color accentHover: "#f5ba60"
+    // the brand typeface, bundled in /usr/share/fonts/kirkus. If it's missing, Qt substitutes a
     // standard sans automatically.
-    readonly property string fontFamily: "Space Grotesk"
+    readonly property string fontFamily: "DM Sans"
 
     // The models can't be indexed directly, so mirror the bits we need through invisible repeaters.
     Repeater {
@@ -103,7 +103,7 @@ Rectangle {
         font.pixelSize: 15
     }
 
-    // ---- the K, faded (the Plasma splash starts from this same opacity) ----
+    // ---- the bird, faded (the Plasma splash starts from this same opacity) ----
     Image {
         id: lockup
         source: "mark.png"
@@ -112,7 +112,7 @@ Rectangle {
         y: Math.floor(root.height / 2 - implicitHeight / 2) - 50
     }
 
-    // ---- login form, under the K ----
+    // ---- login form, under the bird ----
     Column {
         id: form
         anchors.horizontalCenter: parent.horizontalCenter
@@ -135,9 +135,9 @@ Rectangle {
             width: 280
             height: 42
             radius: 21
-            color: "#0b1020"                // navy
+            color: "#1f2025"                // Ink, lifted
             border.width: 1
-            border.color: password.activeFocus ? root.accent : "#232a3d"
+            border.color: password.activeFocus ? root.accent : "#2e2f35"
             transform: Translate { id: shakeOffset; x: 0 }
 
             Behavior on border.color { ColorAnimation { duration: 150 } }
@@ -173,7 +173,7 @@ Rectangle {
                 Text {
                     anchors.verticalCenter: parent.verticalCenter
                     text: "Password for " + (users.count > 0 ? root.userLabel() : userModel.lastUser)
-                    color: "#5f677a"
+                    color: "#77736b"
                     font: password.font
                     visible: password.text.length === 0
                 }
@@ -193,7 +193,7 @@ Rectangle {
                 Text {
                     anchors.centerIn: parent
                     text: "→"
-                    color: root.textColor
+                    color: "#16171b"        // Ink on Marigold
                     font.family: root.fontFamily
                     font.pixelSize: 17
                 }
@@ -223,8 +223,8 @@ Rectangle {
     component Action: Text {
         id: action
         signal activated()
-        color: actionArea.containsMouse ? "#fff8ec" : "#8a92a4"
-        font.family: "Space Grotesk"
+        color: actionArea.containsMouse ? "#f3efe6" : "#8f8b83"
+        font.family: "DM Sans"
         font.pixelSize: 13
         MouseArea {
             id: actionArea

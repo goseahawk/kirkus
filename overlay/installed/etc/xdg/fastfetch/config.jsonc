@@ -1,4 +1,4 @@
-// kirkus: fastfetch with the K mark and the brand colours.
+// kirkus: fastfetch with the kirkus bird and the brand colours.
 // If you create your own ~/.config/fastfetch/config.jsonc, it takes priority over this file.
 // The same config is also installed as a preset: fastfetch -c kirkus
 {
@@ -7,11 +7,11 @@
     "type": "file",
     "source": "/usr/share/kirkus/fastfetch-logo.txt",
     // $1 = blue K, $2 = cream (raw ANSI truecolour: 38;2;R;G;B)
-    "color": { "1": "38;2;85;144;180", "2": "38;2;255;248;236" },
+    "color": { "1": "38;2;242;169;59", "2": "38;2;243;239;230" },
     "padding": { "top": 1, "left": 1, "right": 3 }
   },
   "display": {
-    "color": { "keys": "38;2;85;144;180", "title": "38;2;255;248;236" }
+    "color": { "keys": "38;2;242;169;59", "title": "38;2;243;239;230" }
   },
   "modules": [
     "title", "separator",

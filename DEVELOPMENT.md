@@ -17,7 +17,7 @@ install and use kirkus, see the [README](README.md).
 | `overlay/installed/` | files copied into every installed system (incl. `kirk-detect`) |
 | `overlay/hardware/broadcom-wl/` | added only when a chip needs the `wl` driver |
 | `overlay/hardware/mac/` | added only on Intel Macs |
-| `branding/` | logo sources and everything generated from them |
+| `branding/` | the logo files (`build/`) and the tools that make every screen image from them (`tools/`) |
 | `site/` | the download website, published to GitHub Pages by `.github/workflows/website.yml` |
 | `tools/` | Intel Mac boot troubleshooting: a read-only diagnosis script and a repair script |
 
@@ -142,7 +142,7 @@ draws the image and runs its own Esc-interruptible wait. If that script is remov
 it, you get GRUB's normal hidden wait.
 
 When the menu does show, it uses the splash as its background with the entries underneath. Theme files
-are in `/boot/grub/themes/kirkus/`. `kirk-grub-theme-font` builds its font from Space Grotesk,
+are in `/boot/grub/themes/kirkus/`. `kirk-grub-theme-font` builds its font from DM Sans,
 falling back to Noto Sans or GRUB's built-in font.
 
 To change it, edit `GRUB_TIMEOUT` / `GRUB_TIMEOUT_STYLE` in `/etc/default/grub` (`menu` shows it every
@@ -169,7 +169,7 @@ welcome message, System Settings → About this System, fastfetch, the login ban
 ## The website
 
 `site/` is the download website, at https://goseahawk.github.io/kirkus/. It's plain HTML and CSS,
-with the Lexend font (SIL Open Font License, `site/fonts/OFL.txt`) bundled so nothing loads from
+with the DM Sans font (SIL Open Font License, `site/fonts/OFL.txt`) bundled so nothing loads from
 other sites. `download.js` asks GitHub's API for the latest release and points the button at its
 ISO, with the version, size and date; if that fails, the button links to the latest release page.
 So publishing a release updates the website by itself.

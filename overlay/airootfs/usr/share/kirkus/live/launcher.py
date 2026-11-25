@@ -6,8 +6,8 @@ import subprocess
 import tkinter as tk
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-BG, TILE, TILE_HOVER = "#000000", "#0b1020", "#162038"
-CREAM, BLUE, SLATE, GREEN, AMBER = "#fff8ec", "#5590b4", "#aeb6c8", "#7fc79a", "#e0b25c"
+BG, TILE, TILE_HOVER = "#16171b", "#1f2025", "#2a2b31"
+CREAM, BLUE, SLATE, GREEN, AMBER = "#f3efe6", "#f2a93b", "#8f8b83", "#7fc79a", "#e8915a"
 FONT = "Noto Sans"
 
 

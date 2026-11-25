@@ -97,7 +97,7 @@ fi
 echo "== desktop =="
 flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo \
   || echo "Could not add Flathub (offline?). Run this again later to add it."
-/usr/local/bin/kirk-install-fonts || echo "Font download failed; the login screen falls back to Noto Sans."
+/usr/local/bin/kirk-install-fonts || true
 /usr/local/bin/kirk-login-theme kirkus
 gtk-update-icon-cache -q -t -f /usr/share/icons/hicolor 2>/dev/null || true
 # The Plasma splash is the default for everyone via /etc/xdg/ksplashrc; set it for you as well, in
