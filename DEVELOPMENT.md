@@ -235,6 +235,21 @@ bottom. A wrong password shakes the field; Caps Lock gets a warning.
 
 The lock screen (Super+L) belongs to Plasma, not SDDM, so it's unaffected.
 
+## Desktop colours
+
+The default colour scheme is **kirkus Dark**: Ink backgrounds, Bone text, Marigold for selections and
+focus (with Ink text on it), and Breeze Dark icons. **kirkus Light** (Bone backgrounds, Ink text) is
+there too. Both are in `/usr/share/color-schemes/`; change them in System Settings → Colors & Themes →
+Colors. `branding/tools/make-color-schemes.py` writes both files and the default in
+`/etc/xdg/kdeglobals`.
+
+New accounts get kirkus Dark from `/etc/xdg/kdeglobals`. `kirk-set-theme` (autostart) switches
+existing accounts over once at login, but only if they still use one of KDE's Breeze schemes, and
+leaves `~/.config/kirk-theme-1-done` so it never runs again.
+
+The Application Launcher button shows the bird on its own (`kirkus-mark`). `kirk-set-launcher-icon`
+sets it once per account, replacing only KDE's stock icon or the older kirkus app icon.
+
 ## Startup splash (after login)
 
 The Plasma splash, `org.kirkus.splash`, uses the same logo in the same place. When you log in, the

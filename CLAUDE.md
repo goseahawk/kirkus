@@ -51,6 +51,9 @@ and keeps itself updated. Public repo: github.com/goseahawk/kirkus. How it works
 - `branding/tools/make-screens.py` builds every screen image, the wallpaper and the app icon from
   those files; `make-fastfetch-logo.py` and `make-live-icons.py` do the rest. Rerun them after any
   logo change, and check that the login and splash bird are pixel-identical.
+- The desktop colours are the kirkus Dark scheme (default) and kirkus Light, both written by
+  `branding/tools/make-color-schemes.py`, which also puts the dark one in `/etc/xdg/kdeglobals`.
+  The Application Launcher button shows the bird alone (`kirkus-mark`), not the app icon.
 - Every screen is Ink and centres its image at `x = W/2`, `y = H/2 - 50`, with even image sizes:
   GRUB background = the bird; boot splash (Plymouth) = the word "kirkus", fading in; login screen
   (SDDM) = the bird at 30% opacity; Plasma splash = the same bird brightening from 30% to full.

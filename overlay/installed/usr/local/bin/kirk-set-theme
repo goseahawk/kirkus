@@ -1,0 +1,21 @@
+#!/bin/sh
+# One-shot, at login: switch an account to the kirkus colours (kirkus Dark, with Breeze Dark icons).
+# New accounts get them from /etc/xdg/kdeglobals anyway; this brings existing accounts over too.
+# Runs once per account, and only if it still uses one of KDE's standard Breeze colour schemes, so
+# a scheme someone picked themselves is left alone. Change it in System Settings → Colors & Themes.
+flag="$HOME/.config/kirk-theme-1-done"
+[ -e "$flag" ] && exit 0
+current=$(kreadconfig6 --file kdeglobals --group General --key ColorScheme 2>/dev/null)
+case $current in
+  ""|Breeze|BreezeLight|BreezeClassic|BreezeDark|KirkusDark)
+    sleep 5
+    command -v plasma-apply-colorscheme >/dev/null 2>&1 || exit 0
+    plasma-apply-colorscheme KirkusDark >/dev/null 2>&1 || exit 0
+    if [ -x /usr/lib/plasma-changeicons ]; then
+      /usr/lib/plasma-changeicons breeze-dark >/dev/null 2>&1
+    else
+      kwriteconfig6 --file kdeglobals --group Icons --key Theme breeze-dark 2>/dev/null
+    fi ;;
+esac
+mkdir -p "$HOME/.config"; touch "$flag"
+exit 0

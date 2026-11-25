@@ -10,6 +10,7 @@ Needs rsvg-convert (librsvg), Pillow and numpy. Writes straight into overlay/:
   sddm preview.png, plasma splash preview.png                  previews shown in System Settings
   backgrounds/kirkus.svg                                       the wallpaper
   icons/.../kirkus-logo.svg                                    the app icon
+  icons/.../kirkus-mark.svg                                    the bird alone (launcher button)
 
 Every screen centres its image at x = W/2, y = H/2 - 50, and the images have even sizes, so the
 bird on the login screen and on the Plasma splash land on exactly the same pixels.
@@ -149,6 +150,16 @@ wall = f'''<svg xmlns="http://www.w3.org/2000/svg" width="2880" height="1800" vi
 '''
 p = os.path.join(INST, "usr/share/backgrounds/kirkus.svg")
 open(p, "w").write(wall)
+print("wrote", os.path.relpath(p, ROOT))
+
+# ---- the bird on its own, square, for the Application Launcher button (bone body, for dark panels) ----
+x, y, w, h = vb
+side = max(w, h)
+square = re.sub(r'width="[^"]*" height="[^"]*" viewBox="[^"]*"',
+                f'width="512" height="512" viewBox="{x - (side - w) / 2:.2f} {y - (side - h) / 2:.2f} {side:.2f} {side:.2f}"',
+                mark_dark, count=1)
+p = os.path.join(INST, "usr/share/icons/hicolor/scalable/apps/kirkus-mark.svg")
+open(p, "w").write(square)
 print("wrote", os.path.relpath(p, ROOT))
 
 # ---- app icon ----
