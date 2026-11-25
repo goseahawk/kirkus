@@ -2,10 +2,10 @@
     "KPackageStructure": "Plasma/LookAndFeel",
     "KPlugin": {
         "Authors": [ { "Name": "kirkus" } ],
-        "Description": "The kirkus look: kirkus Dark colours, Breeze Dark icons and the kirkus startup splash",
+        "Description": "Ink, Bone and Marigold: kirkus Dark colours, Breeze Dark icons, the kirkus wallpaper and splash",
         "Id": "org.kirkus.splash",
         "Name": "kirkus",
-        "Version": "1.0"
+        "Version": "2.0"
     },
     "X-Plasma-APIVersion": "2"
 }

@@ -7,11 +7,14 @@ Needs rsvg-convert (librsvg), Pillow and numpy. Writes straight into overlay/:
   sddm/themes/kirkus/mark.png, plasma splash images/mark.png   the bird for dark screens
   plymouth/themes/kirkus/wordmark.png, live/wordmark.png       the word "kirkus" for dark screens
   grub/themes/kirkus/background.png                            Ink, with the bird
-  sddm preview.png, plasma splash preview.png                  previews shown in System Settings
-  look-and-feel previews/preview.png, fullscreenpreview.jpg    the Global Theme's previews
-  backgrounds/kirkus.svg                                       the wallpaper
+  plasma splash preview.png                                    the splash's preview in System Settings
+  wallpapers/kirkus/                                           the wallpaper ("Quiet"), dark and light
+  backgrounds/kirkus.svg                                       the same wallpaper, where older accounts look
   icons/.../kirkus-logo.svg                                    the app icon
   icons/.../kirkus-mark.svg                                    the bird alone (launcher button)
+
+The Global Themes' previews and the login screen's preview are real screenshots, not drawn here;
+DEVELOPMENT.md says how to retake them.
 
 Every screen centres its image at x = W/2, y = H/2 - 50, and the images have even sizes, so the
 bird on the login screen and on the Plasma splash land on exactly the same pixels.
@@ -118,7 +121,7 @@ def text(xy, s, size, fill, anchor="la", weight="Regular"):
 text((SCREEN[0] / 2, 44), "Tuesday, November 25     9:41 AM", 15, DIM, "ma")
 fx, fy = SCREEN[0] / 2 - 140, my + mark.height + 84
 d.rounded_rectangle([fx * S, fy * S, (fx + 280) * S, (fy + 42) * S], radius=21 * S,
-                    fill=FIELD, outline=FIELD_LINE, width=S)
+                    fill=FIELD, outline=MARIGOLD, width=S)      # focused, as the real screen starts
 text((fx + 18, fy + 21), "Password for kirkus", 15, HINT, "lm")
 gx, gy = fx + 280 - 5 - 32, fy + 5
 go = Image.new("RGBA", big.size)
@@ -133,58 +136,64 @@ for label in ("Shut Down", "Restart", "Sleep"):
 pv.alpha_composite(big.resize(SCREEN, Image.LANCZOS))
 save(pv.convert("RGB"), INST, "usr/share/sddm/themes/kirkus/preview.png")
 
-# ---- wallpaper: Ink, a soft glow, and a large faint bird lower right ----
-paths = re.search(r"<svg[^>]*>(.*)</svg>", mark_dark, re.S).group(1)
+# ---- the bird's parts, as Qt-safe SVG (self-closing elements: Qt's SVG reader rejects anything
+#      it thinks is nested wrongly, and then shows nothing) ----
+def element(colour):
+    m = re.search(r'<(path|circle)\b([^>]*?fill="%s"[^>]*?)\s*/?>(?:\s*</\1>)?' % colour, mark_dark)
+    return f"<{m.group(1)}{re.sub(r' fill=\"[^\"]*\"', '', m.group(2))}"
+BODY, HEAD, EYE = element("#f3efe6"), element("#f2a93b"), element("#16171b")
 vb = [float(v) for v in re.search(r'viewBox="([^"]*)"', mark_dark).group(1).split()]
-scale = 1100 / vb[3]
-wall = f'''<svg xmlns="http://www.w3.org/2000/svg" width="2880" height="1800" viewBox="0 0 2880 1800">
-  <defs>
-    <radialGradient id="glow" cx="0.70" cy="0.60" r="0.80">
-      <stop offset="0" stop-color="#22232a"/>
-      <stop offset="0.55" stop-color="#16171b"/>
-      <stop offset="1" stop-color="#0e0f12"/>
-    </radialGradient>
-  </defs>
-  <rect width="2880" height="1800" fill="url(#glow)"/>
-  <g opacity="0.12" transform="translate({1980 - (vb[0] + vb[2] / 2) * scale:.2f} {440 - vb[1] * scale:.2f}) scale({scale:.5f})">{paths}</g>
-</svg>
-'''
-p = os.path.join(INST, "usr/share/backgrounds/kirkus.svg")
-open(p, "w").write(wall)
-print("wrote", os.path.relpath(p, ROOT))
+probe = render(mark_dark, 2000)
+_k = vb[3] / 2000
+_x0, _y0, _x1, _y1 = ink_box(probe)
+INK_X, INK_Y = vb[0] + _x0 * _k, vb[1] + _y0 * _k          # the bird's ink box, in its own units
+INK_W, INK_H = (_x1 - _x0) * _k, (_y1 - _y0) * _k
 
-# ---- the bird on its own, square, for the Application Launcher button (bone body, for dark panels) ----
-x, y, w, h = vb
-side = max(w, h)
-square = re.sub(r'width="[^"]*" height="[^"]*" viewBox="[^"]*"',
-                f'width="512" height="512" viewBox="{x - (side - w) / 2:.2f} {y - (side - h) / 2:.2f} {side:.2f} {side:.2f}"',
-                mark_dark, count=1)
-p = os.path.join(INST, "usr/share/icons/hicolor/scalable/apps/kirkus-mark.svg")
-open(p, "w").write(square)
-print("wrote", os.path.relpath(p, ROOT))
+def bird(cx, top, height, body, head, eye, body_extra=""):
+    """the bird, ink box `height` tall, centred on x = cx, its top at y = top"""
+    k = height / INK_H
+    return (f'<g transform="translate({cx - (INK_X + INK_W / 2) * k:.2f} {top - INK_Y * k:.2f}) '
+            f'scale({k:.5f})">{BODY}{body_extra} fill="{body}"/>{HEAD} fill="{head}"/>'
+            f'{EYE} fill="{eye}"/></g>')
 
-# ---- Global Theme previews: the wallpaper with a kirkus Dark panel and the launcher bird ----
-def lnf_preview(W, H):
-    wp = render(open(os.path.join(INST, "usr/share/backgrounds/kirkus.svg")).read(), H)
-    wp = wp.resize((W, H), Image.LANCZOS) if wp.size != (W, H) else wp
-    ph = round(H * 0.045)
-    d = ImageDraw.Draw(wp)
-    d.rectangle([0, H - ph, W, H], fill=(31, 32, 37, 255))
-    bird = render(square, round(ph * 0.8))
-    wp.alpha_composite(bird, (round(ph * 0.4), H - ph + round(ph * 0.1)))
-    buttons = Image.new("RGBA", (W, H))
-    bd = ImageDraw.Draw(buttons)
-    for i in range(3):                          # a few app buttons, faint
-        x = round(ph * 2.0 + i * ph * 1.1)
-        bd.rounded_rectangle([x, H - ph + round(ph * .2), x + round(ph * .6), H - round(ph * .2)],
-                             radius=round(ph * .12), fill=BONE + (70 if i else 140,))
-    wp.alpha_composite(buttons)
-    f = ImageFont.truetype(os.path.join(FONTS, "DMSans-Regular.ttf"), round(ph * 0.36))
-    d.text((W - round(ph * .5), H - ph / 2), "9:41 AM", font=f, fill=BONE, anchor="rm")
-    return wp.convert("RGB")
-LNF = os.path.join(INST, "usr/share/plasma/look-and-feel/org.kirkus.splash/contents/previews")
-save(lnf_preview(640, 360), LNF, "preview.png")
-save(lnf_preview(1920, 1080), LNF, "fullscreenpreview.jpg")
+# ---- wallpaper "Quiet": flat colour, and a large bird one shade off it, lower right ----
+WALL = (2880, 1800)
+def quiet(bg, tone):
+    W, H = WALL
+    return (f'<svg xmlns="http://www.w3.org/2000/svg" width="{W}" height="{H}" viewBox="0 0 {W} {H}">'
+            f'<rect width="{W}" height="{H}" fill="{bg}"/>'
+            + bird(0.70 * W, 0.15 * H, 1.0 * H, tone, tone, bg) + "</svg>\n")
+QUIET_DARK = quiet("#16171b", "#222327")        # Ink, and Bone at about 5% over it
+QUIET_LIGHT = quiet("#f3efe6", "#e4e0d8")       # Bone, and Ink at about 7% over it
+
+def write(text, *path):
+    p = os.path.join(*path)
+    os.makedirs(os.path.dirname(p), exist_ok=True)
+    open(p, "w").write(text)
+    print("wrote", os.path.relpath(p, ROOT))
+
+# A wallpaper package, like KDE's own: the Global Themes name it ("Image=kirkus"), so it's there
+# from the first frame of a new account and on the lock screen. Plasma shows images_dark/ with a dark
+# colour scheme and images/ with a light one.
+WP = os.path.join(INST, "usr/share/wallpapers/kirkus")
+write('{\n    "KPlugin": {\n        "Authors": [ { "Name": "kirkus" } ],\n        "Id": "kirkus",\n'
+      '        "Name": "kirkus"\n    }\n}\n', WP, "metadata.json")
+write(QUIET_DARK, WP, "contents/images_dark/2880x1800.svg")
+write(QUIET_LIGHT, WP, "contents/images/2880x1800.svg")
+save(render(QUIET_DARK, 250).convert("RGB"), WP, "contents/screenshot.png")
+# the same picture at the path older accounts already point at
+write(QUIET_DARK, INST, "usr/share/backgrounds/kirkus.svg")
+
+# ---- the bird on its own, square, for the Application Launcher button. Its body takes the
+#      theme's text colour (KDE recolours "ColorScheme-Text"), so it's Bone on a dark panel and Ink
+#      on a light one; the head stays Marigold. ----
+side = max(INK_W, INK_H) * 1.06
+icon = (f'<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" '
+        f'viewBox="{INK_X + INK_W / 2 - side / 2:.2f} {INK_Y + INK_H / 2 - side / 2:.2f} {side:.2f} {side:.2f}">'
+        '<defs><style type="text/css" id="current-color-scheme">.ColorScheme-Text { color:#f3efe6; }</style></defs>'
+        f'{BODY} class="ColorScheme-Text" style="fill:currentColor"/>{HEAD} fill="#f2a93b"/>{EYE} fill="#16171b"/>'
+        '</svg>\n')
+write(icon, INST, "usr/share/icons/hicolor/scalable/apps/kirkus-mark.svg")
 
 # ---- app icon ----
 p = os.path.join(INST, "usr/share/icons/hicolor/scalable/apps/kirkus-logo.svg")

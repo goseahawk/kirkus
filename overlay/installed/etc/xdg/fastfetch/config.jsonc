@@ -6,7 +6,7 @@
   "logo": {
     "type": "file",
     "source": "/usr/share/kirkus/fastfetch-logo.txt",
-    // $1 = blue K, $2 = cream (raw ANSI truecolour: 38;2;R;G;B)
+    // $1 = Marigold bird, $2 = Bone (raw ANSI truecolour: 38;2;R;G;B)
     "color": { "1": "38;2;242;169;59", "2": "38;2;243;239;230" },
     "padding": { "top": 1, "left": 1, "right": 3 }
   },

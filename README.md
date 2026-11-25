@@ -98,6 +98,8 @@ password you chose.
 - **Touchpad:** on a laptop you're asked once whether to keep tap to click. You can change it later in
   System Settings → Mouse & Touchpad.
 - **Apps:** install apps from **Discover**, in the app menu.
+- **Light or dark:** kirkus starts dark. For the light version, open System Settings → **Global
+  Theme** and choose **kirkus Light**, or turn on **Switch to Dark Mode at Night** to have both.
 - **Firewall:** on from the start. It blocks other computers from connecting in, without getting in
   the way of anything you do. Change it in System Settings → **Firewall**.
 - **Your computer's details:** System Settings → **About this System** shows the model, battery

@@ -1,0 +1,11 @@
+{
+    "KPackageStructure": "Plasma/LookAndFeel",
+    "KPlugin": {
+        "Authors": [ { "Name": "kirkus" } ],
+        "Description": "Bone, Ink and Marigold: kirkus Light colours, Breeze icons, the kirkus wallpaper and splash",
+        "Id": "org.kirkus.light",
+        "Name": "kirkus Light",
+        "Version": "2.0"
+    },
+    "X-Plasma-APIVersion": "2"
+}

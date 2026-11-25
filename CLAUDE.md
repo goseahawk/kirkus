@@ -51,13 +51,20 @@ and keeps itself updated. Public repo: github.com/goseahawk/kirkus. How it works
 - `branding/tools/make-screens.py` builds every screen image, the wallpaper and the app icon from
   those files; `make-fastfetch-logo.py` and `make-live-icons.py` do the rest. Rerun them after any
   logo change, and check that the login and splash bird are pixel-identical.
-- The default Global Theme is kirkus (`org.kirkus.splash`): kirkus Dark colours, Breeze Dark icons,
-  Breeze Plasma style and window borders, and the kirkus splash. Its previews come from
-  `make-screens.py`.
-- The desktop colours are the kirkus Dark scheme (default) and kirkus Light, both written by
-  `branding/tools/make-color-schemes.py`, which also puts the dark one in `/etc/xdg/kdeglobals` and
-  writes Konsole's kirkus profile and colour scheme.
-  The Application Launcher button shows the bird alone (`kirkus-mark`), not the app icon.
+- Two Global Themes: kirkus (`org.kirkus.splash`, the default: kirkus Dark colours, Breeze Dark
+  icons) and kirkus Light (`org.kirkus.light`), paired for "Switch to Dark Mode at Night". Both set
+  the kirkus wallpaper and splash, and their default layout puts the bird alone (`kirkus-mark`) on the
+  Application Launcher; a new account needs no scripts. DEVELOPMENT.md → "Desktop theme" has the
+  details, including the login scripts that bring existing accounts over.
+- The colour schemes, `/etc/xdg/kdeglobals` and Konsole's profile come from
+  `branding/tools/make-color-schemes.py`.
+- The wallpaper is "Quiet": flat Ink with a large bird one shade lighter (flat Bone and one shade
+  darker for kirkus Light), as the package `/usr/share/wallpapers/kirkus`. No gradients (the owner
+  found the old one cheap; they band on real screens).
+- The Global Theme previews are real screenshots of a fresh account in that theme (Dolphin at Home,
+  Konsole running fastfetch), so they match what people get. Retake them after any look change.
+- SVGs Plasma loads must suit Qt's strict SVG reader: self-closing elements, nothing nested oddly,
+  no filters. A file Qt rejects shows nothing at all.
 - Every screen is Ink and centres its image at `x = W/2`, `y = H/2 - 50`, with even image sizes:
   GRUB background = the bird; boot splash (Plymouth) = the word "kirkus", fading in; login screen
   (SDDM) = the bird at 30% opacity; Plasma splash = the same bird brightening from 30% to full.
@@ -71,6 +78,11 @@ There's no way to boot kirkus from here, so:
 - Test scripts against mocks of the commands they call (pacman, nmcli, gdbus, curl, kdialog), with
   paths redirected to a temporary folder, covering each case.
 - Say clearly what has only been tested that way.
+- Desktop look and theme logic can be checked in a real Plasma 6 session: debootstrap the newest
+  Ubuntu release from archive.ubuntu.com (Arch and Debian mirrors are blocked here) into a chroot,
+  install `plasma-desktop kwin-x11 xvfb`, run `kwin_x11` and `plasmashell` on Xvfb as a test user
+  with `XDG_CONFIG_DIRS=$HOME/.config/kdedefaults:/etc/xdg` (as startplasma sets it), and screenshot
+  with `import -window root`. Still say it was Ubuntu's Plasma under X11, not kirkus on hardware.
 
 Not yet confirmed on real hardware: tap to click and the first-login
 touchpad question, and weekly automatic updates.

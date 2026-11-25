@@ -1,10 +1,34 @@
 #!/bin/sh
-# One-shot: set the wallpaper on a user's first Plasma login.
-flag="$HOME/.config/kirk-wallpaper-done"
+# One-shot per account, at login: show the kirkus wallpaper (the "kirkus" wallpaper package, which
+# has a dark and a light picture and follows the colour scheme).
+# New accounts already get it from the kirkus Global Theme. This moves older accounts over: desktops
+# showing the older kirkus wallpaper file or KDE's default ("Next") switch to the package. A
+# wallpaper someone picked themselves is left alone. Runs once; change it any time by right-clicking
+# the desktop.
+flag="$HOME/.config/kirk-wallpaper-2-done"
 [ -e "$flag" ] && exit 0
-sleep 8
-if command -v plasma-apply-wallpaperimage >/dev/null 2>&1 &&
-   plasma-apply-wallpaperimage /usr/share/backgrounds/kirkus.svg; then
-  mkdir -p "$HOME/.config"; touch "$flag"
-fi
-exit 0
+
+js='var n = 0;
+desktops().forEach(function (d) {
+  n++;
+  if (d.wallpaperPlugin != "org.kde.image") return;
+  d.currentConfigGroup = ["Wallpaper", "org.kde.image", "General"];
+  var img = String(d.readConfig("Image", ""));
+  if (img.indexOf("/usr/share/backgrounds/kirkus.svg") >= 0 || img.indexOf("/usr/share/wallpapers/Next") >= 0)
+    d.writeConfig("Image", "file:///usr/share/wallpapers/kirkus");
+});
+print(n);'
+
+# plasmashell may still be starting: retry for about a minute
+i=0
+while [ $i -lt 30 ]; do
+  out=$(busctl --user call org.kde.plasmashell /PlasmaShell org.kde.PlasmaShell \
+          evaluateScript s "$js" 2>/dev/null)
+  n=$(printf '%s' "$out" | grep -o '[0-9][0-9]*' | head -1)
+  if [ -n "$n" ] && [ "$n" -gt 0 ]; then
+    mkdir -p "$HOME/.config"; touch "$flag"
+    exit 0
+  fi
+  i=$((i + 1)); sleep 2
+done
+exit 0   # no desktop found yet; try again next login

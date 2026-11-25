@@ -92,7 +92,9 @@ end = "# ---- end of kirkus colours ----\n"
 old = re.sub(re.escape(start) + r".*?" + re.escape(end), "", old, flags=re.S).rstrip("\n")
 colours, icons = scheme(True)
 block = (start + "[General]\nColorScheme=KirkusDark\n\n[Icons]\nTheme=" + icons + "\n\n" + colours
-         + "[KDE]\nLookAndFeelPackage=org.kirkus.splash\ncontrast=4\nwidgetStyle=Breeze\n" + end)
+         # the Global Theme, and the pair "Switch to Dark Mode at Night" uses (KDE's default is Breeze)
+         + "[KDE]\nDefaultDarkLookAndFeel=org.kirkus.splash\nDefaultLightLookAndFeel=org.kirkus.light\n"
+         + "LookAndFeelPackage=org.kirkus.splash\ncontrast=4\nwidgetStyle=Breeze\n" + end)
 open(p, "w").write((old + "\n\n" if old else "") + block)
 print("wrote", os.path.relpath(p, ROOT))
 

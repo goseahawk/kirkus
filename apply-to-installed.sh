@@ -61,7 +61,8 @@ pacman -S --needed --noconfirm "${PKGS[@]}"
 echo "== kirkus files =="
 # Theme folders belong to kirkus entirely: replace them, so files a newer version dropped go too.
 rm -rf /usr/share/plymouth/themes/kirkus /boot/grub/themes/kirkus /usr/share/sddm/themes/kirkus \
-       /usr/share/plasma/look-and-feel/org.kirkus.splash /usr/share/kirkus
+       /usr/share/plasma/look-and-feel/org.kirkus.splash /usr/share/plasma/look-and-feel/org.kirkus.light \
+       /usr/share/wallpapers/kirkus /usr/share/kirkus
 copy_tree "$SRC"
 [[ $KIRK_BROADCOM_WL == yes ]] && copy_tree "$HW"/broadcom-wl
 [[ $KIRK_IS_MAC == yes ]] && copy_tree "$HW"/mac

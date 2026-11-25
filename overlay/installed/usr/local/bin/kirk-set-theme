@@ -1,14 +1,30 @@
 #!/bin/sh
 # One-shot, at login: switch an account to the kirkus Global Theme (kirkus Dark colours, Breeze
-# Dark icons, the kirkus startup splash). New accounts get it from /etc/xdg anyway; this brings
-# existing accounts over too. It never touches panels or widgets.
-# Runs once per account, and only if it still uses one of KDE's standard Breeze colour schemes, so
-# a look someone picked themselves is left alone. Change it in System Settings → Colors & Themes.
-flag="$HOME/.config/kirk-theme-2-done"
+# Dark icons, the kirkus wallpaper and splash). New accounts already have it (from /etc/xdg); this
+# brings existing accounts over too, including ones that got an earlier version of it. It never
+# touches panels or widgets.
+# Runs once per account, and only if the account uses one of KDE's standard Breeze colour schemes
+# or kirkus Dark, so a look someone picked themselves (kirkus Light included) is left alone. Change
+# it in System Settings → Colors & Themes.
+flag="$HOME/.config/kirk-theme-3-done"
 [ -e "$flag" ] && exit 0
-current=$(kreadconfig6 --file kdeglobals --group General --key ColorScheme 2>/dev/null)
-case $current in
-  ""|Breeze|BreezeLight|BreezeClassic|BreezeDark|KirkusDark)
+done_() { mkdir -p "$HOME/.config"; touch "$flag"; exit 0; }
+
+# The account's own choice, from its own files only (kreadconfig6 would also read the system-wide
+# default in /etc/xdg, which is always kirkus Dark): ~/.config/kdeglobals, then the Global Theme's
+# record in ~/.config/kdedefaults.
+scheme_in() { sed -n '/^\[General\]/,/^\[/s/^ColorScheme=//p' "$1" 2>/dev/null | head -1; }
+own=$(scheme_in "$HOME/.config/kdeglobals")
+[ -n "$own" ] || own=$(scheme_in "$HOME/.config/kdedefaults/kdeglobals")
+if [ -z "$own" ]; then
+  # never chose a scheme: with no colours of its own it already shows kirkus Dark; colours without a
+  # name are KDE's default, Breeze
+  grep -q '^\[Colors:Window\]' "$HOME/.config/kdeglobals" 2>/dev/null || done_
+  own=Breeze
+fi
+
+case $own in
+  Breeze|BreezeLight|BreezeClassic|BreezeDark|KirkusDark)
     sleep 5
     if command -v plasma-apply-lookandfeel >/dev/null 2>&1 &&
        plasma-apply-lookandfeel --apply org.kirkus.splash >/dev/null 2>&1; then
@@ -25,5 +41,4 @@ case $current in
       kwriteconfig6 --file kdeglobals --group KDE --key LookAndFeelPackage org.kirkus.splash 2>/dev/null
     fi ;;
 esac
-mkdir -p "$HOME/.config"; touch "$flag"
-exit 0
+done_
