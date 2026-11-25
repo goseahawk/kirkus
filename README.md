@@ -153,6 +153,10 @@ kirkus start by default. (Hold Option at power-on to choose macOS instead.)
 **My touchpad's click is stuck or broken.** Tap to click instead. To stop a stuck click from getting
 in the way, open System Settings → **Touchpad Clicks** and choose to ignore physical clicks.
 
+**The desktop doesn't look like kirkus.** Open System Settings → **Global Theme**, choose **kirkus**
+and click Apply. If it still looks wrong, run `kirk-theme-check` in Konsole and
+[open an issue](https://github.com/goseahawk/kirkus/issues) with what it shows.
+
 **The login screen is blank.** Press Ctrl+Alt+F2, log in with your username and password, and run
 `sudo kirk-login-theme breeze` and then `sudo systemctl restart sddm`. That switches to KDE's
 standard login screen.

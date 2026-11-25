@@ -8,7 +8,7 @@ kcm_updates=false
 ColorScheme=KirkusDark
 
 [Icons]
-Theme=breeze-dark
+Theme=kirkus
 
 [ColorEffects:Disabled]
 Color=56,56,56

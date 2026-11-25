@@ -12,6 +12,7 @@ Needs rsvg-convert (librsvg), Pillow and numpy. Writes straight into overlay/:
   backgrounds/kirkus.svg                                       the same wallpaper, where older accounts look
   icons/.../kirkus-logo.svg                                    the app icon
   icons/.../kirkus-mark.svg                                    the bird alone (launcher button)
+  icons/kirkus/, icons/kirkus-light/                           the icon themes: Breeze, bird as start icon
 
 The Global Themes' previews and the login screen's preview are real screenshots, not drawn here;
 DEVELOPMENT.md says how to retake them.
@@ -194,6 +195,34 @@ icon = (f'<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" '
         f'{BODY} class="ColorScheme-Text" style="fill:currentColor"/>{HEAD} fill="#f2a93b"/>{EYE} fill="#16171b"/>'
         '</svg>\n')
 write(icon, INST, "usr/share/icons/hicolor/scalable/apps/kirkus-mark.svg")
+
+# ---- icon themes "kirkus" (Breeze Dark underneath) and "kirkus Light" (Breeze underneath). They
+#      replace KDE's own logo, a "K" that looks like the old kirkus mark, with the bird wherever KDE
+#      uses it as the start icon: the Application Launcher's default icon, its menu entries and the
+#      like. Everything else comes from Breeze. ----
+START_ICONS = ("start-here", "start-here-symbolic", "start-here-kde", "start-here-kde-symbolic",
+               "start-here-kde-plasma", "start-here-kde-plasma-symbolic")
+for theme, name, base in (("kirkus", "kirkus", "breeze-dark"), ("kirkus-light", "kirkus Light", "breeze")):
+    write("[Icon Theme]\n"
+          f"Name={name}\n"
+          f"Comment=Breeze icons with the kirkus bird as the start icon\n"
+          f"Inherits={base},hicolor\n"
+          "Example=start-here-kde\n"
+          "DisplayDepth=32\n"
+          # like Breeze: icons take the colour scheme's colours (Marigold folders, the bird's body)
+          "FollowsColorScheme=true\n"
+          "KDE-Extensions=.svg\n"
+          "DesktopDefault=48\nDesktopSizes=16,22,32,48,64,128,256\n"
+          "ToolbarDefault=22\nToolbarSizes=16,22,32,48\n"
+          "MainToolbarDefault=22\nMainToolbarSizes=16,22,32,48\n"
+          "SmallDefault=16\nSmallSizes=16,22,32,48\n"
+          "PanelDefault=48\nPanelSizes=16,22,32,48,64,128,256\n"
+          "DialogDefault=32\nDialogSizes=16,22,32,48,64,128,256\n"
+          "Directories=places/scalable\n\n"
+          "[places/scalable]\nSize=48\nMinSize=8\nMaxSize=512\nType=Scalable\nContext=Places\n",
+          INST, f"usr/share/icons/{theme}/index.theme")
+    for n in START_ICONS:
+        write(icon, INST, f"usr/share/icons/{theme}/places/scalable/{n}.svg")
 
 # ---- app icon ----
 p = os.path.join(INST, "usr/share/icons/hicolor/scalable/apps/kirkus-logo.svg")

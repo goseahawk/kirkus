@@ -350,7 +350,9 @@ id -u "$KIRK_USER" >/dev/null 2>&1 || useradd -m -G wheel -s /bin/bash "$KIRK_US
 /usr/local/bin/kirk-login-theme kirkus
 # Flathub, so Discover can install and update Flatpak apps (skipped quietly if offline)
 flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo || true
-command -v gtk-update-icon-cache >/dev/null && gtk-update-icon-cache -q -t -f /usr/share/icons/hicolor || true
+for d in hicolor kirkus kirkus-light; do
+  command -v gtk-update-icon-cache >/dev/null && gtk-update-icon-cache -q -t -f /usr/share/icons/\$d || true
+done
 if [ "$KIRK_FS" = btrfs ] && ! grep -q grub-btrfs-overlayfs /etc/mkinitcpio.conf; then
   sed -i -E 's/^(HOOKS=\(.*)\)/\1 grub-btrfs-overlayfs)/' /etc/mkinitcpio.conf
 fi

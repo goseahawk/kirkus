@@ -1,0 +1,30 @@
+#!/bin/sh
+# Shows how this account's desktop theme is set up, for when the desktop doesn't look like kirkus.
+# Run it in Konsole (no sudo) and send the output with your question or issue.
+get() { kreadconfig6 --file "$1" --group "$2" --key "$3" 2>/dev/null; }
+mark() { if [ "$2" = "$3" ]; then printf '  %-15s %s\n' "$1:" "$2"; else printf '  %-15s %s   (kirkus: %s)\n' "$1:" "${2:-not set}" "$3"; fi; }
+
+echo "kirkus $(sed -n 's/^VERSION=//p' /etc/kirk-release 2>/dev/null), $(plasmashell --version 2>/dev/null), session: ${XDG_SESSION_TYPE:-unknown}"
+echo
+echo "This account's theme (what System Settings → Colors & Themes shows):"
+mark "Global Theme"  "$(get kdeglobals KDE LookAndFeelPackage)" org.kirkus.splash
+mark "Colors"        "$(get kdeglobals General ColorScheme)" KirkusDark
+mark "Window colour" "$(get kdeglobals Colors:Window BackgroundNormal)" \
+     "$(sed -n '/^\[Colors:Window\]/,/^\[/s/^BackgroundNormal=//p' /usr/share/color-schemes/KirkusDark.colors | head -1)"
+mark "Icons"         "$(get kdeglobals Icons Theme)" kirkus
+mark "Plasma Style"  "$(get plasmarc Theme name)" kirkus
+mark "Splash"        "$(get ksplashrc KSplash Theme)" org.kirkus.splash
+echo
+echo "kirkus themes Plasma can see:"
+for p in org.kirkus.splash org.kirkus.light; do
+  if plasma-apply-lookandfeel --list 2>/dev/null | grep -qx "$p"; then echo "  $p: yes"; else echo "  $p: NO"; fi
+done
+echo
+echo "One-time login steps done:"
+for f in kirk-theme-4-done kirk-wallpaper-2-done kirk-launcher-icon-2-done; do
+  if [ -e "$HOME/.config/$f" ]; then echo "  $f: yes"; else echo "  $f: not yet"; fi
+done
+echo
+echo "Recent theme messages (journalctl -t kirkus-theme):"
+msgs=$(journalctl -q -n 8 -t kirkus-theme 2>/dev/null)
+if [ -n "$msgs" ]; then printf '%s\n' "$msgs" | sed 's/^/  /'; else echo "  (none)"; fi

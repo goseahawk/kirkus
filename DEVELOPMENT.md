@@ -237,50 +237,72 @@ The lock screen (Super+L) belongs to Plasma, not SDDM, so it's unaffected.
 
 ## Desktop theme
 
-There are two Global Themes, each a look-and-feel package in `/usr/share/plasma/look-and-feel/`:
+The theme is called **kirkus** everywhere System Settings → Colors & Themes shows one, with a light
+twin:
 
-| Global Theme | Package | Colours | Icons |
+| Part | kirkus (the default) | kirkus Light | Where |
 |---|---|---|---|
-| **kirkus** (the default) | `org.kirkus.splash` (named so because it began as the splash alone) | kirkus Dark: Ink backgrounds, Bone text | Breeze Dark |
-| **kirkus Light** | `org.kirkus.light` | kirkus Light: Bone backgrounds, Ink text | Breeze |
+| Global Theme | **kirkus** (`org.kirkus.splash`, named so because it began as the splash alone) | **kirkus Light** (`org.kirkus.light`) | `/usr/share/plasma/look-and-feel/` |
+| Colors | **kirkus** (`KirkusDark.colors`): Ink backgrounds, Bone text | **kirkus Light** (`KirkusLight.colors`): Bone backgrounds, Ink text | `/usr/share/color-schemes/` |
+| Plasma Style | **kirkus** | **kirkus** | `/usr/share/plasma/desktoptheme/kirkus/` |
+| Icons | **kirkus**: Breeze Dark, with the bird as the start icon | **kirkus Light**: Breeze, with the bird | `/usr/share/icons/kirkus*/` |
+| Wallpaper | **kirkus**, dark picture | **kirkus**, light picture | `/usr/share/wallpapers/kirkus/` |
+| Splash Screen | **kirkus** | **kirkus** | the `org.kirkus.splash` package |
 
-Both use Marigold for selections and focus (with Ink text on it), KDE's Breeze Plasma style and
-window borders (which take their colours from the scheme), the kirkus wallpaper and the kirkus
-splash. Each package's `contents/defaults` lists what "Apply" sets; `contents/layouts/` is the
-desktop a new account starts with: KDE's own default panel template, with the bird on the
-Application Launcher button.
+Both use Marigold for selections and focus (with Ink text on it), and KDE's Breeze window borders and
+application style, which take their colours from the scheme. Each Global Theme's `contents/defaults`
+lists what "Apply" sets. `/etc/xdg/kdeglobals` and `/etc/xdg/plasmarc` make kirkus everyone's
+default, and make kirkus Light and kirkus the pair that **Switch to Dark Mode at Night** uses (KDE's
+default is Breeze). A new account is fully kirkus from its first frame, with no scripts involved.
 
-`/etc/xdg/kdeglobals` makes kirkus everyone's Global Theme, and makes kirkus Light and kirkus the
-pair that System Settings → Global Theme → **Switch to Dark Mode at Night** uses (KDE's default is
-Breeze). A new account is fully kirkus from its first frame, with no scripts involved.
-
-- **Colours:** `KirkusDark.colors` and `KirkusLight.colors` in `/usr/share/color-schemes/`.
-  `branding/tools/make-color-schemes.py` writes both, the default in `/etc/xdg/kdeglobals`, and
-  Konsole's **kirkus** profile and colour scheme (`/usr/share/konsole/`, made the default by
-  `/etc/xdg/konsolerc`; anyone who picks another profile keeps theirs).
+- **No panel layout of our own.** New accounts get KDE's own default panel, which always matches the
+  installed Plasma. With a copy of it in the kirkus Global Theme, new accounts on Arch's newer Plasma
+  got no panel at all.
+- **Colours:** `branding/tools/make-color-schemes.py` writes both schemes, the defaults in
+  `/etc/xdg/kdeglobals` and `/etc/xdg/plasmarc`, and Konsole's **kirkus** profile and colour scheme
+  (`/usr/share/konsole/`, made the default by `/etc/xdg/konsolerc`; anyone who picks another profile
+  keeps theirs).
+- **Plasma Style:** like KDE's Breeze Dark style, it has no pictures of its own: Plasma draws the
+  panel and pop-ups with Breeze's shapes, in the current scheme's colours. Its `plasmarc` names the
+  kirkus wallpaper as its default.
+- **Icons:** the two icon themes contain only KDE's start icons (`start-here-kde` and friends: KDE's
+  logo, a "K" that looked like the old kirkus mark), redrawn as the bird; everything else comes
+  from Breeze Dark or Breeze. That's how the Application Launcher shows the bird with no setting at
+  all. The bird's body is drawn in the theme's text colour (KDE recolours SVG parts marked
+  `ColorScheme-Text`), so it's Bone on a dark panel and Ink on a light one. `FollowsColorScheme=true`
+  in their `index.theme` is what lets Breeze's icons take the Marigold accent, as Breeze's own do.
+  `make-screens.py` makes them.
 - **Wallpaper ("Quiet"):** flat Ink with a large bird one shade lighter; on kirkus Light, flat Bone
-  with a bird one shade darker. It's a wallpaper package like KDE's own,
-  `/usr/share/wallpapers/kirkus/`, with `contents/images_dark/` and `contents/images/`, and Plasma
-  picks the one that matches the colour scheme. The Global Themes name it (`Image=kirkus`), so it's
-  also the lock screen's wallpaper. `/usr/share/backgrounds/kirkus.svg` is the same picture, kept
-  for older accounts that point at it. `make-screens.py` makes all of these. No gradients: on 8-bit
-  screens they show rings.
-- **Launcher button:** the bird alone (`kirkus-mark`). Its body is drawn in the theme's text colour
-  (KDE recolours SVG parts marked `ColorScheme-Text`), so it's Bone on a dark panel and Ink on a
-  light one.
+  with a bird one shade darker. It's a wallpaper package like KDE's own, with
+  `contents/images_dark/` and `contents/images/`, and Plasma picks the one that matches the colour
+  scheme. The Global Themes name it (`Image=kirkus`), so it's also the lock screen's wallpaper.
+  `/usr/share/backgrounds/kirkus.svg` is the same picture, kept for older accounts that point at it.
+  No gradients: on 8-bit screens they show rings.
 
 Existing accounts are brought over once each, at login, by three autostart scripts. Each leaves a
 file in `~/.config` so it never runs again:
 
 | Script | Does | Leaves alone |
 |---|---|---|
-| `kirk-set-theme` | applies the kirkus Global Theme (`plasma-apply-lookandfeel`; never panels or widgets) | accounts on any scheme other than KDE's Breeze ones or kirkus Dark (`kirk-theme-3-done`) |
+| `kirk-set-theme` | puts the account on the kirkus theme (never panels or widgets) | accounts on any scheme other than KDE's Breeze ones or kirkus (`kirk-theme-4-done`) |
 | `kirk-set-wallpaper` | switches desktops showing the older kirkus file or KDE's "Next" to the kirkus wallpaper | any other wallpaper (`kirk-wallpaper-2-done`) |
 | `kirk-set-launcher-icon` | puts the bird on the Application Launcher | an icon someone picked (`kirk-launcher-icon-2-done`) |
+
+`kirk-set-theme` runs KDE's Global Theme tool (`plasma-apply-lookandfeel`), then checks each setting
+and writes whatever is still wrong into the account's config itself, and tells everything running
+to reload. It only leaves its file once the colours really are kirkus, so a failed attempt is
+retried at the next login. KDE's apply tools can't be trusted alone: when they think a theme is
+already set (and `/etc/xdg` makes them think so) they change nothing and still report success. That's
+how an earlier version left accounts that had KDE's Breeze colours saved without a scheme name
+stuck on Breeze. It logs to the journal: `journalctl -t kirkus-theme`.
 
 Plasma 6 records a Global Theme's choices in `~/.config/kdedefaults/`, which a Plasma login reads
 before `/etc/xdg` (startplasma puts it first in `XDG_CONFIG_DIRS`). `kreadconfig6` always includes
 the system-wide default, so `kirk-set-theme` reads the account's own files to see what it chose.
+
+**`kirk-theme-check`** (no sudo) prints an account's theme settings next to kirkus's, whether Plasma
+can see the kirkus themes, which login steps have run, and the recent `kirkus-theme` log. Ask for
+its output when someone's desktop doesn't look like kirkus.
 
 **Previews.** Each Global Theme's `contents/previews/fullscreenpreview.jpg` (1920×1080) and
 `preview.png` (600×337) are real screenshots of a fresh kirkus account in that theme, with Dolphin

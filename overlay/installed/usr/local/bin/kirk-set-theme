@@ -1,44 +1,99 @@
 #!/bin/sh
-# One-shot, at login: switch an account to the kirkus Global Theme (kirkus Dark colours, Breeze
-# Dark icons, the kirkus wallpaper and splash). New accounts already have it (from /etc/xdg); this
-# brings existing accounts over too, including ones that got an earlier version of it. It never
-# touches panels or widgets.
-# Runs once per account, and only if the account uses one of KDE's standard Breeze colour schemes
-# or kirkus Dark, so a look someone picked themselves (kirkus Light included) is left alone. Change
-# it in System Settings → Colors & Themes.
-flag="$HOME/.config/kirk-theme-3-done"
+# One-shot per account, at login: put the account on the kirkus theme (the kirkus colours, icons,
+# Plasma Style and splash, as the kirkus Global Theme sets them). New accounts already have it from
+# /etc/xdg; this brings existing accounts over, including any an earlier version of this script
+# missed. Only accounts on KDE's Breeze colours or on kirkus are changed: a look someone picked
+# (kirkus Light included) is left alone. Panels, widgets and the wallpaper are never touched here.
+#
+# KDE's apply tools can't be trusted alone: when they think a theme is already set (and /etc/xdg makes
+# them think so) they change nothing and still report success. So after running the Global Theme
+# tool, this checks each setting, writes whatever is still wrong into the account's own config, and
+# only stops trying once the colours really are kirkus. It logs to the journal:
+#     journalctl -t kirkus-theme
+flag="$HOME/.config/kirk-theme-4-done"
 [ -e "$flag" ] && exit 0
-done_() { mkdir -p "$HOME/.config"; touch "$flag"; exit 0; }
+CONF=$HOME/.config
+SCHEME=/usr/share/color-schemes/KirkusDark.colors
+log() { logger -t kirkus-theme "$*" 2>/dev/null; }
+done_() { mkdir -p "$CONF"; touch "$flag"; exit 0; }
 
-# The account's own choice, from its own files only (kreadconfig6 would also read the system-wide
-# default in /etc/xdg, which is always kirkus Dark): ~/.config/kdeglobals, then the Global Theme's
-# record in ~/.config/kdedefaults.
+# ---- is this account on Breeze or kirkus? Read its own files only: kreadconfig6 would also read the
+#      system-wide default in /etc/xdg, which is always kirkus. ----
 scheme_in() { sed -n '/^\[General\]/,/^\[/s/^ColorScheme=//p' "$1" 2>/dev/null | head -1; }
-own=$(scheme_in "$HOME/.config/kdeglobals")
-[ -n "$own" ] || own=$(scheme_in "$HOME/.config/kdedefaults/kdeglobals")
+own=$(scheme_in "$CONF/kdeglobals")
+[ -n "$own" ] || own=$(scheme_in "$CONF/kdedefaults/kdeglobals")
 if [ -z "$own" ]; then
-  # never chose a scheme: with no colours of its own it already shows kirkus Dark; colours without a
-  # name are KDE's default, Breeze
-  grep -q '^\[Colors:Window\]' "$HOME/.config/kdeglobals" 2>/dev/null || done_
+  # never chose a scheme: with no colours of its own it already shows kirkus; colours without a name
+  # are KDE's default, Breeze
+  grep -q '^\[Colors:Window\]' "$CONF/kdeglobals" 2>/dev/null || { log "already on the kirkus defaults"; done_; }
   own=Breeze
 fi
-
 case $own in
-  Breeze|BreezeLight|BreezeClassic|BreezeDark|KirkusDark)
-    sleep 5
-    if command -v plasma-apply-lookandfeel >/dev/null 2>&1 &&
-       plasma-apply-lookandfeel --apply org.kirkus.splash >/dev/null 2>&1; then
-      :
-    else
-      # no Global Theme tool: set the colours and icons directly
-      command -v plasma-apply-colorscheme >/dev/null 2>&1 || exit 0
-      plasma-apply-colorscheme KirkusDark >/dev/null 2>&1 || exit 0
-      if [ -x /usr/lib/plasma-changeicons ]; then
-        /usr/lib/plasma-changeicons breeze-dark >/dev/null 2>&1
-      else
-        kwriteconfig6 --file kdeglobals --group Icons --key Theme breeze-dark 2>/dev/null
-      fi
-      kwriteconfig6 --file kdeglobals --group KDE --key LookAndFeelPackage org.kirkus.splash 2>/dev/null
-    fi ;;
+  Breeze|BreezeLight|BreezeClassic|BreezeDark|KirkusDark) ;;
+  *) log "left alone: the account uses its own colour scheme ($own)"; done_ ;;
 esac
-done_
+
+sleep 5                                  # let Plasma finish starting
+
+# ---- 1. KDE's own Global Theme tool: it also updates everything already running ----
+plasma-apply-lookandfeel --apply org.kirkus.splash >/dev/null 2>&1 || log "plasma-apply-lookandfeel failed"
+
+# ---- 2. check, and write what's still wrong ----
+get() { kreadconfig6 --file "$1" --group "$2" --key "$3" 2>/dev/null; }
+want_bg=$(sed -n '/^\[Colors:Window\]/,/^\[/s/^BackgroundNormal=//p' "$SCHEME" | head -1)
+colours_ok() { [ "$(get kdeglobals Colors:Window BackgroundNormal)" = "$want_bg" ]; }
+changed=""
+
+if ! colours_ok; then
+  # copy the scheme into kdeglobals, as System Settings → Colors does (all but its [General] group)
+  awk '/^\[/ { g = substr($0, 2, length($0) - 2); n = split(g, parts, "\\]\\["); next }
+       /=/ && g != "General" { i = index($0, "="); printf "%s\t%s\t%s\n", g, substr($0, 1, i - 1), substr($0, i + 1) }' "$SCHEME" |
+  while IFS="$(printf '\t')" read -r group key value; do
+    case $group in
+      *"]["*) kwriteconfig6 --file kdeglobals --group "${group%%]*}" --group "${group#*[}" --key "$key" "$value" ;;
+      *)      kwriteconfig6 --file kdeglobals --group "$group" --key "$key" "$value" ;;
+    esac
+  done
+  kwriteconfig6 --file kdeglobals --group General --key ColorScheme --notify KirkusDark
+  changed="$changed colours"
+fi
+# the rest: only where it's still KDE's Breeze (or unset), never something picked by hand
+case $(get kdeglobals Icons Theme) in
+  ""|breeze|breeze-dark)
+    kwriteconfig6 --file kdeglobals --group Icons --key Theme --notify kirkus; changed="$changed icons" ;;
+esac
+case $(get plasmarc Theme name) in
+  ""|default|breeze-dark|breeze-light)
+    kwriteconfig6 --file plasmarc --group Theme --key name --notify kirkus; changed="$changed plasma-style" ;;
+esac
+case $(get ksplashrc KSplash Theme) in
+  ""|org.kde.breeze.desktop|org.kde.breezedark.desktop|org.kde.Breeze)
+    kwriteconfig6 --file ksplashrc --group KSplash --key Engine KSplashQML
+    kwriteconfig6 --file ksplashrc --group KSplash --key Theme org.kirkus.splash; changed="$changed splash" ;;
+esac
+case $(get kdeglobals KDE LookAndFeelPackage) in
+  ""|org.kde.breeze.desktop|org.kde.breezedark.desktop|org.kde.breezetwilight.desktop)
+    kwriteconfig6 --file kdeglobals --group KDE --key LookAndFeelPackage org.kirkus.splash; changed="$changed global-theme" ;;
+esac
+# the Global Theme's own record, which System Settings' "Defaults" buttons go back to
+if [ -d "$CONF/kdedefaults" ]; then
+  kwriteconfig6 --file "$CONF/kdedefaults/kdeglobals" --group General --key ColorScheme KirkusDark
+  kwriteconfig6 --file "$CONF/kdedefaults/kdeglobals" --group Icons --key Theme kirkus
+  kwriteconfig6 --file "$CONF/kdedefaults/plasmarc" --group Theme --key name kirkus
+fi
+
+if [ -n "$changed" ]; then
+  # tell what's running to reload: colours, widget style, icons, window borders
+  dbus-send --session --type=signal /KGlobalSettings org.kde.KGlobalSettings.notifyChange int32:0 int32:0 2>/dev/null
+  dbus-send --session --type=signal /KGlobalSettings org.kde.KGlobalSettings.notifyChange int32:2 int32:0 2>/dev/null
+  dbus-send --session --type=signal /KIconLoader org.kde.KIconLoader.iconChanged int32:0 2>/dev/null
+  dbus-send --session --type=signal /KWin org.kde.KWin.reloadConfig 2>/dev/null
+  log "the Global Theme tool left some settings unchanged; set them directly:$changed"
+fi
+
+if colours_ok; then
+  log "kirkus theme applied (the account was on $own)"
+  done_
+fi
+log "colours still not kirkus; will try again at next login"
+exit 0

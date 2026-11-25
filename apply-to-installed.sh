@@ -62,6 +62,7 @@ echo "== kirkus files =="
 # Theme folders belong to kirkus entirely: replace them, so files a newer version dropped go too.
 rm -rf /usr/share/plymouth/themes/kirkus /boot/grub/themes/kirkus /usr/share/sddm/themes/kirkus \
        /usr/share/plasma/look-and-feel/org.kirkus.splash /usr/share/plasma/look-and-feel/org.kirkus.light \
+       /usr/share/plasma/desktoptheme/kirkus /usr/share/icons/kirkus /usr/share/icons/kirkus-light \
        /usr/share/wallpapers/kirkus /usr/share/kirkus
 copy_tree "$SRC"
 [[ $KIRK_BROADCOM_WL == yes ]] && copy_tree "$HW"/broadcom-wl
@@ -100,7 +101,7 @@ flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.f
   || echo "Could not add Flathub (offline?). Run this again later to add it."
 /usr/local/bin/kirk-install-fonts || true
 /usr/local/bin/kirk-login-theme kirkus
-gtk-update-icon-cache -q -t -f /usr/share/icons/hicolor 2>/dev/null || true
+for d in hicolor kirkus kirkus-light; do gtk-update-icon-cache -q -t -f /usr/share/icons/$d 2>/dev/null || true; done
 # The Plasma splash is the default for everyone via /etc/xdg/ksplashrc; set it for you as well, in
 # case you picked a different one before.
 if [[ -n ${SUDO_USER:-} ]] && command -v kwriteconfig6 >/dev/null; then

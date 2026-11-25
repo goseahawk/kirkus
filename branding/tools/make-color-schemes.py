@@ -6,6 +6,7 @@ usage: make-color-schemes.py [PROJECT_DIR]        (default: the project this scr
   overlay/installed/usr/share/color-schemes/KirkusDark.colors    Ink, Bone and Marigold (default)
   overlay/installed/usr/share/color-schemes/KirkusLight.colors   Bone, Ink and Marigold
   overlay/installed/etc/xdg/kdeglobals                           the dark scheme as everyone's default
+  overlay/installed/etc/xdg/plasmarc                             the kirkus Plasma Style as everyone's default
   overlay/installed/usr/share/konsole/kirkus.colorscheme, .profile, etc/xdg/konsolerc   Konsole
 
 Selected items are Marigold with Ink text, as everywhere else in kirkus.
@@ -36,7 +37,7 @@ def scheme(dark):
         button, button_alt = (41, 42, 48), (46, 47, 53)
         comp_fg, comp_dim, comp = BONE, (162, 158, 149), (16, 17, 20)
         wm_active, wm_inactive, wm_fg_inactive = (31, 32, 37), (26, 27, 32), (120, 117, 110)
-        icons = "breeze-dark"
+        icons = "kirkus"            # Breeze Dark, with the bird as the start icon
     else:
         fg, dim = INK, (95, 91, 82)
         accent_text, link, visited = (140, 86, 10), (140, 86, 10), (130, 80, 50)
@@ -46,7 +47,7 @@ def scheme(dark):
         button, button_alt = (236, 231, 220), (229, 223, 211)
         comp_fg, comp_dim, comp = BONE, (162, 158, 149), INK
         wm_active, wm_inactive, wm_fg_inactive = (236, 231, 220), BONE, (120, 117, 110)
-        icons = "breeze"
+        icons = "kirkus-light"      # Breeze, with the bird as the start icon
     common = dict(fg=fg, fg_dim=dim, active=accent_text, link=link, visited=visited,
                   neg=neg, neutral=neutral, pos=pos)
     groups = {
@@ -76,7 +77,7 @@ def scheme(dark):
     return effects + body, icons
 
 
-for dark, file, name in ((True, "KirkusDark", "kirkus Dark"), (False, "KirkusLight", "kirkus Light")):
+for dark, file, name in ((True, "KirkusDark", "kirkus"), (False, "KirkusLight", "kirkus Light")):
     colours, _ = scheme(dark)
     p = os.path.join(INST, "usr/share/color-schemes", file + ".colors")
     os.makedirs(os.path.dirname(p), exist_ok=True)
@@ -126,6 +127,11 @@ open(p, "w").write("".join(out) + "[General]\nBlur=false\nColorRandomization=fal
 print("wrote", os.path.relpath(p, ROOT))
 p = os.path.join(INST, "usr/share/konsole/kirkus.profile")
 open(p, "w").write("[Appearance]\nColorScheme=kirkus\n\n[General]\nName=kirkus\nParent=FALLBACK/\n")
+print("wrote", os.path.relpath(p, ROOT))
+# ---- the Plasma Style everyone starts with: kirkus (see usr/share/plasma/desktoptheme/kirkus) ----
+p = os.path.join(INST, "etc/xdg/plasmarc")
+open(p, "w").write("# kirkus: the kirkus Plasma Style is everyone's default (System Settings → Plasma Style).\n"
+                   "[Theme]\nname=kirkus\n")
 print("wrote", os.path.relpath(p, ROOT))
 p = os.path.join(INST, "etc/xdg/konsolerc")
 open(p, "w").write("# kirkus: the kirkus profile (kirkus colours) is Konsole's default. Pick another in\n"

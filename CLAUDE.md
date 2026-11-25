@@ -51,11 +51,17 @@ and keeps itself updated. Public repo: github.com/goseahawk/kirkus. How it works
 - `branding/tools/make-screens.py` builds every screen image, the wallpaper and the app icon from
   those files; `make-fastfetch-logo.py` and `make-live-icons.py` do the rest. Rerun them after any
   logo change, and check that the login and splash bird are pixel-identical.
-- Two Global Themes: kirkus (`org.kirkus.splash`, the default: kirkus Dark colours, Breeze Dark
-  icons) and kirkus Light (`org.kirkus.light`), paired for "Switch to Dark Mode at Night". Both set
-  the kirkus wallpaper and splash, and their default layout puts the bird alone (`kirkus-mark`) on the
-  Application Launcher; a new account needs no scripts. DEVELOPMENT.md → "Desktop theme" has the
+- The desktop theme is called kirkus everywhere System Settings shows one: Global Theme (`org.kirkus.splash`,
+  the default), Colors, Plasma Style, Icons (Breeze with the bird as KDE's start icon, so the launcher
+  shows it with no setting), wallpaper and splash; kirkus Light is the twin, paired for "Switch to
+  Dark Mode at Night". A new account needs no scripts. DEVELOPMENT.md → "Desktop theme" has the
   details, including the login scripts that bring existing accounts over.
+- Don't ship a panel layout in the Global Theme: with a copy of KDE's in it, new accounts on Arch's
+  newer Plasma got no panel (it worked on Plasma 6.7). KDE's own layout always matches the installed
+  Plasma.
+- KDE's `plasma-apply-*` tools change nothing, and still exit 0, when they think a theme is already
+  set; `/etc/xdg` makes them think so. Check the result and write the settings directly if needed
+  (`kirk-set-theme` does). `kirk-theme-check` shows an account's real theme state; ask for its output.
 - The colour schemes, `/etc/xdg/kdeglobals` and Konsole's profile come from
   `branding/tools/make-color-schemes.py`.
 - The wallpaper is "Quiet": flat Ink with a large bird one shade lighter (flat Bone and one shade
