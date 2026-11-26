@@ -1,0 +1,3 @@
+# kirkus: let this browser install web apps (it writes their menu entries and icons).
+[Context]
+filesystems=xdg-data/applications;xdg-data/icons;
