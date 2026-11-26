@@ -20,7 +20,7 @@ Arch Linux.
 ## What you need
 
 - A **64-bit Intel or AMD PC**, or an **Intel Mac**. Apple Silicon Macs (M1 and later) aren't
-  supported.
+  supported: for those, see [kirki](https://goseahawk.github.io/kirki/).
 - At least **15 GB** of free disk space (30 GB or more is comfortable), and 4 GB of memory or more.
 - A **USB stick** of 4 GB or more. Everything on it will be erased.
 - An **internet connection** while installing.
