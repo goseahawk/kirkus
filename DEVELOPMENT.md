@@ -329,5 +329,6 @@ package is the kirkus Global Theme (see "Desktop theme").
 - Discover with Flatpak and Flathub set up, for installing and updating apps
 - Chrome, Chromium, Brave, Edge, Vivaldi and ungoogled-chromium from Flathub can install web apps:
   `/var/lib/flatpak/overrides/<app id>` lets them write menu entries and icons
-  (`~/.local/share/applications`, `~/.local/share/icons`), which Flathub doesn't allow by default.
+  (`~/.local/share/applications`, `~/.local/share/icons`, as home paths: the `xdg-data/` form clashes
+  with the browser's own links and it then won't start), which Flathub doesn't allow by default.
   It means the browser can add launchers to the app menu, as it can when not installed as a Flatpak.
